@@ -4,8 +4,7 @@ from common.constants import UTM_ZONE_38_SRID
 from gis.model.models import Point_T
 from .common import handle_response
 
-from fastapi import APIRouter, HTTPException
-
+from fastapi import APIRouter
 
 router = APIRouter()
 

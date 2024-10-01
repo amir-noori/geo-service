@@ -1,7 +1,8 @@
-
+import os
 
 db = {
-    "username": "GIS",
-    "password": "123",
-    "url": "192.168.24.52:1521/gisdb"
+    "oracle_version": os.environ['oracle_version'],
+    "username": os.environ['db_username'],
+    "password": os.environ['db_password'],
+    "url": f"{os.environ['db_ip']}:{os.environ['db_port']}/{os.environ['db_service']}"
 }
