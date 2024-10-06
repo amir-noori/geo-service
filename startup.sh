@@ -1,3 +1,4 @@
+#!/bin/bash
 
 export oracle_version="12"
 export db_username="GIS"
@@ -13,7 +14,13 @@ export db_service="gisdb"
 # export db_port="1521"
 # export db_service="oracle11db"
 
+export PYTHONPATH=/opt/app:$PYTHONPATH
+export oracle_client_home="/opt/app/oracle"
+
 export app_port=8000
 export app_host="0.0.0.0"
 
+source bin/activate
 fastapi dev --reload --host $app_host --port $app_port app.py
+
+
