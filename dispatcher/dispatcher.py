@@ -3,16 +3,21 @@ import types
 from functools import wraps
 import requests
 import json
-
+import os
+from util.common_util import get_state_ip_by_code
 
 def dispatch(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         request = kwargs['request']
         request_url = request.url
-        redirect_url = f"http://IP:PORT/{request.url.path}"
+        
+        state_code = "" # TODO
+        service_ip = get_state_ip_by_code(state_code)
+        service_port = os.environ["service_provider_port"]
+        redirect_url = f"http://{service_ip}:{service_port}/{request.url.path}/?{request.query_params}"
         print(f"redirecting from url: {request_url} to {redirect_url}")
-        return call_service_provider(str(request_url) + "&redirect=False")
+        return call_service_provider(str(request_url))
 
     return wrapper
 

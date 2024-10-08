@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export service_provider_port=8000
+
 export oracle_version="12"
 export db_username="GIS"
 export db_password="123"
