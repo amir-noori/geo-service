@@ -51,7 +51,7 @@ or edit the `startup.sh` and simply run:
                 "segment": "1", // deeds1.a13
                 "area": "125.2" // deed9.i71
             },
-        }
+        },
 
         "apartements": [
             {

@@ -1,3 +1,10 @@
+from enum import Enum
+
+
+class GeomType(Enum):
+    POLYGON = "POLYGON"
+    LINE = "LINE"
+    POINT = "POINT"
 
 
 class GISModel:

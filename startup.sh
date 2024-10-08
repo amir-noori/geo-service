@@ -19,8 +19,9 @@ export oracle_client_home="/opt/app/oracle"
 
 export app_port=8000
 export app_host="0.0.0.0"
+export app_mode="dispatcher"
 
 source bin/activate
-fastapi dev --reload --host $app_host --port $app_port app.py
+fastapi dev --host $app_host --port $app_port app.py
 
 

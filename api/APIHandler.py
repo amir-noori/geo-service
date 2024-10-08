@@ -1,6 +1,6 @@
 
 
-from .parcels import router as parcel_router
+from .parcels_api import router as parcel_router
 
 
 class APIHandler:
