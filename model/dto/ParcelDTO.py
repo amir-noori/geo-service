@@ -63,7 +63,7 @@ class ParcelInfoDTO(BaseDTO):
 
     common_metadata: ParcelMetadataDTO
     ground: ParcelGroundDTO
-    apartments: list
+    apartments: list[ParcelMetadataDTO]
 
     def __init__(self, common_metadata: ParcelMetadataDTO, ground: ParcelGroundDTO,
                  apartments) -> None:

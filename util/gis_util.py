@@ -1,22 +1,29 @@
-from osgeo import ogr
-from osgeo import osr
+# from osgeo import ogr
+# from osgeo import osr
 
-from gis.model.models import Point_T
+from shapely.wkt import loads
+from shapely.geometry import Polygon, Point
+
+from gis.model.models import Point_T, Poly_T
 
 
-def transform_point(p: Point_T, to_srid):
+def poly_contains_point(poly: Poly_T, point: Point_T):
+    return poly.to_shapely().contains(point.to_shapely())
 
-    point = ogr.Geometry(ogr.wkbPoint)
-    point.AddPoint(p.x, p.y)
 
-    inSpatialRef = osr.SpatialReference()
-    inSpatialRef.ImportFromEPSG(p.srid)
+# def transform_point(p: Point_T, to_srid):
 
-    outSpatialRef = osr.SpatialReference()
-    outSpatialRef.ImportFromEPSG(to_srid)
+#     point = ogr.Geometry(ogr.wkbPoint)
+#     point.AddPoint(p.x, p.y)
 
-    coordTransform = osr.CoordinateTransformation(inSpatialRef, outSpatialRef)
+#     inSpatialRef = osr.SpatialReference()
+#     inSpatialRef.ImportFromEPSG(p.srid)
 
-    point.Transform(coordTransform)
+#     outSpatialRef = osr.SpatialReference()
+#     outSpatialRef.ImportFromEPSG(to_srid)
 
-    return Point_T(point.GetX(), point.GetY(), to_srid)
+#     coordTransform = osr.CoordinateTransformation(inSpatialRef, outSpatialRef)
+
+#     point.Transform(coordTransform)
+
+#     return Point_T(point.GetX(), point.GetY(), to_srid)

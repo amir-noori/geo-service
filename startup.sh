@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ./set_states_env.sh
+
 export service_provider_port=8000
 
 export oracle_version="12"

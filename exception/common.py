@@ -18,5 +18,8 @@ class CustomException(Exception):
 
 class ErrorCodes:
 
+    SERVER_ERROR = ErrorCode(500, "SERVER_ERROR")
+
     NO_PARCEL_FOUND = ErrorCode(10000, "NO_PARCEL_FOUND")
     MULTIPLE_PARCEL_FOUND = ErrorCode(10001, "MULTIPLE_PARCEL_FOUND")
+    NO_STATE_FOUND = ErrorCode(10002, "NO_STATE_FOUND")

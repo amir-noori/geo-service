@@ -5,21 +5,32 @@ import requests
 import json
 import os
 from util.common_util import get_state_ip_by_code
+from common.ApplicationContext import ApplicationContext
 
-def dispatch(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        request = kwargs['request']
-        request_url = request.url
-        
-        state_code = "" # TODO
-        service_ip = get_state_ip_by_code(state_code)
-        service_port = os.environ["service_provider_port"]
-        redirect_url = f"http://{service_ip}:{service_port}/{request.url.path}/?{request.query_params}"
-        print(f"redirecting from url: {request_url} to {redirect_url}")
-        return call_service_provider(str(request_url))
 
-    return wrapper
+app_mode = os.environ["app_mode"]
+
+
+def dispatch(dispatch_event):
+    def decorator(fn):
+        @wraps(fn)
+        async def wrapper(*args, **kwargs):
+            if app_mode == "dispatcher":
+                request = kwargs['request']
+                request_url = request.url
+                state_code = dispatch_event.fire({"data": kwargs})
+                print(f"dispatch key: {state_code}")
+                service_ip = get_state_ip_by_code(state_code)
+                service_port = os.environ["service_provider_port"]
+                redirect_url = f"http://{service_ip}:{service_port}/{request.url.path}/?{request.query_params}"
+                print(f"redirecting from url: {request_url} to {redirect_url}")
+                # return call_service_provider(str(request_url))
+                return {}
+            else:
+                return fn(*args, **kwargs)
+
+        return wrapper
+    return decorator
 
 
 def call_service_provider(url):

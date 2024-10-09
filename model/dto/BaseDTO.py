@@ -74,6 +74,10 @@ class BaseResponse(BaseModel):
     )
     
     header: Header
+    
+    def toJSON(self):
+        return toJSON(self)
+
 
     def __init__(self, header=None) -> None:
         super().__init__()

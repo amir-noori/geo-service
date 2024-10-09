@@ -1,16 +1,31 @@
-from py.service.parcel_service import *
+from service.parcel_service import *
 # from util.gis_util import transform_point
 from common.constants import UTM_ZONE_38_SRID
 from gis.model.models import Point_T
 from .common import handle_response
 from util.common_util import get_state_code_by_name
+from util.gis_util import poly_contains_point
 from model.dto.ParcelDTO import *
-
-
+import time
+from event.Event import Event
+from common.ApplicationContext import ApplicationContext
 from fastapi import APIRouter, Request
 from dispatcher.dispatcher import dispatch
+from exception.common import ErrorCodes
 
 router = APIRouter()
+
+
+def find_state_for_dispatch(event):
+    data = event["data"]
+    longtitude = data["longtitude"]
+    latitude = data["latitude"]
+    srid = data["srid"]
+    centroid = Point_T(longtitude, latitude, srid)
+    for state_code, polygon in ApplicationContext.states_polygon_shape_map.items():
+        if polygon.contains(centroid.to_shapely()):
+            return state_code
+    raise ServiceException(ErrorCodes.NO_STATE_FOUND)
 
 
 @router.get("/find_polygon_by_centroid")
@@ -28,9 +43,10 @@ def find_polygon_by_centroid_api(request: Request, longtitude: float, latitude: 
     return handle_response({"parcel": str(geometry_wkt)})
 
 
-@router.get("/find_parcel_info_by_centroid")
-@dispatch
-def find_parcel_info_by_centroid_api(request: Request, longtitude: float, latitude: float, srid="4326"):
+@router.get("/find_parcel_info_by_centroid", response_model=ParcelInfoResponse)
+@dispatch(dispatch_event=Event(find_state_for_dispatch))
+def find_parcel_info_by_centroid_api(request: Request, longtitude: float, latitude:
+                                     float, srid="4326"):
     point = Point_T(longtitude, latitude, srid)
     parcel = find_parcel_info_by_centroid(point)
     parcel_info = assemble_parcel_info_response(parcel)
@@ -48,9 +64,9 @@ def assemble_parcel_info_response(parcel) -> ParcelInfoDTO:
     if deed.deed_parts:
         for part in deed.deed_parts:
             apartment_metadata = ParcelMetadataDTO(subsidiary_plate_number=part.subsidiary_plate_number,
-                                                partitioned=deed.partitioned,
-                                                segment=deed.segment,
-                                                area=deed.legal_area)
+                                                   partitioned=deed.partitioned,
+                                                   segment=deed.segment,
+                                                   area=deed.legal_area)
             apartments.append(apartment_metadata)
 
     common_metadata = ParcelMetadataDTO(state=state,
