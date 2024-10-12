@@ -5,7 +5,7 @@ from data.db_helper import execute_query
 from data.DBResult import DBResult
 from common.constants import *
 from gis.model.models import Point_T
-from py.model.entity.Parcel import *
+from model.entity.Parcel import *
 from service.util import process_label
 from service.deed_service import find_deed
 
