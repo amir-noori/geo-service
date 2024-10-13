@@ -14,7 +14,7 @@ from exception.service_exception import ServiceException
 
 QUERIES = {
     "query_centroid_by_point": """
-        SELECT SDO_UTIL.TO_WKTGEOMETRY(c.POLY) as POLY, TXT_LABLE as LABEL
+        SELECT SDO_UTIL.TO_WKTGEOMETRY(c.POLY) as POLY, TXT_LABLE as LABEL, SDO_GEOM.SDO_AREA(c.POLY) as AREA
         FROM gis.CENTROID c
         WHERE 
         DEL_USER is null and DEL_DATE is null and
@@ -25,7 +25,7 @@ QUERIES = {
     """,
 
     "query_shape_by_point": """
-        SELECT SDO_UTIL.TO_WKTGEOMETRY(s.POLY) as POLY, LABLE1 as LABEL
+        SELECT SDO_UTIL.TO_WKTGEOMETRY(s.POLY) as POLY, LABLE1 as LABEL , SDO_GEOM.SDO_AREA(s.POLY) as AREA
         FROM gis.SHAPE s
         WHERE 
             DEL_USER is null and DEL_DATE is null and
@@ -48,13 +48,15 @@ def find_polygon_by_centroid(centroid: Point_T) -> Parcel:
         geometry_wkt = None
         deed = None
         cms = None
+        area_wkt = None
         for result in results:
             geometry_wkt = wkt.loads(str(result['POLY']))
+            area_wkt=str(result['AREA'])
             label = str(result['LABEL'])
             deed = process_label(label)
             cms = deed.cms
 
-        return Parcel(polygon=geometry_wkt, deed=deed, cms=cms)
+        return Parcel(polygon=geometry_wkt, deed=deed, cms=cms, area=area_wkt)
 
     query_centroid = QUERIES['query_centroid_by_point'].format(
         x=centroid.x, y=centroid.y, srid=centroid.srid)

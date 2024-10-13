@@ -105,11 +105,13 @@ class Parcel(BaseEntity):
     cardinals: str
     deed: Deed
     cms: str
+    area: str
 
     def __init__(self, polygon=None, centroid: Point_T = None, deed: Deed = None,
-                 cardinals=None, cms=None) -> None:
+                 cardinals=None, cms=None, area=None) -> None:
         self.polygon = polygon
         self.centroid = centroid
         self.cardinals = cardinals
         self.deed = deed
         self.cms = cms
+        self.area = area
