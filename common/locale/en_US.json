@@ -1,0 +1,10 @@
+{
+    "500":"SERVER ERROR",
+    "10000": "NO_PARCEL_FOUND",
+    "10001": "MULTIPLE_PARCEL_FOUND",
+    "10002": "NO_STATE_FOUND",
+    "result_code_0": "Operation succesful!",
+    "error_code_400": "Bad Request!",
+    "error_code_404": "Record not Found.",
+    "error_code_500": "Internal Server Error."
+}

@@ -1,4 +1,4 @@
-
+from common.localization import Localization
 class ErrorCode:
 
     def __init__(self, code, message_key) -> None:
@@ -18,8 +18,8 @@ class CustomException(Exception):
 
 class ErrorCodes:
 
-    SERVER_ERROR = ErrorCode(500, "SERVER_ERROR")
+    SERVER_ERROR = ErrorCode(500, Localization().translate("500"))
 
-    NO_PARCEL_FOUND = ErrorCode(10000, "NO_PARCEL_FOUND")
-    MULTIPLE_PARCEL_FOUND = ErrorCode(10001, "MULTIPLE_PARCEL_FOUND")
-    NO_STATE_FOUND = ErrorCode(10002, "NO_STATE_FOUND")
+    NO_PARCEL_FOUND = ErrorCode(10000, Localization().translate("10000"))
+    MULTIPLE_PARCEL_FOUND = ErrorCode(10001, Localization().translate("10001"))
+    NO_STATE_FOUND = ErrorCode(10002, Localization().translate("10002"))

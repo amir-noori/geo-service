@@ -1,0 +1,10 @@
+{
+    "500":"SERVER ERROR",
+    "10000": "NO_PARCEL_FOUND",
+    "10001": "MULTIPLE_PARCEL_FOUND",
+    "10002": "NO_STATE_FOUND",
+    "result_code_0": "عملیات با موفقیت انجام شد.",
+    "error_code_400": "درخواست اشتباه",
+    "error_code_404": "رکوردی با مشخصات ارسال شده پیدا نشد.",
+    "error_code_500": "خطای سیستمی."
+}
