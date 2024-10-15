@@ -89,11 +89,14 @@ def find_deed_parts(deed: Deed):
 
         return deed_parts
 
-    query_deed_parts = QUERIES['query_deeds9_by_volume'].format(
-        volume_code=deed.volume_code,
-        volume_number=deed.volume_number,
-        page_number=deed.page_number
-    )
+    deed_parts = []
+    if deed:
+        query_deed_parts = QUERIES['query_deeds9_by_volume'].format(
+            volume_code=deed.volume_code,
+            volume_number=deed.volume_number,
+            page_number=deed.page_number
+        )
+        
+        deed_parts = execute_query(query_deed_parts, run)
     
-    deed_parts = execute_query(query_deed_parts, run)
     return deed_parts
