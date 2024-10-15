@@ -108,7 +108,7 @@ def assemble_parcel_info_response(parcel) -> ParcelInfoDTO:
             apartment_metadata = ParcelMetadataDTO(subsidiary_plate_number=part.subsidiary_plate_number,
                                                    partitioned=deed.partitioned,
                                                    segment=deed.segment,
-                                                   area=deed.legal_area)
+                                                   area=part.legal_area)
             apartments.append(apartment_metadata)
 
     common_metadata = ParcelMetadataDTO(state=state,
