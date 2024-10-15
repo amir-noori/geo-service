@@ -9,6 +9,12 @@ def get_state_code_by_name(name):
 
     return None
 
+def get_state_name_by_code(code):
+    for state_code, state_name in states.items():
+        if code == state_code:
+            return state_name
+
+    return None
 
 def get_state_ip_by_code(code):
     for state_code, ip in state_to_db_mapping.items():

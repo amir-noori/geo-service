@@ -3,11 +3,11 @@ SHELL ["/bin/bash", "-c"]
 
 RUN apt update
 
-# Oracle client
+# Oracle client libaio1t64
 RUN apt install libaio1t64 unzip wget -y 
-ENV LD_LIBRARY_PATH=/opt/oracle/instantclient_21_4
+ENV LD_LIBRARY_PATH=/opt/oracle
 RUN mkdir -p /opt/oracle
-COPY ../lib/instantclient_21_4 /opt/oracle
+COPY ./lib/instantclient_21_4_ /opt/oracle
 
 # Python and dependencies
 RUN apt install -y python3
@@ -24,4 +24,5 @@ RUN cd /opt/app && source bin/activate && \
     pip install oracledb && \
     pip install "fastapi[standard]" && \
     pip install shapely && \
+    pip install requests && \
     deactivate

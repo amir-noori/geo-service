@@ -9,7 +9,13 @@ buildbase:
 buildapp:
 	docker build . -t geoubuntu_app -f ./docker/BUILD_APP.Dockerfile --build-arg mode=dev --progress=plain
 
+buildapprun:
+	docker build . -t geoubuntu_app -f ./docker/BUILD_APP.Dockerfile --build-arg mode=run --progress=plain
+
 build: buildbase buildapp
 
 runapp:
-	docker run -i -p 8000:8000 -t geoubuntu_app:latest /bin/bash
+	docker run -i -p 8001:8001 --env-file ./docker/env.app.list -t geoubuntu_app:latest /bin/bash
+
+rundispatcher:
+	docker run -i -p 8000:8000 --env-file ./docker/env.dispatcher.list -t geoubuntu_app:latest  /bin/bash

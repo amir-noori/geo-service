@@ -1,5 +1,6 @@
 from .BaseDTO import BaseDTO, BaseResponse, partial_model
 from gis.model.models import GeomType
+from common.constants import GLOBAL_SRID
 
 
 @partial_model
@@ -8,7 +9,7 @@ class ParcelGeomDTO(BaseDTO):
     type: str
     crs: str
 
-    def __init__(self, geom: str, type: GeomType, crs: str) -> None:
+    def __init__(self, geom: str=None, type: GeomType=GeomType.POLYGON, crs: str=GLOBAL_SRID) -> None:
         super().__init__()
         self.geom = geom
         self.type = type

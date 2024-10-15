@@ -1,4 +1,4 @@
-from py.model.entity.Parcel import Deed
+from model.entity.Parcel import Deed
 
 import re
 
