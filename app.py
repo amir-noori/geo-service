@@ -1,14 +1,13 @@
 from fastapi import FastAPI
 import os
-
 from api.APIHandler import APIHandler
 from common.ApplicationContext import ApplicationContext
 from data.db_helper import get_db_connection_pool
-
-
 from common.states import state_polygon_mapping
 from gis.model.models import Poly_T
 from common.constants import GLOBAL_SRID
+from i18n.locale.localization import Localization
+from util.log_util import get_logger
 
 def load_states_polygons():
     states_polygon_shape_map = {}
@@ -29,5 +28,8 @@ else:
     load_states_polygons()
 
 ApplicationContext.app = app
+
+log = get_logger(__name__)
+log.debug(f"Startup: {Localization.translate("SUCCESS")}")
 APIHandler(app)
 
