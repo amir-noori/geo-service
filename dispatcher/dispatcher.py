@@ -5,7 +5,6 @@ import requests
 import json
 import os
 from util.common_util import get_state_ip_by_code
-from common.ApplicationContext import ApplicationContext
 
 
 app_mode = os.environ["app_mode"]
@@ -21,11 +20,9 @@ def dispatch(dispatch_event):
                 state_code = dispatch_event.fire({"data": kwargs})
                 print(f"dispatch key: {state_code}")
                 service_ip = get_state_ip_by_code(state_code)
-                service_port = os.environ["service_provider_port"]
-                redirect_url = f"http://{service_ip}:{service_port}/{request.url.path}/?{request.query_params}"
+                redirect_url = f"http://{service_ip}/{request.url.path}/?{request.query_params}"
                 print(f"redirecting from url: {request_url} to {redirect_url}")
-                # return call_service_provider(str(request_url))
-                return {}
+                return call_service_provider(str(request_url))
             else:
                 return fn(*args, **kwargs)
 

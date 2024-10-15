@@ -7,6 +7,8 @@ def fa_to_gibberish(text):
     return text
 
 def gibberish_to_fa(text):
-    for key, value in gibberish_to_fa_mapping.items():
-        text = text.replace(key, value)
+    if text:
+        for key, value in gibberish_to_fa_mapping.items():
+            text = text.replace(key, value)
     return text
+    

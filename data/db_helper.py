@@ -12,6 +12,7 @@ def get_db_connection_pool():
     return get_connection_pool(db['username'], db['password'], db['url'])    
 
 def execute_query(query, func):
+    print(query)
     connection = ApplicationContext.connection_pool.acquire()
     cursor = connection.cursor()
     cursor.execute(query)

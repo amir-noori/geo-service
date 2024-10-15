@@ -22,6 +22,9 @@ or edit the `startup.sh` and simply run:
     # run and connect immediately
     make runapp
 
+    # to copy files to container
+    docker cp HOST_PATH CONTAINER_ID:CONTAINER_PATH
+
 
 ## Service:
 

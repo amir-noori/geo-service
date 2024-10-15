@@ -18,6 +18,9 @@ class BaseEntity:
     def toJSON(self):
         return toJSON(self)
     
+    def __str__(self) -> str:
+        return self.toJSON()
+    
 
 class Deed(BaseEntity):
     

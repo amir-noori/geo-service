@@ -2,7 +2,7 @@
 from data.db_helper import execute_query
 from data.DBResult import DBResult
 from common.constants import *
-from py.model.entity.Parcel import *
+from model.entity.Parcel import *
 from util.lang_util import gibberish_to_fa
 
 QUERIES = {
@@ -43,18 +43,20 @@ def find_deed(deed: Deed):
         results = db_result.results
 
         for result in results:
-            state = str(result['STATE'])
-            if state:
-                state = gibberish_to_fa(state)
+            state = None
+            if result['STATE']:
+                state = gibberish_to_fa(str(result['STATE']))
             address = str(result['ADDRESS'])
             area = str(result['AREA'])
             subsidiary_plate_number = str(result['SUBSIDIARY_PLATE_NUMBER'])
             partitioned = str(result['PARTITIONED'])
             segment = str(result['SEGMENT'])
-            return Deed(state=state, address_text=address, volume_code=deed.volume_code,
+            result = Deed(state=state, address_text=address, volume_code=deed.volume_code,
                         volume_number=deed.volume_number, page_number=deed.page_number,
                         legal_area=area, subsidiary_plate_number=subsidiary_plate_number,
                         partitioned=partitioned, segment=segment)
+            print(f"retrieved deed: {result}")
+            return deed
 
         return None
 
