@@ -1,0 +1,10 @@
+{
+    "SERVER_ERROR":"Internal Server Error.",
+    "NO_PARCEL_FOUND": "No parcel Found",
+    "MULTIPLE_PARCEL_FOUND": "Multiple Parcels Found",
+    "NO_STATE_FOUND": "No State Found",
+    "SUCCESS": "Operation Successful",
+    "ERROR_CODE_400": "Bad Request!",
+    "ERROR_CODE_404": "No Record Found",
+    "ERROR_CODE_500": "General System Error"
+}

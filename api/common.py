@@ -1,6 +1,6 @@
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-
+from i18n.locale.localization import Localization
 from model.dto.BaseDTO import Header, BaseDTO
 
 
@@ -13,7 +13,7 @@ class ResponseCode:
 
 class ResponseCodes:
 
-    SUCCESS = ResponseCode(0, "SUCCESS")
+    SUCCESS = ResponseCode(0, Localization().translate("SUCCESS"))
 
 
 def handle_response(response: BaseDTO, exclude_unset=True, exclude_none=True):
