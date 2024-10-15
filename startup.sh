@@ -30,6 +30,8 @@ export app_mode="${app_mode:-app}"
 # app_mode must be set (values: "dev" or "run" , default: "dev")
 export app_level="${app_level:-dev}" 
 
+export enable_db_log="${enable_db_log:-true}" 
+
 source bin/activate
 
 if [ $app_mode = "dispatcher" ]; then

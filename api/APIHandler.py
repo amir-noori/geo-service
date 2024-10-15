@@ -6,15 +6,21 @@ from .parcels_api import router as parcel_router
 from exception.service_exception import ServiceException
 from exception.common import ErrorCodes
 from model.dto.BaseDTO import Header, BaseResponse
+from api.middleware import DBLogMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+import os
+
 
 
 class APIHandler:
 
     def __init__(self, app) -> None:
         self.app = app
+        self.app_mode = os.environ['app_mode']
 
         self.handle_routes()
         self.handle_exceptions()
+        self.handle_middleware()
 
     def handle_routes(self):
         self.app.include_router(
@@ -43,3 +49,9 @@ class APIHandler:
                 status_code=ErrorCodes.SERVER_ERROR.code,
                 content=jsonable_encoder(response),
             )
+
+    def handle_middleware(self):
+        enable_db_log = os.environ['enable_db_log']
+        if self.app_mode == "app" and enable_db_log == "true":
+            db_log_middleware = DBLogMiddleware()
+            self.app.add_middleware(BaseHTTPMiddleware, dispatch=db_log_middleware)

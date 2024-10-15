@@ -17,6 +17,6 @@ WORKDIR /opt/app
 ENV LD_LIBRARY_PATH=/opt/oracle
 
 COPY ./ /opt/app 
-# ENTRYPOINT ["/opt/app/startup.sh"]
+ENTRYPOINT ["/opt/app/startup.sh"]
 
 

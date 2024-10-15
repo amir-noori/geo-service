@@ -30,6 +30,13 @@ or edit the `startup.sh` and simply run:
 
 ### parcel service output:
 
+find_parcel_info_by_centroid service call:
+
+    http://192.168.100.10:8001/parcels/find_parcel_info_by_centroid?longtitude=47.21948&latitude=33.22798&srid=4326
+
+
+    output:
+    
     {
 
         "commonMetadata": {

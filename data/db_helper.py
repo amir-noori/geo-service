@@ -22,5 +22,15 @@ def execute_query(query, func):
     row_count = cursor.rowcount
     db_result = DBResult(row_count, results)
     function_return = func(db_result)
+    cursor.close()
     connection.close()
     return function_return
+
+def execute_insert(query, params):
+    print(query)
+    connection = ApplicationContext.connection_pool.acquire()
+    cursor = connection.cursor()
+    cursor.execute(query, params)
+    connection.commit()
+    cursor.close()
+    connection.close()

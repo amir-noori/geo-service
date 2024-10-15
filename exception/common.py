@@ -12,6 +12,7 @@ class ErrorCode:
 class CustomException(Exception):
 
     def __init__(self, error_code: ErrorCode, error_message="") -> None:
+        super().__init__()
         self.error_message = error_message
         self.error_code = error_code
 

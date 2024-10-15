@@ -81,5 +81,5 @@ class ParcelInfoResponse(BaseResponse):
     body: ParcelInfoDTO
 
     def __init__(self, body=None) -> None:
-        super().__init__()
+        super().__init__(header=None)
         self.body = body

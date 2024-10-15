@@ -36,6 +36,42 @@ def get_state_code(event):
     return data["state_code"]
 
 
+def load_states_polygons_list():
+    state_polygon_map = {}
+    for state_code, address in state_to_db_mapping.items():
+        if address:
+            address_split = address.split(":")
+            ip = address_split[0]
+            port = address_split[1]
+            url = f"http://{ip}:{port}/parcels/find_state_polygon?state_code={state_code}"
+            print(f"calling URL: {url} to get state polygon.")
+            try:
+                response = requests.get(url)
+                if response.status_code == 200:
+                    state_polygon = json.loads(response.content.decode('utf-8'))
+                    wkt = state_polygon['geom']
+
+                    response_dict = json.loads(response.content)
+                    poly = Poly_T(wkt=response_dict['geom'], srid=GLOBAL_SRID)
+                    state_polygon_map[state_code] = poly.to_shapely()
+
+                else:
+                    print(response.status_code, response)
+            except Exception as e:
+                print(f"""
+                        *********************************************
+                                            ERROR
+                        *********************************************
+                        
+                        error connecting to server {url}
+                        Exception: {e}
+                      """)
+
+
+    ApplicationContext.states_polygon_shape_map = state_polygon_map
+    return {}
+
+
 @router.get("/find_polygon_by_centroid")
 @dispatch
 def find_polygon_by_centroid_api(request: Request, longtitude: float, latitude: float, srid="4326"):
@@ -72,26 +108,7 @@ def find_state_polygon_api(request: Request, state_code: str):
 
 @router.get("/get_states_polygons")
 def get_states_polygons_api(request: Request):
-    state_polygon_map = {}
-    for state_code, address in state_to_db_mapping.items():
-        address_split = address.split(":")
-        ip = address_split[0]
-        port = address_split[1]
-        url = f"http://{ip}:{port}/parcels/find_state_polygon?state_code={state_code}"
-        print(f"calling URL: {url} to get state polygon.")
-        response = requests.get(url)
-        if response.status_code == 200:
-            state_polygon = json.loads(response.content.decode('utf-8'))
-            wkt = state_polygon['geom']
-
-            response_dict = json.loads(response.content)
-            poly = Poly_T(wkt=response_dict['geom'], srid=GLOBAL_SRID)
-            state_polygon_map[state_code] = poly.to_shapely()
-
-        else:
-            print(response.status_code, response)
-
-    ApplicationContext.states_polygon_shape_map = state_polygon_map
+    load_states_polygons_list()
     return {}
 
 
