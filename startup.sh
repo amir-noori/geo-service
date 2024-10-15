@@ -4,12 +4,12 @@
 
 export service_provider_port=8001
 
-export oracle_version="11"
-export db_username="GIS"
-export db_password="123"
-export db_ip="192.168.24.52"
-export db_port="1521"
-export db_service="gisdb"
+# export oracle_version="11"
+# export db_username="GIS"
+# export db_password="123"
+# export db_ip="192.168.24.52"
+# export db_port="1521"
+# export db_service="gisdb"
 
 # export oracle_version="11"
 # export db_username="test_user"
@@ -21,8 +21,8 @@ export db_service="gisdb"
 export PYTHONPATH=pwd:$PYTHONPATH
 export oracle_client_home="/opt/oracle"
 
-export app_port=8001
-export dispatch_port=8000
+export app_port="${app_port:-8001}" 
+export dispatch_port="${dispatch_port:-8000}"
 export app_host="0.0.0.0"
 # app_mode must be set (values: "dispatcher" or "app" , default: "app")
 export app_mode="${app_mode:-app}" 
