@@ -17,12 +17,13 @@ export db_service="gisdb"
 # export db_ip="192.168.24.52"
 # export db_port="1521"
 # export db_service="oracle11db"
-
-export PYTHONPATH=/opt/app:$PYTHONPATH
-export oracle_client_home="/opt/app/oracle"
+export app_port=8001
+export dispatch_port=8000
+export PYTHONPATH=pwd:$PYTHONPATH
+export oracle_client_home="/opt/oracle"
 export LOG_LEVEL="DEBUG"
+export LOG_FORMAT="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 export locale="en_US"
-export app_port=8000
 export app_host="0.0.0.0"
 # app_mode must be set (values: "dispatcher" or "app" , default: "app")
 export app_mode="${app_mode:-app}" 
