@@ -26,13 +26,17 @@ QUERIES = {
         SELECT 
             i71 as LEGAL_AREA, 
             i64 as SEGMENT, 
-            i76 as SUBSIDIARY_PLATE_NUMBER
+            i75 as SUBSIDIARY_PLATE_NUMBER
         FROM gis.DEEDS9 d9
         WHERE 
             i89 is null and
             i0 = '{volume_code}' and 
             i1 = '{volume_number}' and 
-            i2 = '{page_number}'
+            i2 = '{page_number}' and
+            i52D not in ('cldk','cldkSfhSfkhdShpnhed') and
+            i75 is not null and
+            i76 is not null and
+            i64 like 'A%G%'
     """
 }
 
