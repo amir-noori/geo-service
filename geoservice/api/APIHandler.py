@@ -50,6 +50,22 @@ class APIHandler:
                 status_code=ResponseCodes.SUCCESS.code, # TODO: maybe we should return proper http response
                 content=jsonable_encoder(response),
             )
+            
+            
+        @self.app.exception_handler(Exception)
+        def exception_handler(request: Request, ex: Exception):
+
+            # TODO: messsage_key must be translated
+            error_message = ErrorCodes.SERVER_ERROR.messsage_key
+
+            header = Header(result_code=ErrorCodes.SERVER_ERROR.code,
+                            result_message=error_message)
+            response = BaseResponse(header=header)
+
+            return JSONResponse(
+                status_code=ErrorCodes.SERVER_ERROR.code,
+                content=jsonable_encoder(response),
+            )            
 
     def handle_middleware(self):
         enable_db_log = os.environ['enable_db_log']

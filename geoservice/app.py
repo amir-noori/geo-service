@@ -7,9 +7,7 @@ from geoservice.data.db_helper import get_db_connection_pool
 
 
 """
-    TODO: exception db log
     TODO: authentication
-
 """
 
 

@@ -132,7 +132,7 @@ def find_polygon_by_centroid(centroid: Point_T) -> Parcel:
 def find_parcel_info_by_centroid(centroid: Point_T) -> Parcel:
     parcel = find_polygon_by_centroid(centroid)
     deed = find_deed(parcel.deed)
-
+    
     # : must be set in find_deed
     parcel.deed.address_text = deed.address_text
     parcel.deed.legal_area = deed.legal_area
