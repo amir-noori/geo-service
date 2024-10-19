@@ -1,15 +1,15 @@
-from fastapi import Request
+from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
 from .parcels_api import router as parcel_router
 from exception.service_exception import ServiceException
-from exception.common import ErrorCodes
+from exception.common import ResponseCodes
 from model.dto.BaseDTO import Header, BaseResponse
-from api.middleware import DBLogMiddleware
+from api.middleware.MockMiddleware import MockMiddleware
+from api.middleware.DBLogMiddleware import DBLogMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 import os
-
 
 
 class APIHandler:
@@ -46,7 +46,7 @@ class APIHandler:
             response = BaseResponse(header=header)
 
             return JSONResponse(
-                status_code=ErrorCodes.SERVER_ERROR.code,
+                status_code=ResponseCodes.SUCCESS.code,
                 content=jsonable_encoder(response),
             )
 
@@ -54,4 +54,11 @@ class APIHandler:
         enable_db_log = os.environ['enable_db_log']
         if self.app_mode == "app" and enable_db_log == "true":
             db_log_middleware = DBLogMiddleware()
-            self.app.add_middleware(BaseHTTPMiddleware, dispatch=db_log_middleware)
+            self.app.add_middleware(
+                BaseHTTPMiddleware, dispatch=db_log_middleware)
+
+        enable_api_mock = os.environ['enable_api_mock']
+        if enable_api_mock == "true":
+            mock_middleware = MockMiddleware()
+            self.app.add_middleware(
+                BaseHTTPMiddleware, dispatch=mock_middleware)

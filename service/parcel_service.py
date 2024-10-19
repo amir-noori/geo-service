@@ -12,7 +12,7 @@ from service.util import process_label
 from service.deed_service import find_deed
 from util.common_util import get_state_name_by_code
 
-from exception.common import ErrorCodes
+from exception.common import ResponseCodes
 from exception.service_exception import ServiceException
 
 
@@ -95,7 +95,7 @@ def find_polygon_by_centroid(centroid: Point_T) -> Parcel:
         row_count = db_result.row_count
         results = db_result.results
         if row_count > 1:
-            raise ServiceException(ErrorCodes.MULTIPLE_PARCEL_FOUND)
+            raise ServiceException(ResponseCodes.MULTIPLE_PARCEL_FOUND)
 
         geometry_wkt = None
         deed = None
@@ -119,9 +119,9 @@ def find_polygon_by_centroid(centroid: Point_T) -> Parcel:
     shape_parcel = execute_query(query_shape, run)
 
     if not centroid_parcel.polygon and not shape_parcel.polygon:
-        raise ServiceException(ErrorCodes.NO_PARCEL_FOUND)
+        raise ServiceException(ResponseCodes.NO_PARCEL_FOUND)
     elif centroid_parcel.polygon and shape_parcel.polygon:
-        raise ServiceException(ErrorCodes.MULTIPLE_PARCEL_FOUND)
+        raise ServiceException(ResponseCodes.MULTIPLE_PARCEL_FOUND)
     else:
         if shape_parcel.polygon:
             return shape_parcel

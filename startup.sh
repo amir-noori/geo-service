@@ -31,6 +31,7 @@ export app_mode="${app_mode:-app}"
 export app_level="${app_level:-dev}" 
 
 export enable_db_log="${enable_db_log:-true}" 
+export enable_api_mock="${enable_api_mock:-false}"
 
 source bin/activate
 

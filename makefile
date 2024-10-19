@@ -19,3 +19,4 @@ runapp:
 
 rundispatcher:
 	docker run -i -p 8000:8000 --env-file ./docker/env.dispatcher.list -t geoubuntu_app:latest  /bin/bash
+

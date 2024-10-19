@@ -1,5 +1,5 @@
 
-class ErrorCode:
+class ResponseCode:
 
     def __init__(self, code, message_key) -> None:
         self.code = code
@@ -11,16 +11,17 @@ class ErrorCode:
 
 class CustomException(Exception):
 
-    def __init__(self, error_code: ErrorCode, error_message="") -> None:
+    def __init__(self, error_code: ResponseCode, error_message="") -> None:
         super().__init__()
         self.error_message = error_message
         self.error_code = error_code
 
 
-class ErrorCodes:
+class ResponseCodes:
+    
+    SUCCESS = ResponseCode(200, "SUCCESS")
+    SERVER_ERROR = ResponseCode(500, "SERVER_ERROR")
 
-    SERVER_ERROR = ErrorCode(500, "SERVER_ERROR")
-
-    NO_PARCEL_FOUND = ErrorCode(10000, "NO_PARCEL_FOUND")
-    MULTIPLE_PARCEL_FOUND = ErrorCode(10001, "MULTIPLE_PARCEL_FOUND")
-    NO_STATE_FOUND = ErrorCode(10002, "NO_STATE_FOUND")
+    NO_PARCEL_FOUND = ResponseCode(10000, "NO_PARCEL_FOUND")
+    MULTIPLE_PARCEL_FOUND = ResponseCode(10001, "MULTIPLE_PARCEL_FOUND")
+    NO_STATE_FOUND = ResponseCode(10002, "NO_STATE_FOUND")

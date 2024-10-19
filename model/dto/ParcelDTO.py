@@ -1,4 +1,4 @@
-from .BaseDTO import BaseDTO, BaseResponse, partial_model
+from model.dto.BaseDTO import BaseDTO, BaseResponse, partial_model
 from gis.model.models import GeomType
 from common.constants import GLOBAL_SRID
 

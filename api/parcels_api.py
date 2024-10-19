@@ -2,14 +2,14 @@ from service.parcel_service import *
 # from util.gis_util import transform_point
 from common.constants import UTM_ZONE_38_SRID
 from gis.model.models import Point_T
-from .common import handle_response
+from api.common import handle_response
 from util.common_util import get_state_code_by_name
 from model.dto.ParcelDTO import *
 from event.Event import Event
 from common.ApplicationContext import ApplicationContext
 from fastapi import APIRouter, Request
 from dispatcher.dispatcher import dispatch
-from exception.common import ErrorCodes
+from exception.common import ResponseCodes
 from common.states import state_to_db_mapping
 from gis.model.models import Poly_T
 import requests
@@ -28,7 +28,7 @@ def find_state_for_dispatch(event):
     for state_code, polygon in ApplicationContext.states_polygon_shape_map.items():
         if polygon.contains(centroid.to_shapely()):
             return state_code
-    raise ServiceException(ErrorCodes.NO_STATE_FOUND)
+    raise ServiceException(ResponseCodes.NO_STATE_FOUND)
 
 
 def get_state_code(event):
