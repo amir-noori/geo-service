@@ -1,7 +1,7 @@
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
-from geoservice.model.dto.BaseDTO import Header, BaseDTO
+from geoservice.model.dto.BaseDTO import Header, BaseResponse
 
 
 class ResponseCode:
@@ -16,7 +16,7 @@ class ResponseCodes:
     SUCCESS = ResponseCode(200, "SUCCESS")
 
 
-def handle_response(response: BaseDTO, exclude_unset=True, exclude_none=True):
+def handle_response(response: BaseResponse, exclude_unset=True, exclude_none=True):
     header = Header(
         result_code=ResponseCodes.SUCCESS.code,
         result_message=ResponseCodes.SUCCESS.message_key

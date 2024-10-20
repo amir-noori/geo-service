@@ -51,17 +51,14 @@ class Header(BaseModel):
 
 class BaseDTO(BaseModel):
 
-    header: Header
-
     model_config = ConfigDict(
         alias_generator=to_camel,
         populate_by_name=True,
         from_attributes=True,
     )
 
-    def __init__(self, header=None) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.header = header
 
     def toJSON(self):
         return toJSON(self)

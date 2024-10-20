@@ -3,6 +3,8 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
 from geoservice.api.parcels_api import router as parcel_router
+from geoservice.api.units_api import router as unit_router
+
 from geoservice.exception.service_exception import ServiceException
 from geoservice.exception.common import ErrorCodes
 from geoservice.api.common import ResponseCodes
@@ -28,6 +30,12 @@ class APIHandler:
             parcel_router,
             prefix="/parcels",
             tags=["parcels"],
+        )
+        
+        self.app.include_router(
+            unit_router,
+            prefix="/unit",
+            tags=["unit"],
         )
 
     def handle_exceptions(self):

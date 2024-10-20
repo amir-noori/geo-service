@@ -80,6 +80,28 @@ class ParcelInfoResponse(BaseResponse):
 
     body: ParcelInfoDTO
 
-    def __init__(self, body=None) -> None:
-        super().__init__(header=None)
+    def __init__(self, body=None, header=None) -> None:
+        super().__init__(header=header)
+        self.body = body
+
+
+@partial_model
+class ParcelListDTO(BaseDTO):
+
+    parcel_geom_list: list[ParcelGeomDTO]
+    buffer_geom: ParcelGeomDTO
+
+    def __init__(self, parcel_geom_list: list[ParcelGeomDTO] = [], buffer_geom: ParcelGeomDTO=None) -> None:
+        super().__init__()
+        self.parcel_geom_list = parcel_geom_list
+        self.buffer_geom = buffer_geom
+
+
+@partial_model
+class ParcelListResponse(BaseResponse):
+
+    body: ParcelListDTO
+
+    def __init__(self, body: ParcelListDTO = None, header=None) -> None:
+        super().__init__(header=header)
         self.body = body

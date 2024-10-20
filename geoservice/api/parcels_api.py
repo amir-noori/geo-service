@@ -87,6 +87,36 @@ def find_polygon_by_centroid_api(request: Request, longtitude: float, latitude: 
     return handle_response({"parcel": str(geometry_wkt)})
 
 
+@router.get("/find_parcel_list_by_centroid", response_model=ParcelListResponse)
+@dispatch(dispatch_event=Event(find_state_for_dispatch))
+def find_parcel_list_by_centroid_api(request: Request, longtitude: float, latitude:
+                                     float, distance: float = None, srid="4326"):
+
+    if not distance:
+        distance = 10
+
+    # TODO: must get value from system parameter
+    if distance > 200:
+        distance = 200
+
+    point = Point_T(longtitude, latitude, srid)
+    polygon_list, buffer = find_parcel_list_by_centroid(point, distance)
+
+    parcel_geom_list = []
+    for polygon in polygon_list:
+        parcel_geom = ParcelGeomDTO(
+            geom=polygon, type=GeomType.POLYGON, crs=GLOBAL_SRID)
+        parcel_geom_list.append(parcel_geom)
+
+    buffer_geom = ParcelGeomDTO(
+        geom=buffer, type=GeomType.POLYGON, crs=GLOBAL_SRID)
+    parcel_list_dto = ParcelListDTO(
+        parcel_geom_list=parcel_geom_list, buffer_geom=buffer_geom)
+    parcel_list_response = ParcelListResponse(body=parcel_list_dto)
+
+    return handle_response(parcel_list_response)
+
+
 @router.get("/find_parcel_info_by_centroid", response_model=ParcelInfoResponse)
 @dispatch(dispatch_event=Event(find_state_for_dispatch))
 def find_parcel_info_by_centroid_api(request: Request, longtitude: float, latitude:

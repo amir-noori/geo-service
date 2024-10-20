@@ -60,6 +60,52 @@ QUERIES = {
             and LEVEL1 || COLOR1 || STYLE1 || WEIGHT1 = '41503'
             and DEL_USER is null
             and poly is not null
+    """,
+
+    "query_centorid_polygon_list_by_point": """
+        select SDO_UTIL.TO_WKTGEOMETRY(c.POLY) as POLY
+        from gis.CENTROID c
+        where SDO_RELATE(c.POLY,
+                        SDO_GEOM.SDO_BUFFER(
+                                SDO_GEOMETRY('POINT({x} {y})', {srid}),
+                                SDO_DIM_ARRAY(
+                                        SDO_DIM_ELEMENT('Longitude', -180, 180, 0.01),
+                                        SDO_DIM_ELEMENT('Latitude', -180, 180, 0.01)
+                                    ),
+                                {distance}
+                            )
+                , 'mask=inside+touch+OVERLAPBDYINTERSECT+coveredby') = 'TRUE'
+            and TXT_LABLE like '%*'
+            and DEL_USER is null and DEL_DATE is null
+    """,
+
+    "query_shape_polygon_list_by_point": """
+        select SDO_UTIL.TO_WKTGEOMETRY(c.POLY) as POLY
+        from gis.SHAPE c
+        where SDO_RELATE(c.POLY,
+                        SDO_GEOM.SDO_BUFFER(
+                                SDO_GEOMETRY('POINT({x} {y})', {srid}),
+                                SDO_DIM_ARRAY(
+                                        SDO_DIM_ELEMENT('Longitude', -180, 180, 0.01),
+                                        SDO_DIM_ELEMENT('Latitude', -180, 180, 0.01)
+                                    ),
+                                {distance}
+                            )
+                , 'mask=inside+touch+OVERLAPBDYINTERSECT+coveredby') = 'TRUE'
+            and LABLE1 like '%*'
+            and DEL_USER is null and DEL_DATE is null
+    """,
+    
+    "query_point_buffer": """
+        select SDO_UTIL.TO_WKTGEOMETRY(SDO_GEOM.SDO_BUFFER(
+                SDO_GEOMETRY('POINT({x} {y})', {srid}),
+                SDO_DIM_ARRAY(
+                        SDO_DIM_ELEMENT('Longitude', -180, 180, 0.01),
+                        SDO_DIM_ELEMENT('Latitude', -180, 180, 0.01)
+                    ),
+                {distance}
+            )) as BUFFER
+        from dual
     """
 }
 
@@ -71,11 +117,11 @@ def find_state_polygon(state_code: str) -> str:
         geometry_wkt_list = []
         for result in results:
             geometry_wkt_list.append(str(result['STATE_POLY']))
-        
+
         geometry_wkt = union_polygons_by_wkt(geometry_wkt_list)
 
         return str(geometry_wkt)
-    
+
     geometry_wkt = execute_query(QUERIES['query_state_polygon'], run)
 
     # geometry_wkt = ""
@@ -85,7 +131,7 @@ def find_state_polygon(state_code: str) -> str:
     #     error_obj, = e.args
     #     if error_obj.full_code == "ORA-30625":
     #         print("ORA-30625 -> ignored") # TODO: investigate
-                   
+
     return Parcel(polygon=geometry_wkt)
 
 
@@ -132,13 +178,13 @@ def find_polygon_by_centroid(centroid: Point_T) -> Parcel:
 def find_parcel_info_by_centroid(centroid: Point_T) -> Parcel:
     parcel = find_polygon_by_centroid(centroid)
     deed = find_deed(parcel.deed)
-    
+
     # : must be set in find_deed
     parcel.deed.address_text = deed.address_text
     parcel.deed.legal_area = deed.legal_area
     parcel.deed.partitioned = deed.partitioned
     parcel.deed.segment = deed.segment
-    
+
     if deed.state and deed.state != None:
         parcel.deed.state = deed.state
     else:
@@ -146,3 +192,38 @@ def find_parcel_info_by_centroid(centroid: Point_T) -> Parcel:
         parcel.deed.state = get_state_name_by_code(current_state_code)
 
     return parcel
+
+
+def find_parcel_list_by_centroid(centroid: Point_T, distance: float):
+    def run_poly(db_result: DBResult):
+        results = db_result.results
+        geometry_wkt_list = []
+        for result in results:
+            geometry_wkt = wkt.loads(str(result['POLY']))
+            geometry_wkt_list.append(str(geometry_wkt))
+
+        return geometry_wkt_list
+    
+    def run_buffer(db_result: DBResult):
+        results = db_result.results
+        buffer = None
+        for result in results:
+            geometry_wkt = wkt.loads(str(result['BUFFER']))
+            buffer = str(geometry_wkt)
+
+        return buffer
+
+    query_centorid_polygon_list = QUERIES['query_centorid_polygon_list_by_point'].format(
+        x=centroid.x, y=centroid.y, srid=centroid.srid, distance=distance)
+
+    query_shape_polygon_list = QUERIES['query_shape_polygon_list_by_point'].format(
+        x=centroid.x, y=centroid.y, srid=centroid.srid, distance=distance)
+    
+    query_buffer = QUERIES['query_point_buffer'].format(
+        x=centroid.x, y=centroid.y, srid=centroid.srid, distance=distance)
+
+    centroid_polygon_list = execute_query(query_centorid_polygon_list, run_poly)
+    shape_polygon_list = execute_query(query_shape_polygon_list, run_poly)
+    buffer = execute_query(query_buffer, run_buffer)
+
+    return centroid_polygon_list + shape_polygon_list, buffer
