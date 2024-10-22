@@ -34,18 +34,13 @@ class BaseLogger(SingletonMeta):
     def critical(cls, message: str):
         pass
 
-class Handler(BaseLogger):
+class SimpleLogger(BaseLogger):
 
     def __init__(self, level,format):
         # Create a logger object with the specified name
         self._logger = logging.getLogger('my_logger')
         # Set the logging level to DEBUG
         self._logger.setLevel(level)
-
-        # Create a file handler to log messages to a file
-        #file_handler = logging.FileHandler('my_log_file.log')
-        # Set the file handler logging level to DEBUG
-        #file_handler.setLevel(level)
 
         # Create a console handler to log messages to the console
         console_handler = logging.StreamHandler()
@@ -54,12 +49,10 @@ class Handler(BaseLogger):
 
         # Define the log message format
         formatter = logging.Formatter(format)
-        # Set the formatter for both the file and console handlers
-        #file_handler.setFormatter(formatter)
+        # Set the formatter for console handlers
         console_handler.setFormatter(formatter)
 
-        # Add the file and console handlers to the logger
-        #self._logger.addHandler(file_handler)
+        # Add the console handlers to the logger
         self._logger.addHandler(console_handler)
 
     def debug(self, message: str):
