@@ -105,3 +105,12 @@ class ParcelListResponse(BaseResponse):
     def __init__(self, body: ParcelListDTO = None, header=None) -> None:
         super().__init__(header=header)
         self.body = body
+
+@partial_model
+class StatePolygonResponse(BaseResponse):
+
+    body: ParcelGeomDTO
+
+    def __init__(self, body: ParcelGeomDTO = None, header=None) -> None:
+        super().__init__(header=header)
+        self.body = body
