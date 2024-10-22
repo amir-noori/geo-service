@@ -12,6 +12,7 @@ from geoservice.model.dto.BaseDTO import Header, BaseResponse
 from geoservice.api.middleware.MockMiddleware import MockMiddleware
 from geoservice.api.middleware.DBLogMiddleware import DBLogMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
+from i18n.locale import Locale
 import os
 
 
@@ -49,7 +50,8 @@ class APIHandler:
                 error_message = ex.error_message
             else:
                 error_message = ex.error_code.messsage_key
-
+            locale= Locale.get_locale(request.query_params.get("lang","en_US"))
+            error_message = locale.translate(error_message)
             header = Header(result_code=ex.error_code.code,
                             result_message=error_message)
             response = BaseResponse(header=header)
@@ -65,6 +67,8 @@ class APIHandler:
 
             # TODO: messsage_key must be translated
             error_message = ErrorCodes.SERVER_ERROR.messsage_key
+            locale= Locale.get_locale(request.query_params.get("lang","en_US"))
+            error_message = locale.translate(error_message)
 
             header = Header(result_code=ErrorCodes.SERVER_ERROR.code,
                             result_message=error_message)
