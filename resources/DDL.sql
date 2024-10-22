@@ -4,6 +4,7 @@ create table GIS.TBL_MESSAGE_LOG
   ID                  NUMBER(10),
   tracking_id         VARCHAR2(255 CHAR),
   service_key         VARCHAR2(255 CHAR),
+  service_name         VARCHAR2(400 CHAR),
   source_ip           VARCHAR2(255 CHAR),
   method              VARCHAR2(255 CHAR),
   destination_ip      VARCHAR2(255 CHAR),

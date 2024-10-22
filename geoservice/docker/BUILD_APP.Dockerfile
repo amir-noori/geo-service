@@ -18,6 +18,6 @@ ENV LD_LIBRARY_PATH=/opt/oracle
 
 COPY ./ /opt/app 
 WORKDIR /opt/app
-# ENTRYPOINT ["geoservice/startup.sh"]
+ENTRYPOINT ["geoservice/startup.sh"]
 
 
