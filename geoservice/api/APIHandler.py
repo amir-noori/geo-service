@@ -15,6 +15,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 import os
 
 
+
 class APIHandler:
 
     def __init__(self, app) -> None:
@@ -29,7 +30,7 @@ class APIHandler:
         self.app.include_router(
             parcel_router,
             prefix="/parcels",
-            tags=["parcels"],
+            tags=["parcels"]
         )
         
         self.app.include_router(
@@ -87,3 +88,4 @@ class APIHandler:
             mock_middleware = MockMiddleware()
             self.app.add_middleware(
                 BaseHTTPMiddleware, dispatch=mock_middleware)
+        

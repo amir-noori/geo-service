@@ -35,13 +35,35 @@ class DBLogMiddleware:
         response_txt = None
         if response_body:
             response_txt = str(response_body[0].decode())
-        db_message_log = DbMessageLog.create_message_log(request, response_txt)
+
+        request_body = await request.body()
+        db_message_log = DbMessageLog(request=request_body.decode("utf-8"),
+                                      response=response_txt,
+                                      method=request.method,
+                                      request_url=str(request.url),
+                                      source_ip=str(request.client.host))
+        # db_message_log = DbMessageLog.create_message_log(request, response_txt)
         if exception:
             exception_txt = repr(exception) + " ---> " + ''.join(
                 traceback.TracebackException.from_exception(exception).format())
             db_message_log.exception = exception_txt
             print(exception_txt)
-            
+
+        service_key = None
+        service_name = None
+        try:
+            service_key = request.scope["service_key"]
+        except KeyError:
+            pass
+        
+        try:
+            service_name = request.scope["service_name"]
+        except KeyError:
+            pass
+
+        db_message_log.service_key = service_key
+        db_message_log.service_name = service_name
+
         db_message_log.request_time = request_time
         db_message_log.response_time = response_time
         save_db_message_log(db_message_log)

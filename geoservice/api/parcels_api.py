@@ -4,14 +4,16 @@ from geoservice.common.constants import UTM_ZONE_38_SRID
 from geoservice.gis.model.models import Point_T
 from geoservice.api.common import handle_response
 from geoservice.util.common_util import get_state_code_by_name
-from geoservice.model.dto.ParcelDTO import *
+from geoservice.model.dto.ParcelDtoResponse import *
+from geoservice.model.dto.ParcelDtoRequest import *
 from geoservice.event.Event import Event
 from geoservice.common.ApplicationContext import ApplicationContext
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 from geoservice.dispatcher.dispatcher import dispatch
 from geoservice.exception.common import ErrorCodes
 from geoservice.common.states import state_to_db_mapping
 from geoservice.gis.model.models import Poly_T
+from geoservice.api.route import route
 import requests
 import json
 
@@ -49,8 +51,10 @@ def load_states_polygons_list():
             try:
                 response = requests.get(url)
                 if response.status_code == 200:
-                    response_dict = json.loads(response.content.decode('utf-8'))
-                    poly = Poly_T(wkt=response_dict['body']['geom'], srid=GLOBAL_SRID)
+                    response_dict = json.loads(
+                        response.content.decode('utf-8'))
+                    poly = Poly_T(
+                        wkt=response_dict['body']['geom'], srid=GLOBAL_SRID)
                     state_polygon_map[state_code] = poly.to_shapely()
 
                 else:
@@ -69,7 +73,8 @@ def load_states_polygons_list():
     return {}
 
 
-@router.get("/find_polygon_by_centroid")
+# @router.get("/find_polygon_by_centroid")
+@route(router=router, method="get", path="/find_polygon_by_centroid")
 @dispatch
 def find_polygon_by_centroid_api(request: Request, longtitude: float, latitude: float, srid="4326"):
     """
@@ -84,20 +89,16 @@ def find_polygon_by_centroid_api(request: Request, longtitude: float, latitude: 
     return handle_response({"parcel": str(geometry_wkt)})
 
 
-@router.get("/find_parcel_list_by_centroid", response_model=ParcelListResponse)
+# @router.get("/find_parcel_list_by_centroid", response_model=ParcelListResponse)
+@route(router=router, method="get", path="/find_parcel_list_by_centroid", response_model=ParcelListResponse)
 @dispatch(dispatch_event=Event(find_state_for_dispatch))
-def find_parcel_list_by_centroid_api(request: Request, longtitude: float, latitude:
-                                     float, distance: float = None, srid="4326"):
+def find_parcel_list_by_centroid_api(request: Request, parcel_request_dto: ParcelInfoRequestDTO = Depends()):
 
-    if not distance:
-        distance = 10
-
-    # TODO: must get value from system parameter
-    if distance > 200:
-        distance = 200
-
-    point = Point_T(longtitude, latitude, srid)
-    polygon_list, buffer = find_parcel_list_by_centroid(point, distance)
+    point = Point_T(parcel_request_dto.longtitude,
+                    parcel_request_dto.latitude,
+                    parcel_request_dto.srid)
+    polygon_list, buffer = find_parcel_list_by_centroid(
+        point, parcel_request_dto.distance)
 
     parcel_geom_list = []
     for polygon in polygon_list:
@@ -114,11 +115,14 @@ def find_parcel_list_by_centroid_api(request: Request, longtitude: float, latitu
     return handle_response(parcel_list_response)
 
 
-@router.get("/find_parcel_info_by_centroid", response_model=ParcelInfoResponse)
+# @router.get("/find_parcel_info_by_centroid", response_model=ParcelInfoResponse)
+@route(router=router, method="get", path="/find_parcel_info_by_centroid", response_model=ParcelInfoResponse)
 @dispatch(dispatch_event=Event(find_state_for_dispatch))
-def find_parcel_info_by_centroid_api(request: Request, longtitude: float, latitude:
-                                     float, srid="4326"):
-    point = Point_T(longtitude, latitude, srid)
+def find_parcel_info_by_centroid_api(request: Request,
+                                     parcel_request_dto: ParcelInfoRequestDTO = Depends()):
+    point = Point_T(parcel_request_dto.longtitude,
+                    parcel_request_dto.latitude,
+                    parcel_request_dto.srid)
     parcel = find_parcel_info_by_centroid(point)
     parcel_info = assemble_parcel_info_response(parcel)
     response = ParcelInfoResponse(parcel_info)
@@ -126,6 +130,7 @@ def find_parcel_info_by_centroid_api(request: Request, longtitude: float, latitu
 
 
 @router.get("/find_state_polygon", response_model=ParcelGeomDTO)
+# @route(router=router, method="get", path="/find_state_polygon", response_model=ParcelGeomDTO)
 @dispatch(dispatch_event=Event(get_state_code))
 def find_state_polygon_api(request: Request, state_code: str):
     parcel = find_state_polygon(state_code)
@@ -134,7 +139,8 @@ def find_state_polygon_api(request: Request, state_code: str):
     return handle_response(state_polygon_response)
 
 
-@router.get("/get_states_polygons")
+# @router.get("/get_states_polygons")
+@route(router=router, method="get", path="/get_states_polygons")
 def get_states_polygons_api(request: Request):
     load_states_polygons_list()
     return {}

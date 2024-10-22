@@ -86,6 +86,7 @@ CREATE TABLE GIS.TBL_API_DESCRIPTION (
     api_url varchar2(1500 char),
     is_enabled number(1,0),
     is_mocked number(1,0),
+    is_log_enabled number(1,0),
     bypass_auth number(1,0),
     api_description varchar2(2000 char),
     mocked_response CLOB
