@@ -13,6 +13,7 @@ from geoservice.exception.common import ErrorCodes
 from geoservice.common.states import state_to_db_mapping
 from geoservice.gis.model.models import Poly_T
 import requests
+import json
 
 
 router = APIRouter()
@@ -48,12 +49,8 @@ def load_states_polygons_list():
             try:
                 response = requests.get(url)
                 if response.status_code == 200:
-                    state_polygon = json.loads(
-                        response.content.decode('utf-8'))
-                    wkt = state_polygon['geom']
-
-                    response_dict = json.loads(response.content)
-                    poly = Poly_T(wkt=response_dict['geom'], srid=GLOBAL_SRID)
+                    response_dict = json.loads(response.content.decode('utf-8'))
+                    poly = Poly_T(wkt=response_dict['body']['geom'], srid=GLOBAL_SRID)
                     state_polygon_map[state_code] = poly.to_shapely()
 
                 else:
@@ -132,8 +129,9 @@ def find_parcel_info_by_centroid_api(request: Request, longtitude: float, latitu
 @dispatch(dispatch_event=Event(get_state_code))
 def find_state_polygon_api(request: Request, state_code: str):
     parcel = find_state_polygon(state_code)
-    parcel_dto = ParcelGeomDTO(geom=parcel.polygon)
-    return handle_response(parcel_dto)
+    parcel_geom_dto = ParcelGeomDTO(geom=parcel.polygon)
+    state_polygon_response = StatePolygonResponse(body=parcel_geom_dto)
+    return handle_response(state_polygon_response)
 
 
 @router.get("/get_states_polygons")

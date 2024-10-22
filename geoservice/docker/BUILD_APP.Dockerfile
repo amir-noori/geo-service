@@ -17,7 +17,7 @@ RUN ln -s /lib/x86_64-linux-gnu/libaio.so.1t64.0.2 /lib/x86_64-linux-gnu/libaio.
 ENV LD_LIBRARY_PATH=/opt/oracle
 
 COPY ./ /opt/app 
-WORKDIR /opt/app/geoservice
-# ENTRYPOINT ["/opt/app/geoservice/startup.sh"]
+WORKDIR /opt/app
+ENTRYPOINT ["geoservice/startup.sh"]
 
 
