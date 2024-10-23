@@ -93,6 +93,7 @@ QUERIES = {
                             )
                 , 'mask=inside+touch+OVERLAPBDYINTERSECT+coveredby') = 'TRUE'
             and LABLE1 like '%*'
+            and LABLE1 not like '%TASBITED%'
             and DEL_USER is null and DEL_DATE is null
     """,
     
