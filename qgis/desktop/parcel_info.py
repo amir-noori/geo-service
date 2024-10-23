@@ -19,7 +19,7 @@ def call_parcel_info_service(latitude, longtitude):
         logger().error(response_content)
     else:
         logger().debug(f"error code: {response.status_code}")
-        logger().debug("error", response.content)
+        logger().debug(f"error {response.content}")
 
 
 call_parcel_info_service(33.1194320,46.1747897)

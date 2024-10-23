@@ -53,7 +53,7 @@ def process_label(label):
         page_number = label[underline_index2 + 1:bb_index]
 
     except IndexError as e:
-        logger().debug("index error: " + str(e))
+        logger().debug(f"index error:  + {str(e)}")
 
     logger().debug(f"""
             process label:

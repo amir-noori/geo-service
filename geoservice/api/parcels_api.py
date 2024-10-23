@@ -59,7 +59,7 @@ def load_states_polygons_list():
                     state_polygon_map[state_code] = poly.to_shapely()
 
                 else:
-                    logger().error(response.status_code, response)
+                    logger().error(f"{response.status_code} , {response}")
             except Exception as e:
                 logger().debug(f"""
                         *********************************************

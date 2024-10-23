@@ -7,7 +7,7 @@ class Event:
         self.handler = handler
 
     def fire(self, *args, **kargs):
-        logger().error("fire: ", self.handler)
+        logger().error(f"fire: , {self.handler}")
         return self.handler(*args, **kargs)
 
     __call__ = fire
