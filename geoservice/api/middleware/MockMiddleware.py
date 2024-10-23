@@ -3,14 +3,13 @@ from fastapi.responses import JSONResponse
 from integration.service.api_description_service import find_api_description
 from log.logger import logger
 
-log = logger()
-
 class MockMiddleware():
+    log = logger()
     def __init__(self):
         pass
 
     async def __call__(self, request: Request, call_next):
-        log.debug("mock middleware called")
+        self.log.debug("mock middleware called")
 
         api_key = request.url.path
         if api_key.endswith("/"):

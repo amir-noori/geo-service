@@ -2,12 +2,11 @@
 from functools import wraps
 from log.logger import logger
 
-log = logger()
-
 def cached():
     """
         cache function return
     """
+    log = logger()
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
