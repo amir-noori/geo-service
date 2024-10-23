@@ -168,7 +168,14 @@ def find_polygon_by_centroid(centroid: Point_T) -> Parcel:
     if not centroid_parcel.polygon and not shape_parcel.polygon:
         raise ServiceException(ErrorCodes.NO_PARCEL_FOUND)
     elif centroid_parcel.polygon and shape_parcel.polygon:
-        raise ServiceException(ErrorCodes.MULTIPLE_PARCEL_FOUND)
+        """
+         TODO: for some points (Tehran -> 35.756578727113194, 51.34700238704682) we have both shape and centorid polies
+            it must be investigated further.
+            for now lets not raise exception and return centroid poly which most probably is surrounded by shape poly
+        """
+        print(f"multiple polygons found for centroid {centroid}. ignoring shape!")
+        shape_parcel.polygon = None
+        # raise ServiceException(ErrorCodes.MULTIPLE_PARCEL_FOUND)
     else:
         if shape_parcel.polygon:
             return shape_parcel
