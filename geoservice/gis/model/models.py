@@ -29,6 +29,9 @@ class Point_T(GISModel):
     def to_shapely(self):
         return loads(f'POINT ({self.x} {self.y})')
 
+    def __str__(self) -> str:
+        return f'POINT ({self.x} {self.y}) SRID {self.srid}'
+
 
 class Poly_T(GISModel):
 
