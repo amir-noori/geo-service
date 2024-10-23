@@ -1,23 +1,23 @@
 
 from functools import wraps
-
-
+from log.logger import logger
 
 def cached():
     """
         cache function return
     """
+    log = logger()
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
             if not hasattr(fn, "return_cached_value"):
-                print("setting empty cache attribute")
+                log.debug("setting empty cache attribute")
                 fn.return_cached_value = {}
                                 
             if not fn.return_cached_value:
-                print("getting cache value")
+                log.debug("getting cache value")
                 value = fn(*args, **kwargs)
-                print("setting cache value")
+                log.debug("setting cache value")
                 fn.return_cached_value = value
             
             return fn.return_cached_value

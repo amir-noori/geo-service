@@ -1,7 +1,9 @@
 from geoservice.model.entity.Parcel import Deed
+from log.logger import logger
 
 import re
 
+log = logger()
 
 def process_label(label):
     cms = None
@@ -52,9 +54,9 @@ def process_label(label):
         page_number = label[underline_index2 + 1:bb_index]
 
     except IndexError as e:
-        print("index error: " + str(e))
+        log.error(f"index error:  + {str(e)}")
 
-    print(f"""
+    log.error(f"""
             process label:
                 cms: {cms}, 
                 section: {section}, 

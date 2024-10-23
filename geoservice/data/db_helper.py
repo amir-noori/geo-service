@@ -2,8 +2,10 @@
 from geoservice.data.db import get_connection, get_connection_pool
 from geoservice.data.DBResult import DBResult
 from geoservice.common.ApplicationContext import ApplicationContext
-
 from geoservice.config import db
+from log.logger import logger
+
+log = logger()
 
 def get_db_connection():
     return get_connection(db['username'], db['password'], db['url'])    
@@ -12,7 +14,7 @@ def get_db_connection_pool():
     return get_connection_pool(db['username'], db['password'], db['url'])    
 
 def execute_query(query, func):
-    print(query)
+    log.debug(query)
     connection = ApplicationContext.connection_pool.acquire()
     cursor = connection.cursor()
     cursor.execute(query)
@@ -27,7 +29,7 @@ def execute_query(query, func):
     return function_return
 
 def execute_insert(query, params):
-    print(query)
+    log.debug(query)
     connection = ApplicationContext.connection_pool.acquire()
     cursor = connection.cursor()
     cursor.execute(query, params)
