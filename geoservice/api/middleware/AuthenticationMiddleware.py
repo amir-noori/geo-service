@@ -6,15 +6,16 @@ from integration.service.channel_service import find_channel
 from log.logger import logger
 from fastapi import status
 
+log = logger()
 
 class AuthenticationMiddleware:
     def __init__(self):
         pass
 
     async def __call__(self, request: Request, call_next):
-        logger().error("mock middleware called")
+        log.debug("mock middleware called")
         headers = request.headers
-        logger().error("headers are "+ f"{headers}")
+        log.debug("headers are "+ f"{headers}")
 
         auth_header = None
         auth_type = None
@@ -34,7 +35,7 @@ class AuthenticationMiddleware:
         except (KeyError, IndexError):
             pass
 
-        logger().error(f"auth_header: {auth_header}")
+        log.debug(f"auth_header: {auth_header}")
 
         api_key = request.url.path
         if api_key.endswith("/"):
@@ -43,7 +44,7 @@ class AuthenticationMiddleware:
         api_desc = find_api_description(api_key)
 
         if not api_desc or not api_desc.is_enabled:
-            logger().error(f"service is not available with api_key: {api_key}, api_desc: {api_desc}")
+            log.debug(f"service is not available with api_key: {api_key}, api_desc: {api_desc}")
             return JSONResponse(content={'status': 'service is not available (enabled)'},
                                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
 
@@ -51,7 +52,7 @@ class AuthenticationMiddleware:
             return await call_next(request)
 
         else:
-            logger().error("trying to authenticate")
+            log.debug("trying to authenticate")
             try:
                 channel_id = int(channel_id)
             except TypeError:
@@ -63,7 +64,7 @@ class AuthenticationMiddleware:
                     not channel or \
                     channel.auth_key != auth_key.strip():
 
-                logger().debug(f"authentication failed for auth_header: {auth_header}, channel_id: {channel_id}, channel: {channel}")
+                log.error(f"authentication failed for auth_header: {auth_header}, channel_id: {channel_id}, channel: {channel}")
                 return JSONResponse(content={'status': 'not authorized'},
                                     status_code=status.HTTP_401_UNAUTHORIZED)
 

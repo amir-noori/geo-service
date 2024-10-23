@@ -7,12 +7,14 @@ from datetime import datetime
 import traceback
 from log.logger import logger
 
+log = logger()
+
 class DBLogMiddleware:
     def __init__(self):
         pass
 
     async def __call__(self, request: Request, call_next):
-        logger().error("db log middleware called.")
+        log.debug("db log middleware called.")
 
         exception = None
         request_time = None
@@ -47,7 +49,7 @@ class DBLogMiddleware:
             exception_txt = repr(exception) + " ---> " + ''.join(
                 traceback.TracebackException.from_exception(exception).format())
             db_message_log.exception = exception_txt
-            logger().debug(exception_txt)
+            log.error(exception_txt)
 
         service_key = None
         service_name = None
@@ -75,5 +77,5 @@ class DBLogMiddleware:
         db_message_log.request_time = request_time
         db_message_log.response_time = response_time
         save_db_message_log(db_message_log)
-        logger().error("insert service log to DB.")
+        log.debug("insert service log to DB.")
         return response

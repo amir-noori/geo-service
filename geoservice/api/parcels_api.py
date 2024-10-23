@@ -20,7 +20,7 @@ import json
 
 
 router = APIRouter()
-
+log = logger()
 
 def find_state_for_dispatch(event):
     data = event["data"]
@@ -48,7 +48,7 @@ def load_states_polygons_list():
             ip = address_split[0]
             port = address_split[1]
             url = f"http://{ip}:{port}/parcels/find_state_polygon?state_code={state_code}"
-            logger().error(f"calling URL: {url} to get state polygon.")
+            log.debug(f"calling URL: {url} to get state polygon.")
             try:
                 response = requests.get(url)
                 if response.status_code == 200:
@@ -59,9 +59,9 @@ def load_states_polygons_list():
                     state_polygon_map[state_code] = poly.to_shapely()
 
                 else:
-                    logger().error(f"{response.status_code} , {response}")
+                    log.debug(f"{response.status_code} , {response}")
             except Exception as e:
-                logger().debug(f"""
+                log.error(f"""
                         *********************************************
                                             ERROR
                         *********************************************
@@ -150,7 +150,7 @@ def get_states_polygons_api(request: Request):
 
 
 def assemble_parcel_info_response(parcel) -> ParcelInfoDTO:
-    logger().error(f"assembling parcel {parcel}")
+    log.debug(f"assembling parcel {parcel}")
     deed = parcel.deed
     state = deed.state
     state_code = get_state_code_by_name(state)

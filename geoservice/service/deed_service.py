@@ -6,6 +6,8 @@ from geoservice.model.entity.Parcel import *
 from geoservice.util.lang_util import gibberish_to_fa
 from log.logger import logger
 
+log = logger()
+
 QUERIES = {
     "query_deeds1_by_volume": """
         SELECT 
@@ -60,7 +62,7 @@ def find_deed(deed: Deed):
                         volume_number=deed.volume_number, page_number=deed.page_number,
                         legal_area=area, subsidiary_plate_number=subsidiary_plate_number,
                         partitioned=partitioned, segment=segment)
-            logger().error(f"retrieved deed: {result}")
+            log.debug(f"retrieved deed: {result}")
             return deed
 
         return None

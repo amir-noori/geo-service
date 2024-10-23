@@ -2,6 +2,8 @@
 from functools import wraps
 from log.logger import logger
 
+log = logger()
+
 def cached():
     """
         cache function return
@@ -10,13 +12,13 @@ def cached():
         @wraps(fn)
         def wrapper(*args, **kwargs):
             if not hasattr(fn, "return_cached_value"):
-                logger().error("setting empty cache attribute")
+                log.debug("setting empty cache attribute")
                 fn.return_cached_value = {}
                                 
             if not fn.return_cached_value:
-                logger().error("getting cache value")
+                log.debug("getting cache value")
                 value = fn(*args, **kwargs)
-                logger().error("setting cache value")
+                log.debug("setting cache value")
                 fn.return_cached_value = value
             
             return fn.return_cached_value
