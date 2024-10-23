@@ -5,6 +5,7 @@ create table GIS.TBL_MESSAGE_LOG
   tracking_id         VARCHAR2(255 CHAR),
   service_key         VARCHAR2(255 CHAR),
   service_name         VARCHAR2(400 CHAR),
+  channel_id            NUMBER(10,0),
   source_ip           VARCHAR2(255 CHAR),
   method              VARCHAR2(255 CHAR),
   destination_ip      VARCHAR2(255 CHAR),
@@ -138,7 +139,7 @@ END;
 
 
 -- create trigger for TBL_MESSAGE_LOG_SEQ
-CREATE OR REPLACE TRIGGER TBL_API_DESCRIPTION_SEQ_TRIGGER
+CREATE OR REPLACE TRIGGER TBL_API_DESC_SEQ_TRIGGER
     BEFORE INSERT
     ON TBL_API_DESCRIPTION
     FOR EACH ROW
@@ -148,3 +149,86 @@ BEGIN
     INTO :new.ID
     FROM dual;
 END;
+
+
+
+
+
+----------------------------------------------------------------------------------------
+
+
+
+-- create TBL_CHANNEL table
+
+
+CREATE TABLE GIS.TBL_CHANNEL (
+	id number(10,0) not null, 
+	auth_key varchar2(2000 char), 
+	channel_id number(10,0),
+	channel_name varchar2(255 char),
+	description varchar2(500 char)
+);
+
+
+
+
+-- create PK for TBL_CHANNEL table
+declare
+    v_sql LONG;
+begin
+
+    v_sql := '
+ALTER TABLE GIS.TBL_CHANNEL ADD (
+CONSTRAINT TBL_CHANNEL_PK PRIMARY KEY (ID))
+';
+    execute immediate v_sql;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE = -2260 THEN
+            NULL; -- suppresses ORA-2260 
+        ELSE
+            RAISE;
+        END IF;
+END;
+
+
+
+-- create seq TBL_CHANNEL table
+declare
+    v_sql LONG;
+begin
+
+    v_sql := '
+                CREATE SEQUENCE GIS.TBL_CHANNEL_SEQ START WITH 1
+                ';
+    execute immediate v_sql;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE = -955 THEN
+            NULL; -- suppresses ORA-00955
+        ELSE
+            RAISE;
+        END IF;
+END;
+
+
+
+-- create trigger for TBL_CHANNEL_SEQ
+CREATE OR REPLACE TRIGGER TBL_CHANNEL_SEQ_TRIGGER
+    BEFORE INSERT
+    ON TBL_CHANNEL
+    FOR EACH ROW
+
+BEGIN
+    SELECT TBL_CHANNEL_SEQ.NEXTVAL
+    INTO :new.ID
+    FROM dual;
+END;
+
+
+
+
+
+

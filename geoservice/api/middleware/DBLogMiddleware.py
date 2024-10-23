@@ -60,9 +60,16 @@ class DBLogMiddleware:
             service_name = request.scope["service_name"]
         except KeyError:
             pass
+        
+        try:
+            channel_id = request.scope["channel_id"]
+        except KeyError:
+            pass
+
 
         db_message_log.service_key = service_key
         db_message_log.service_name = service_name
+        db_message_log.channel_id = channel_id
 
         db_message_log.request_time = request_time
         db_message_log.response_time = response_time

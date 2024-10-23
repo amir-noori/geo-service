@@ -11,6 +11,7 @@ from geoservice.api.common import ResponseCodes
 from geoservice.model.dto.BaseDTO import Header, BaseResponse
 from geoservice.api.middleware.MockMiddleware import MockMiddleware
 from geoservice.api.middleware.DBLogMiddleware import DBLogMiddleware
+from geoservice.api.middleware.AuthenticationMiddleware import AuthenticationMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 import os
 
@@ -77,15 +78,26 @@ class APIHandler:
             )            
 
     def handle_middleware(self):
-        enable_db_log = os.environ['enable_db_log']
-        if self.app_mode == "app" and enable_db_log == "true":
-            db_log_middleware = DBLogMiddleware()
-            self.app.add_middleware(
-                BaseHTTPMiddleware, dispatch=db_log_middleware)
 
         enable_api_mock = os.environ['enable_api_mock']
         if enable_api_mock == "true":
             mock_middleware = MockMiddleware()
             self.app.add_middleware(
                 BaseHTTPMiddleware, dispatch=mock_middleware)
+        
+        auth_middleware = AuthenticationMiddleware()
+        self.app.add_middleware(
+            BaseHTTPMiddleware, dispatch=auth_middleware)
+            
+        """
+            db log middleware must be the last one on the stack so that whatever
+            happens in other middlewares, the log is available
+        """
+        enable_db_log = os.environ['enable_db_log']
+        if self.app_mode == "app" and enable_db_log == "true":
+            db_log_middleware = DBLogMiddleware()
+            self.app.add_middleware(
+                BaseHTTPMiddleware, dispatch=db_log_middleware)
+
+
         

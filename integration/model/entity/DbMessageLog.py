@@ -6,18 +6,20 @@ class DbMessageLog():
     def __init__(self, request=None, response=None, request_url=None,
                  service_key=None, exception=None, request_time=None,
                  response_time=None, method=None, source_ip=None,
-                 destination_ip=None) -> None:
+                 destination_ip=None, channel_id=None, service_name=None) -> None:
         self.tracking_id = str(uuid.uuid1())
         self.request = request
         self.response = response
         self.request_url = request_url
         self.service_key = service_key
+        self.service_name = service_name
         self.exception = exception
         self.request_time = request_time
         self.response_time = response_time
         self.method = method
         self.source_ip = source_ip
         self.destination_ip = destination_ip
+        self.channel_id = channel_id
 
     @staticmethod
     def create_message_log(request, response_body):
