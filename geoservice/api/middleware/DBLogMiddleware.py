@@ -5,14 +5,14 @@ from integration.service.message_log_service import save_db_message_log
 from integration.model.entity.DbMessageLog import DbMessageLog
 from datetime import datetime
 import traceback
-
+from log.logger import logger
 
 class DBLogMiddleware:
     def __init__(self):
         pass
 
     async def __call__(self, request: Request, call_next):
-        print("db log middleware called.")
+        logger().error("db log middleware called.")
 
         exception = None
         request_time = None
@@ -47,7 +47,7 @@ class DBLogMiddleware:
             exception_txt = repr(exception) + " ---> " + ''.join(
                 traceback.TracebackException.from_exception(exception).format())
             db_message_log.exception = exception_txt
-            print(exception_txt)
+            logger().debug(exception_txt)
 
         service_key = None
         service_name = None
@@ -75,5 +75,5 @@ class DBLogMiddleware:
         db_message_log.request_time = request_time
         db_message_log.response_time = response_time
         save_db_message_log(db_message_log)
-        print("insert service log to DB.")
+        logger().error("insert service log to DB.")
         return response

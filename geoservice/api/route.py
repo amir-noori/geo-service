@@ -2,7 +2,7 @@ from functools import wraps
 from geoservice.model.dto.BaseDTO import BaseDTO
 from fastapi.requests import Request
 from fastapi import APIRouter
-
+from log.logger import logger
 
 def route(router: APIRouter, method: str, path: str, response_model=None):
 
@@ -32,13 +32,13 @@ def route(router: APIRouter, method: str, path: str, response_model=None):
 
             for key, obj in kwargs.items():
                 if isinstance(obj, BaseDTO):
-                    print("getting service key from request")
+                    logger().error("getting service key from request")
                     service_key = obj.get_service_key()
 
             # kwargs should be iterated second time to ensure service_key is already found before setting it in request scope
             for key, obj in kwargs.items():
                 if isinstance(obj, Request):
-                    print("setting service key in scope")
+                    logger().error("setting service key in scope")
                     obj.scope["service_key"] = service_key
                     obj.scope["service_name"] = path
 

@@ -3,7 +3,7 @@ from starlette.concurrency import iterate_in_threadpool
 from fastapi.responses import JSONResponse
 from integration.service.api_description_service import find_api_description
 from integration.service.channel_service import find_channel
-
+from log.logger import logger
 from fastapi import status
 
 
@@ -12,9 +12,9 @@ class AuthenticationMiddleware:
         pass
 
     async def __call__(self, request: Request, call_next):
-        print("mock middleware called")
+        logger().error("mock middleware called")
         headers = request.headers
-        print("headers are ", headers)
+        logger().error("headers are "+ f"{headers}")
 
         auth_header = None
         auth_type = None
@@ -34,7 +34,7 @@ class AuthenticationMiddleware:
         except (KeyError, IndexError):
             pass
 
-        print(f"auth_header: {auth_header}")
+        logger().error(f"auth_header: {auth_header}")
 
         api_key = request.url.path
         if api_key.endswith("/"):
@@ -43,7 +43,7 @@ class AuthenticationMiddleware:
         api_desc = find_api_description(api_key)
 
         if not api_desc or not api_desc.is_enabled:
-            print(f"service is not available with api_key: {api_key}, api_desc: {api_desc}")
+            logger().error(f"service is not available with api_key: {api_key}, api_desc: {api_desc}")
             return JSONResponse(content={'status': 'service is not available (enabled)'},
                                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
 
@@ -51,7 +51,7 @@ class AuthenticationMiddleware:
             return await call_next(request)
 
         else:
-            print("trying to authenticate")
+            logger().error("trying to authenticate")
             try:
                 channel_id = int(channel_id)
             except TypeError:
@@ -63,7 +63,7 @@ class AuthenticationMiddleware:
                     not channel or \
                     channel.auth_key != auth_key.strip():
 
-                print(f"authentication failed for auth_header: {auth_header}, channel_id: {channel_id}, channel: {channel}")
+                logger().debug(f"authentication failed for auth_header: {auth_header}, channel_id: {channel_id}, channel: {channel}")
                 return JSONResponse(content={'status': 'not authorized'},
                                     status_code=status.HTTP_401_UNAUTHORIZED)
 
