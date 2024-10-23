@@ -1,5 +1,7 @@
 import os
-from localization import BaseLocalization
+from i18n.localization import BaseLocalization
+
+
 class Locale:
     @staticmethod
     def get_lang(language_code: str):

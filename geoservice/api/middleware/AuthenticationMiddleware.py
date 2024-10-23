@@ -52,7 +52,12 @@ class AuthenticationMiddleware:
 
         else:
             print("trying to authenticate")
-            channel = find_channel(int(channel_id))
+            try:
+                channel_id = int(channel_id)
+            except TypeError:
+                channel_id = None
+
+            channel = find_channel(channel_id)
             if not auth_header or \
                     not auth_key or \
                     not channel or \

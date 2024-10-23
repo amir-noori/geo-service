@@ -7,7 +7,7 @@ class BaseLocalization:
         self.translations = self.load_translations()
 
     def load_translations(self):
-        locale_file = os.path.join(os.path.dirname(__file__), 'locales', f'{self.locale}.json')
+        locale_file = os.path.join(os.path.dirname(__file__), 'locale', f'{self.locale}.json')
         if not os.path.exists(locale_file):
             raise FileNotFoundError(f"Locale file for {self.locale} not found.")
 

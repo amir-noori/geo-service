@@ -89,6 +89,7 @@ def find_polygon_by_centroid_api(request: Request, longtitude: float, latitude: 
     return handle_response({"parcel": str(geometry_wkt)})
 
 
+# TODO: handle invalid request
 # @router.get("/find_parcel_list_by_centroid", response_model=ParcelListResponse)
 @route(router=router, method="get", path="/find_parcel_list_by_centroid", response_model=ParcelListResponse)
 @dispatch(dispatch_event=Event(find_state_for_dispatch))
@@ -115,6 +116,7 @@ def find_parcel_list_by_centroid_api(request: Request, parcel_request_dto: Parce
     return handle_response(parcel_list_response)
 
 
+# TODO: handle invalid request
 # @router.get("/find_parcel_info_by_centroid", response_model=ParcelInfoResponse)
 @route(router=router, method="get", path="/find_parcel_info_by_centroid", response_model=ParcelInfoResponse)
 @dispatch(dispatch_event=Event(find_state_for_dispatch))

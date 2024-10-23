@@ -51,6 +51,7 @@ class DBLogMiddleware:
 
         service_key = None
         service_name = None
+        channel_id = None
         try:
             service_key = request.scope["service_key"]
         except KeyError:
