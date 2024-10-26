@@ -23,10 +23,10 @@ router = APIRouter()
 log = logger()
 
 def find_state_for_dispatch(event):
-    data = event["data"]
-    longtitude = data["longtitude"]
-    latitude = data["latitude"]
-    srid = data["srid"]
+    data = event["data"]["parcel_request_dto"]
+    longtitude = data.longtitude
+    latitude = data.latitude
+    srid = data.srid
     centroid = Point_T(longtitude, latitude, srid)
 
     for state_code, polygon in ApplicationContext.states_polygon_shape_map.items():
@@ -42,6 +42,9 @@ def get_state_code(event):
 
 def load_states_polygons_list():
     state_polygon_map = {}
+    dispatcher_http_channel=os.environ['dispatcher_http_channel']
+    dispatcher_http_password=os.environ['dispatcher_http_password']
+    
     for state_code, address in state_to_db_mapping.items():
         if address:
             address_split = address.split(":")
@@ -50,7 +53,7 @@ def load_states_polygons_list():
             url = f"http://{ip}:{port}/parcels/find_state_polygon?state_code={state_code}"
             log.debug(f"calling URL: {url} to get state polygon.")
             try:
-                response = requests.get(url)
+                response = requests.get(url, headers={"Authorization": f"{dispatcher_http_channel}:{dispatcher_http_password}"})
                 if response.status_code == 200:
                     response_dict = json.loads(
                         response.content.decode('utf-8'))
@@ -59,7 +62,7 @@ def load_states_polygons_list():
                     state_polygon_map[state_code] = poly.to_shapely()
 
                 else:
-                    log.debug(f"{response.status_code} , {response}")
+                    log.debug(f"{response.status_code} , {response.content}")
             except Exception as e:
                 log.error(f"""
                         *********************************************

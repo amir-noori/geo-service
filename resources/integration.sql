@@ -10,6 +10,11 @@ insert into TBL_API_DESCRIPTION
 (api_name, api_url, is_enabled, is_mocked, is_log_enabled, bypass_auth, api_description, mocked_response)
 values ('find_parcel_info_by_centroid', '/parcels/find_parcel_info_by_centroid', 1, 0, 1, 0, '', '{"mocked": "true", "status": "OK"}');
 
+insert into TBL_API_DESCRIPTION
+(api_name, api_url, is_enabled, is_mocked, is_log_enabled, bypass_auth, api_description, mocked_response)
+values ('find_state_polygon', '/parcels/find_state_polygon', 1, 0, 1, 0, '', '{"mocked": "true", "status": "OK"}');
+
+
 
 
 -- channels

@@ -86,14 +86,17 @@ class APIHandler:
     def handle_middleware(self):
 
         enable_api_mock = os.environ['enable_api_mock']
-        if enable_api_mock == "true":
+        # TODO: mock middleware is better be handled at dispatcher
+        if self.app_mode == "app" and enable_api_mock == "true":
             mock_middleware = MockMiddleware()
             self.app.add_middleware(
                 BaseHTTPMiddleware, dispatch=mock_middleware)
         
-        auth_middleware = AuthenticationMiddleware()
-        self.app.add_middleware(
-            BaseHTTPMiddleware, dispatch=auth_middleware)
+        # TODO: auth middleware is better be handled at dispatcher
+        if self.app_mode == "app":
+            auth_middleware = AuthenticationMiddleware()
+            self.app.add_middleware(
+                BaseHTTPMiddleware, dispatch=auth_middleware)
             
         """
             db log middleware must be the last one on the stack so that whatever

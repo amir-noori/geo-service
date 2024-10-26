@@ -1,3 +1,5 @@
+from fastapi import status
+
 
 class ErrorCode:
 
@@ -24,3 +26,5 @@ class ErrorCodes:
     NO_PARCEL_FOUND = ErrorCode(10000, "NO_PARCEL_FOUND")
     MULTIPLE_PARCEL_FOUND = ErrorCode(10001, "MULTIPLE_PARCEL_FOUND")
     NO_STATE_FOUND = ErrorCode(10002, "NO_STATE_FOUND")
+    
+    NO_UNIT_FOUND = ErrorCode(20002, "NO_UNIT_FOUND")
