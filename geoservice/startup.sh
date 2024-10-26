@@ -35,7 +35,7 @@ export LOG_LEVEL="${LOG_LEVEL:-INFO}"
 export LOG_DIR="${LOG_DIR:-/opt/log}"
 
 export default_locale="${default_locale:-en_US}"
-export LOG_FORMAT="${LOG_FORMAT}$"
+export LOG_FORMAT="${LOG_FORMAT}"
 
 export enable_db_log="${enable_db_log:-true}" 
 export enable_api_mock="${enable_api_mock:-false}"
