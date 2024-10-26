@@ -22,6 +22,12 @@ import json
 router = APIRouter()
 log = logger()
 
+def check_request_params(request: Request):
+    longitude = request.query_params.get("longtitude",None)
+    latitude = request.query_params.get("latitude",None)
+    if (longitude is None or latitude is None):
+        raise ServiceException(ErrorCodes.INVALID_REQUEST)
+    
 def find_state_for_dispatch(event):
     data = event["data"]
     longtitude = data["longtitude"]
@@ -38,8 +44,7 @@ def find_state_for_dispatch(event):
 def get_state_code(event):
     data = event["data"]
     return data["state_code"]
-
-
+    
 def load_states_polygons_list():
     state_polygon_map = {}
     for state_code, address in state_to_db_mapping.items():
@@ -90,12 +95,12 @@ def find_polygon_by_centroid_api(request: Request, longtitude: float, latitude: 
     return handle_response({"parcel": str(geometry_wkt)})
 
 
-# TODO: handle invalid request
 # @router.get("/find_parcel_list_by_centroid", response_model=ParcelListResponse)
 @route(router=router, method="get", path="/find_parcel_list_by_centroid", response_model=ParcelListResponse)
 @dispatch(dispatch_event=Event(find_state_for_dispatch))
 def find_parcel_list_by_centroid_api(request: Request, parcel_request_dto: ParcelInfoRequestDTO = Depends()):
 
+    check_request_params(request)
     point = Point_T(parcel_request_dto.longtitude,
                     parcel_request_dto.latitude,
                     parcel_request_dto.srid)
@@ -117,12 +122,12 @@ def find_parcel_list_by_centroid_api(request: Request, parcel_request_dto: Parce
     return handle_response(parcel_list_response)
 
 
-# TODO: handle invalid request
 # @router.get("/find_parcel_info_by_centroid", response_model=ParcelInfoResponse)
 @route(router=router, method="get", path="/find_parcel_info_by_centroid", response_model=ParcelInfoResponse)
 @dispatch(dispatch_event=Event(find_state_for_dispatch))
 def find_parcel_info_by_centroid_api(request: Request,
                                      parcel_request_dto: ParcelInfoRequestDTO = Depends()):
+    check_request_params(request)
     point = Point_T(parcel_request_dto.longtitude,
                     parcel_request_dto.latitude,
                     parcel_request_dto.srid)
