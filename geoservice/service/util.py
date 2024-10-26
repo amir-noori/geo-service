@@ -56,7 +56,7 @@ def process_label(label):
     except IndexError as e:
         log.error(f"index error:  + {str(e)}")
 
-    log.error(f"""
+    log.debug(f"""
             process label:
                 cms: {cms}, 
                 section: {section}, 

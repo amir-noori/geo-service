@@ -20,3 +20,6 @@ runapp:
 rundispatcher:
 	docker run -i -p 8000:8000 --env-file ./geoservice/docker/env.dispatcher.list -t geoubuntu_app:latest  /bin/bash
 
+
+dockercp:
+	for i in `docker ps | grep geoubuntu_app | awk '{print $1}'`; do echo "cp to $i"; docker cp . $i:/opt/app; done
