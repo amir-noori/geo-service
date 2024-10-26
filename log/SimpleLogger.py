@@ -46,8 +46,13 @@ class SimpleLogger(BaseLogger):
         console_handler = logging.StreamHandler()
         console_handler.setLevel(level)
 
-        log_dir=os.path.join(os.path.dirname(__file__), 'logs', 'debug.log')
-        file_handler = logging.FileHandler(log_dir)
+        # Create log file path/file if not exists
+        log_dir = os.path.join(os.path.dirname(__file__), 'logs')
+        os.makedirs(log_dir, exist_ok=True)
+        log_file_path = os.path.join(log_dir, 'debug.log')
+
+        # Create a file handler to log messages to the file
+        file_handler = logging.FileHandler(log_file_path)
         file_handler.setLevel(level)
         # Define the log message format
         formatter = logging.Formatter(fmt=format)
