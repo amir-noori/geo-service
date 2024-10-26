@@ -4,6 +4,7 @@ import os
 import datetime
 import threading
 
+
 class SingletonMeta(metaclass=ABCMeta):
     _instances = {}
     # Initialize a lock to ensure thread-safe Singleton instantiation
@@ -17,26 +18,32 @@ class SingletonMeta(metaclass=ABCMeta):
                 cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
 
+
 class BaseLogger(SingletonMeta):
     @abstractmethod
     def debug(cls, message: str):
         pass
+
     @abstractmethod
     def info(cls, message: str):
         pass
+
     @abstractmethod
     def warning(cls, message: str):
         pass
+
     @abstractmethod
     def error(cls, message: str):
         pass
+
     @abstractmethod
     def critical(cls, message: str):
         pass
 
+
 class SimpleLogger(BaseLogger):
 
-    def __init__(self, level,format):
+    def __init__(self, level, format):
         # Create a logger object with the specified name
         self._logger = logging.getLogger('my_logger')
         # Set the logging level to input level
@@ -46,13 +53,12 @@ class SimpleLogger(BaseLogger):
         console_handler = logging.StreamHandler()
         console_handler.setLevel(level)
 
-        # Create log file path/file if not exists
-        log_dir = os.path.join(os.path.dirname(__file__), 'logs')
-        os.makedirs(log_dir, exist_ok=True)
-        log_file_path = os.path.join(log_dir, 'debug.log')
-
-        # Create a file handler to log messages to the file
-        file_handler = logging.FileHandler(log_file_path)
+        log_dir = os.environ['LOG_DIR']
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        
+        log_dir = os.path.join(log_dir, 'debug.log')
+        file_handler = logging.FileHandler(log_dir, mode='a')
         file_handler.setLevel(level)
         # Define the log message format
         formatter = logging.Formatter(fmt=format)

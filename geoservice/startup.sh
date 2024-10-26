@@ -32,6 +32,8 @@ export app_mode="${app_mode:-app}"
 # app_mode must be set (values: "dev" or "run" , default: "dev")
 export app_level="${app_level:-dev}" 
 export LOG_LEVEL="${LOG_LEVEL:-INFO}"
+export LOG_DIR="${LOG_DIR:-/opt/log}"
+
 export default_locale="${default_locale:-en_US}"
 export LOG_FORMAT="${LOG_FORMAT}$"
 
