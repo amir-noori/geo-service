@@ -21,12 +21,6 @@ import json
 
 router = APIRouter()
 log = logger()
-
-def check_request_params(request: Request):
-    longitude = request.query_params.get("longtitude",None)
-    latitude = request.query_params.get("latitude",None)
-    if (longitude is None or latitude is None):
-        raise ServiceException(ErrorCodes.INVALID_REQUEST)
     
 def find_state_for_dispatch(event):
     data = event["data"]
@@ -99,8 +93,6 @@ def find_polygon_by_centroid_api(request: Request, longtitude: float, latitude: 
 @route(router=router, method="get", path="/find_parcel_list_by_centroid", response_model=ParcelListResponse)
 @dispatch(dispatch_event=Event(find_state_for_dispatch))
 def find_parcel_list_by_centroid_api(request: Request, parcel_request_dto: ParcelInfoRequestDTO = Depends()):
-
-    check_request_params(request)
     point = Point_T(parcel_request_dto.longtitude,
                     parcel_request_dto.latitude,
                     parcel_request_dto.srid)
@@ -127,7 +119,6 @@ def find_parcel_list_by_centroid_api(request: Request, parcel_request_dto: Parce
 @dispatch(dispatch_event=Event(find_state_for_dispatch))
 def find_parcel_info_by_centroid_api(request: Request,
                                      parcel_request_dto: ParcelInfoRequestDTO = Depends()):
-    check_request_params(request)
     point = Point_T(parcel_request_dto.longtitude,
                     parcel_request_dto.latitude,
                     parcel_request_dto.srid)

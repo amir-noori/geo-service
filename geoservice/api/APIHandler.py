@@ -1,7 +1,7 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-
+from fastapi.exceptions import RequestValidationError
 from geoservice.api.parcels_api import router as parcel_router
 from geoservice.api.units_api import router as unit_router
 
@@ -42,7 +42,20 @@ class APIHandler:
         )
 
     def handle_exceptions(self):
-
+        
+        @self.app.exception_handler(RequestValidationError)
+        async def validation_exception_handler(request: Request, exc: RequestValidationError):
+            
+            message={"Request Validation Error:":
+                [f"{error["loc"][1]} {error["msg"]}" for error in exc.errors()]
+            }
+            header = Header(result_code=status.HTTP_422_UNPROCESSABLE_ENTITY,result_message=message)
+            response=BaseResponse(header=header)
+            return JSONResponse(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                content=jsonable_encoder(response)
+            )
+        
         @self.app.exception_handler(ServiceException)
         def service_exception_handler(request: Request, ex: ServiceException):
 
@@ -60,7 +73,7 @@ class APIHandler:
             response = BaseResponse(header=header)
 
             return JSONResponse(
-                status_code=ResponseCodes.SUCCESS.code, # TODO: maybe we should return proper http response
+                status_code=status.HTTP_200_OK, # TODO: maybe we should return proper http response
                 content=jsonable_encoder(response),
             )
             
@@ -106,4 +119,4 @@ class APIHandler:
                 BaseHTTPMiddleware, dispatch=db_log_middleware)
 
 
-        
+    
