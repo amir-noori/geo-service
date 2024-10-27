@@ -20,4 +20,7 @@ values ('find_state_polygon', '/parcels/find_state_polygon', 1, 0, 1, 0, '', '{"
 -- channels
 
 insert into TBL_CHANNEL (auth_key, channel_id, channel_name, description) VALUES
-('123', '100', 'test', 'test channel');
+('812d6c7172d654432817ba6bbf47e95a', '100', 'test', 'test channel'); -- pass: 123
+
+insert into TBL_CHANNEL (auth_key, channel_id, channel_name, description) VALUES
+('dfaea6abf2e6aefa80ef55e1581b56de', '1', 'dispatcher', 'dispatcher channel'); -- pass: 123

@@ -5,6 +5,7 @@ from integration.service.api_description_service import find_api_description
 from integration.service.channel_service import find_channel
 from log.logger import logger
 from fastapi import status
+import hashlib
 
 
 class AuthenticationMiddleware:
@@ -37,8 +38,6 @@ class AuthenticationMiddleware:
         except (KeyError, IndexError):
             pass
 
-        self.log.debug(f"auth_header: {auth_header}")
-
         api_key = request.url.path
         if api_key.endswith("/"):
             api_key = api_key[:-1]
@@ -67,7 +66,7 @@ class AuthenticationMiddleware:
             if not auth_header or \
                     not auth_key or \
                     not channel or \
-                    channel.auth_key != auth_key.strip():
+                    channel.auth_key != hashlib.md5(f"[{channel_id}:{auth_key.strip()}]".encode()).hexdigest():
 
                 self.log.debug(
                     f"authentication failed for auth_header: {auth_header}, channel_id: {channel_id}, channel: {channel}")
