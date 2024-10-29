@@ -81,7 +81,7 @@ class APIHandler:
                 try:
                     lang = request.scope['request_body']['header']['lang']
                 except KeyError as e:
-                    print(f"cannot find lang in request body: {e}")
+                    self.log(f"cannot find lang in request body: {e}")
                     
             error_message = get_locale(message=error_message,locale=lang)
             

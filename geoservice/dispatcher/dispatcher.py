@@ -22,8 +22,6 @@ def dispatch(dispatch_event):
                 body = None
                 if method and str(method).upper() == "POST":
                     body = await request.json()
-                    print("type -> ", type(body))
-                    print("body -> ", body)
 
                 request_url = request.url
                 headers_binary = dict(request["headers"])
@@ -32,7 +30,7 @@ def dispatch(dispatch_event):
                     authorization_header = headers_binary["authorization".encode(
                     )].decode()
                 except KeyError as e:
-                    print("KeyError: ", e)
+                    log.debug(f"KeyError: {e}")
 
                 state_code = dispatch_event.fire({"data": kwargs})
                 log.debug(f"dispatch key: {state_code}")

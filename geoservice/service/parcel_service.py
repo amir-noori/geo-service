@@ -11,9 +11,12 @@ from geoservice.model.entity.Parcel import *
 from geoservice.service.util import process_label
 from geoservice.service.deed_service import find_deed
 from geoservice.util.common_util import get_state_name_by_code
-
 from geoservice.exception.common import ErrorCodes
 from geoservice.exception.service_exception import ServiceException
+from log.logger import logger
+
+
+log = logger()
 
 
 QUERIES = {
@@ -181,7 +184,7 @@ def find_polygon_by_centroid(centroid: Point_T) -> Parcel:
             it must be investigated further.
             for now lets not raise exception and return centroid poly which most probably is surrounded by shape poly
         """
-        print(f"multiple polygons found for centroid {centroid}. ignoring shape!")
+        log.warning(f"multiple polygons found for centroid {centroid}. ignoring shape!")
         shape_parcel.polygon = None
         # raise ServiceException(ErrorCodes.MULTIPLE_PARCEL_FOUND)
     else:
