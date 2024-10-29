@@ -26,5 +26,5 @@ def find_unit_by_cmd_api(request: Request, cms: str):
         raise ServiceException(ErrorCodes.NO_UNIT_FOUND)
 
     response = UnitResponse(body=unit_dto)
-    return handle_response(response)
+    return handle_response(request, response)
 

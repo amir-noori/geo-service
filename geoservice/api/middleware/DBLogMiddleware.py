@@ -5,42 +5,60 @@ from integration.service.message_log_service import save_db_message_log
 from integration.model.entity.DbMessageLog import DbMessageLog
 from datetime import datetime
 import traceback
+import json
 from log.logger import logger
+
 
 class DBLogMiddleware:
 
     log = logger()
+
     def __init__(self):
         pass
 
     async def __call__(self, request: Request, call_next):
-        
+
         self.log.debug("db log middleware called.")
+
+        method = request.method.upper()
 
         exception = None
         request_time = None
         response = None
         response_time = None
         response_body = None
+        request_body = None
+        request_txt = None
 
         try:
-            request_time = datetime.now()
-            response = await call_next(request)
-            response_time = datetime.now()
+
+            try:
+                request_time = datetime.now()
+                response = await call_next(request)
+                response_time = datetime.now()
+            except Exception as e:
+                exception = e
+
+            # once the response body is read it cannot be read again. the following code is to overcome that
+            if not exception:
+                response_body = [chunk async for chunk in response.body_iterator]
+                response.body_iterator = iterate_in_threadpool(
+                    iter(response_body))
+
+            response_txt = None
+            if response_body:
+                response_txt = str(response_body[0].decode())
+
+            if method != "GET":
+                request_body = request.scope["request_body"]
+
         except Exception as e:
             exception = e
 
-        # once the response body is read it cannot be read again. the following code is to overcome that
-        if not exception:
-            response_body = [chunk async for chunk in response.body_iterator]
-            response.body_iterator = iterate_in_threadpool(iter(response_body))
+        if request_body:
+            request_txt = json.dumps(request_body)
 
-        response_txt = None
-        if response_body:
-            response_txt = str(response_body[0].decode())
-
-        request_body = await request.body()
-        db_message_log = DbMessageLog(request=request_body.decode("utf-8"),
+        db_message_log = DbMessageLog(request=request_txt,
                                       response=response_txt,
                                       method=request.method,
                                       request_url=str(request.url),
@@ -59,17 +77,16 @@ class DBLogMiddleware:
             service_key = request.scope["service_key"]
         except KeyError:
             pass
-        
+
         try:
             service_name = request.scope["service_name"]
         except KeyError:
             pass
-        
+
         try:
             channel_id = request.scope["channel_id"]
         except KeyError:
             pass
-
 
         db_message_log.service_key = service_key
         db_message_log.service_name = service_name
@@ -79,4 +96,7 @@ class DBLogMiddleware:
         db_message_log.response_time = response_time
         save_db_message_log(db_message_log)
         self.log.debug("insert service log to DB.")
+        if exception:
+            raise exception
+
         return response

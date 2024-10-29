@@ -28,9 +28,9 @@ def get_all_api_descriptions() -> dict[ApiDescription]:
             is_log_enabled = str(result['IS_LOG_ENABLED']) == "1"
             bypass_auth = str(result['BYPASS_AUTH']) == "1"
             api_description = str(result['API_DESCRIPTION'])
-            mocked_response = str(result['MOCKED_RESPONSE'])
-            if mocked_response:
-                mocked_response = json.loads(mocked_response)
+            mocked_response = None
+            if result['MOCKED_RESPONSE']:
+                mocked_response = json.loads(str(result['MOCKED_RESPONSE']))
                 
 
             api_desc = ApiDescription(id=id, api_name=api_name, api_url=api_url,

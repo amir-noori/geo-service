@@ -1,8 +1,10 @@
 from functools import wraps
-from geoservice.model.dto.BaseDTO import BaseDTO
+from geoservice.model.dto.BaseDTO import BaseDTO, BaseRequest
 from fastapi.requests import Request
 from fastapi import APIRouter
 from log.logger import logger
+from pydantic import BaseModel
+
 
 def route(router: APIRouter, method: str, path: str, response_model=None):
 
@@ -34,6 +36,14 @@ def route(router: APIRouter, method: str, path: str, response_model=None):
                 if isinstance(obj, BaseDTO):
                     log.debug("getting service key from request")
                     service_key = obj.get_service_key()
+
+                if isinstance(obj, BaseModel):
+                    log.debug("getting service key from request")
+                    service_key = obj.get_service_key()
+
+                if isinstance(obj, BaseRequest):
+                    log.debug("getting service key from request")
+                    obj = obj.get_service_key()
 
             # kwargs should be iterated second time to ensure service_key is already found before setting it in request scope
             for key, obj in kwargs.items():

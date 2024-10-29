@@ -6,6 +6,7 @@ from copy import deepcopy
 from pydantic import BaseModel, create_model
 from pydantic.fields import FieldInfo
 from geoservice.util.object_util import toJSON
+import os
 
 
 def partial_model(model: Type[BaseModel]):
@@ -34,7 +35,7 @@ class Header(BaseModel):
     model_config = ConfigDict(
         alias_generator=to_camel,
         populate_by_name=True,
-        from_attributes=True,
+        from_attributes=True
     )
 
     result_code: str
@@ -49,12 +50,34 @@ class Header(BaseModel):
         self.result_message = result_message
 
 
+@partial_model
+class RequestHeader(BaseModel):
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+    params: dict
+    lang: str
+
+    def __init__(self, params={}, lang: str = None) -> None:
+        super().__init__()
+        self.params = params
+        if lang:
+            self.lang = lang
+        else:
+            self.lang = os.environ['default_locale']
+
+
 class BaseDTO(BaseModel):
 
     model_config = ConfigDict(
         alias_generator=to_camel,
         populate_by_name=True,
         from_attributes=True,
+        arbitrary_types_allowed=True
     )
 
     def __init__(self) -> None:
@@ -84,6 +107,7 @@ class BaseResponse(BaseModel):
     )
 
     header: Header
+    body: BaseModel
 
     def toJSON(self):
         return toJSON(self)
@@ -91,3 +115,27 @@ class BaseResponse(BaseModel):
     def __init__(self, header=None) -> None:
         super().__init__()
         self.header = header
+
+
+class BaseRequest(BaseModel):
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+        arbitrary_types_allowed=True
+    )
+
+    header: RequestHeader
+    body: BaseModel
+
+    def toJSON(self):
+        return toJSON(self)
+
+    def __init__(self, header=RequestHeader(), body=None) -> None:
+        super().__init__()
+        self.header = header
+        self.body = body
+
+    def get_service_key(self):
+        pass

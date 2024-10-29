@@ -17,18 +17,31 @@ from geoservice.api.route import route
 from log.logger import logger
 import requests
 import json
+from common.annotations import deprecated
 
 
 router = APIRouter()
 log = logger()
 
-def find_state_for_dispatch(event):
+
+def find_state_for_dispatch_get(event):
+    log.debug(f"event data for dispatch {event['data']}")
     data = event["data"]["parcel_request_dto"]
+    return find_state_for_dispatch(data)
+
+
+def find_state_for_dispatch_post(event):
+    log.debug(f"event data for dispatch {event['data']}")
+    data = event["data"]["parcel_info_request"].body
+
+    return find_state_for_dispatch(data)
+
+
+def find_state_for_dispatch(data):
     longtitude = data.longtitude
     latitude = data.latitude
     srid = data.srid
     centroid = Point_T(longtitude, latitude, srid)
-
     for state_code, polygon in ApplicationContext.states_polygon_shape_map.items():
         if polygon.contains(centroid.to_shapely()):
             return state_code
@@ -42,9 +55,9 @@ def get_state_code(event):
 
 def load_states_polygons_list():
     state_polygon_map = {}
-    dispatcher_http_channel=os.environ['dispatcher_http_channel']
-    dispatcher_http_password=os.environ['dispatcher_http_password']
-    
+    dispatcher_http_channel = os.environ['dispatcher_http_channel']
+    dispatcher_http_password = os.environ['dispatcher_http_password']
+
     for state_code, address in state_to_db_mapping.items():
         if address:
             address_split = address.split(":")
@@ -53,7 +66,8 @@ def load_states_polygons_list():
             url = f"http://{ip}:{port}/parcels/find_state_polygon?state_code={state_code}"
             log.debug(f"calling URL: {url} to get state polygon.")
             try:
-                response = requests.get(url, headers={"Authorization": f"{dispatcher_http_channel}:{dispatcher_http_password}"})
+                response = requests.get(url, headers={
+                                        "Authorization": f"{dispatcher_http_channel}:{dispatcher_http_password}"})
                 if response.status_code == 200:
                     response_dict = json.loads(
                         response.content.decode('utf-8'))
@@ -96,7 +110,7 @@ def find_polygon_by_centroid_api(request: Request, longtitude: float, latitude: 
 # TODO: handle invalid request
 # @router.get("/find_parcel_list_by_centroid", response_model=ParcelListResponse)
 @route(router=router, method="get", path="/find_parcel_list_by_centroid", response_model=ParcelListResponse)
-@dispatch(dispatch_event=Event(find_state_for_dispatch))
+@dispatch(dispatch_event=Event(find_state_for_dispatch_get))
 def find_parcel_list_by_centroid_api(request: Request, parcel_request_dto: ParcelInfoRequestDTO = Depends()):
 
     point = Point_T(parcel_request_dto.longtitude,
@@ -117,22 +131,37 @@ def find_parcel_list_by_centroid_api(request: Request, parcel_request_dto: Parce
         parcel_geom_list=parcel_geom_list, buffer_geom=buffer_geom)
     parcel_list_response = ParcelListResponse(body=parcel_list_dto)
 
-    return handle_response(parcel_list_response)
+    return handle_response(request, parcel_list_response)
 
 
 # TODO: handle invalid request
 # @router.get("/find_parcel_info_by_centroid", response_model=ParcelInfoResponse)
+@deprecated("use post version")
 @route(router=router, method="get", path="/find_parcel_info_by_centroid", response_model=ParcelInfoResponse)
-@dispatch(dispatch_event=Event(find_state_for_dispatch))
-def find_parcel_info_by_centroid_api(request: Request,
-                                     parcel_request_dto: ParcelInfoRequestDTO = Depends()):
+@dispatch(dispatch_event=Event(find_state_for_dispatch_get))
+def find_parcel_info_by_centroid_api_get(request: Request,
+                                         parcel_request_dto: ParcelInfoRequestDTO = Depends()):
     point = Point_T(parcel_request_dto.longtitude,
                     parcel_request_dto.latitude,
                     parcel_request_dto.srid)
     parcel = find_parcel_info_by_centroid(point)
     parcel_info = assemble_parcel_info_response(parcel)
     response = ParcelInfoResponse(parcel_info)
-    return handle_response(response)
+    return handle_response(request, response)
+
+
+@route(router=router, method="post", path="/find_parcel_info_by_centroid", response_model=ParcelInfoResponse)
+@dispatch(dispatch_event=Event(find_state_for_dispatch_post))
+def find_parcel_info_by_centroid_api_post(request: Request,
+                                          parcel_info_request: ParcelInfoRequest = Depends()):
+    centroid: CentoridDTO = parcel_info_request.body
+    point = Point_T(centroid.longtitude,
+                    centroid.latitude,
+                    centroid.srid)
+    parcel = find_parcel_info_by_centroid(point)
+    parcel_info = assemble_parcel_info_response(parcel)
+    response = ParcelInfoResponse(parcel_info)
+    return handle_response(request, response)
 
 
 @router.get("/find_state_polygon", response_model=ParcelGeomDTO)
@@ -142,7 +171,7 @@ def find_state_polygon_api(request: Request, state_code: str):
     parcel = find_state_polygon(state_code)
     parcel_geom_dto = ParcelGeomDTO(geom=parcel.polygon)
     state_polygon_response = StatePolygonResponse(body=parcel_geom_dto)
-    return handle_response(state_polygon_response)
+    return handle_response(request, state_polygon_response)
 
 
 # @router.get("/get_states_polygons")

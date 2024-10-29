@@ -11,7 +11,7 @@ class Locale:
             return BaseLocalization('en_US')
 
 
-def get_locale(message,locale=None):
+def get_locale(message, locale=None):
     setLang = locale
     if locale is None:
         setLang = os.getenv('default_locale', 'en_US')

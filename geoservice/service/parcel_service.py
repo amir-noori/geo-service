@@ -46,7 +46,7 @@ QUERIES = {
         WHERE 
             DEL_USER is null and DEL_DATE is null and
             LABLE1 like '%*' and
-            LABLE1 like '%DD%' -- exclude malformed labels
+            LABLE1 like '%DD%' and -- exclude malformed labels
             LABLE1 not like '%TASBITED%' and
             poly is not null and -- there might be multiple records for a shape but the one with poly is needed
             SDO_CONTAINS(s.POLY,

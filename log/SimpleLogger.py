@@ -45,7 +45,7 @@ class SimpleLogger(BaseLogger):
 
     def __init__(self, level, format):
         # Create a logger object with the specified name
-        self._logger = logging.getLogger('my_logger')
+        self._logger = logging.getLogger('logger')
         # Set the logging level to input level
         self._logger.setLevel(level)
 
