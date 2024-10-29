@@ -1,11 +1,11 @@
-from fastapi import Request, Depends
+from fastapi import Request, Depends, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
 from geoservice.api.parcels_api import router as parcel_router
 from geoservice.api.units_api import router as unit_router
 
-from geoservice.exception.service_exception import ServiceException
+from geoservice.exception.service_exception import ServiceException, ValidationException, CustomException
 from geoservice.exception.common import ErrorCodes
 from geoservice.api.common import ResponseCodes
 from geoservice.model.dto.BaseDTO import Header, BaseResponse
@@ -21,11 +21,11 @@ import traceback
 
 async def set_request_body_in_scope(request: Request):
     log = logger()
-    method = request.method.upper()    
+    method = request.method.upper()
 
     lang = os.environ['default_locale']
     request_lang = None
-    
+
     if method == "GET":
         request_lang = request.query_params.get("lang", None)
     else:
@@ -69,21 +69,39 @@ class APIHandler:
 
     def handle_exceptions(self):
 
-        @self.app.exception_handler(ServiceException)
-        def service_exception_handler(request: Request, ex: ServiceException):
-
-            # TODO: messsage_key must be translated
+        def get_custom_exception_response(request: Request, ex: CustomException):
             error_message = ""
             if ex.error_message:
                 error_message = ex.error_message
             else:
                 error_message = ex.error_code.messsage_key
-            error_message = get_locale(
-                message=error_message,
-                locale=request.query_params.get("lang", None))
+
+            lang = request.query_params.get("lang", None)
+            if not lang:
+                try:
+                    lang = request.scope['request_body']['header']['lang']
+                except KeyError as e:
+                    print(f"cannot find lang in request body: {e}")
+                    
+            error_message = get_locale(message=error_message,locale=lang)
+            
             header = Header(result_code=ex.error_code.code,
                             result_message=error_message)
             response = BaseResponse(header=header)
+            return response
+
+        @self.app.exception_handler(ValidationException)
+        def service_exception_handler(request: Request, ex: ValueError):
+            response = get_custom_exception_response(request, ex)
+
+            return JSONResponse(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                content=jsonable_encoder(response),
+            )
+
+        @self.app.exception_handler(ServiceException)
+        def service_exception_handler(request: Request, ex: ServiceException):
+            response = get_custom_exception_response(request, ex)
 
             return JSONResponse(
                 # TODO: maybe we should return proper http response

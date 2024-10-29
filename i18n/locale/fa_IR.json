@@ -6,5 +6,6 @@
     "SUCCESS": "عملیات با موفقیت انجام شد.",
     "ERROR_CODE_400": "درخواست اشتباه",
     "ERROR_CODE_404": "رکوردی با مشخصات ارسال شده پیدا نشد.",
-    "ERROR_CODE_500": "خطای سیستمی."
+    "ERROR_CODE_500": "خطای سیستمی.",
+    "VALIDATION_NATIONAL_ID_REQUIRED": "nationalId : فیلد وارد نشده"
 }

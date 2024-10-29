@@ -6,5 +6,6 @@
     "SUCCESS": "Operation Successful",
     "ERROR_CODE_400": "Bad Request!",
     "ERROR_CODE_404": "No Record Found",
-    "ERROR_CODE_500": "General System Error"
+    "ERROR_CODE_500": "General System Error",
+    "VALIDATION_NATIONAL_ID_REQUIRED": "natinalId is required in header params field."
 }

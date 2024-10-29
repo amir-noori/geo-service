@@ -48,7 +48,8 @@ def route(router: APIRouter, method: str, path: str, response_model=None):
             # kwargs should be iterated second time to ensure service_key is already found before setting it in request scope
             for key, obj in kwargs.items():
                 if isinstance(obj, Request):
-                    log.debug("setting service key in scope")
+                    log.debug("setting service key in scope.")
+                    log.debug("service_key: {service_key}, service_name: {path}")
                     obj.scope["service_key"] = service_key
                     obj.scope["service_name"] = path
 
