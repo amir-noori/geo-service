@@ -4,6 +4,7 @@ from fastapi.encoders import jsonable_encoder
 
 from geoservice.api.parcels_api import router as parcel_router
 from geoservice.api.units_api import router as unit_router
+from geoservice.api.report_api import router as report_router
 
 from geoservice.exception.service_exception import ServiceException, ValidationException, CustomException
 from geoservice.exception.common import ErrorCodes
@@ -67,6 +68,13 @@ class APIHandler:
             dependencies=[Depends(set_request_body_in_scope)]
         )
 
+        self.app.include_router(
+            report_router,
+            prefix="/report",
+            tags=["report"],
+            dependencies=[Depends(set_request_body_in_scope)]
+        )
+
     def handle_exceptions(self):
 
         def get_custom_exception_response(request: Request, ex: CustomException):
@@ -81,10 +89,10 @@ class APIHandler:
                 try:
                     lang = request.scope['request_body']['header']['lang']
                 except KeyError as e:
-                    self.log(f"cannot find lang in request body: {e}")
-                    
-            error_message = get_locale(message=error_message,locale=lang)
-            
+                    self.log.debug(f"cannot find lang in request body: {e}")
+
+            error_message = get_locale(message=error_message, locale=lang)
+
             header = Header(result_code=ex.error_code.code,
                             result_message=error_message)
             response = BaseResponse(header=header)

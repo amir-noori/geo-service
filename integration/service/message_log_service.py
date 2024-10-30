@@ -1,5 +1,4 @@
-from geoservice.data.db_helper import execute_query, execute_insert
-from geoservice.data.DBResult import DBResult
+from geoservice.data.db_helper import execute_insert
 from integration.model.entity.DbMessageLog import DbMessageLog
 
 QUERIES = {

@@ -56,15 +56,27 @@ class ParcelInfoRequest(BaseModel):
     
     @field_validator('header')
     @classmethod
-    def ensure_foobar(cls, h: Any):
+    def validate_header_params(cls, h: Any):
         try:
             if not h.params['nationalId']:
                 raise ValidationException(ErrorCodes.VALIDATION_NATIONAL_ID_REQUIRED)
         except KeyError:
             raise ValidationException(ErrorCodes.VALIDATION_NATIONAL_ID_REQUIRED)
         
+        try:
+            if not h.params['firstName']:
+                raise ValidationException(ErrorCodes.VALIDATION_FIRST_NAME_REQUIRED)
+        except KeyError:
+            raise ValidationException(ErrorCodes.VALIDATION_FIRST_NAME_REQUIRED)
+        
+        try:
+            if not h.params['lastName']:
+                raise ValidationException(ErrorCodes.VALIDATION_LAST_NAME_REQUIRED)
+        except KeyError:
+            raise ValidationException(ErrorCodes.VALIDATION_LAST_NAME_REQUIRED)
+        
         return h
 
     def get_service_key(self):
-        service_key = f"nationalId:{self.header.params['nationalId']}, Centroid({self.body.latitude},{self.body.latitude})"
+        service_key = f"nationalId:{self.header.params['nationalId']}"
         return service_key

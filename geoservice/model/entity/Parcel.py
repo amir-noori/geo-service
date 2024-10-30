@@ -1,6 +1,7 @@
 from enum import Enum
 
 from geoservice.gis.model.models import Point_T
+from geoservice.model.entity.common import BaseEntity
 from geoservice.util.object_util import toJSON
 
 class Direction(Enum):
@@ -8,17 +9,6 @@ class Direction(Enum):
     SOUTH = 2
     EAST = 3
     WEST = 4
-
-
-
-
-class BaseEntity:
-    
-    def toJSON(self):
-        return toJSON(self)
-    
-    def __str__(self) -> str:
-        return self.toJSON()
     
 
 class Deed(BaseEntity):

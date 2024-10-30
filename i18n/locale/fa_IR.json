@@ -7,5 +7,8 @@
     "ERROR_CODE_400": "درخواست اشتباه",
     "ERROR_CODE_404": "رکوردی با مشخصات ارسال شده پیدا نشد.",
     "ERROR_CODE_500": "خطای سیستمی.",
-    "VALIDATION_NATIONAL_ID_REQUIRED": "nationalId : فیلد وارد نشده"
+    "VALIDATION_NATIONAL_ID_REQUIRED": "nationalId : فیلد وارد نشده",
+    "VALIDATION_FIRST_NAME_REQUIRED": "firstName : فیلد وارد نشده",
+    "VALIDATION_LAST_NAME_REQUIRED": "lastName : فیلد وارد نشده",
+    "VALIDATION_EMPTY_REQUEST_FIELDS": "تمام ورودی ها خالی هستند"
 }

@@ -17,7 +17,10 @@ from geoservice.api.route import route
 from log.logger import logger
 import requests
 import json
+from datetime import datetime
 from common.annotations import deprecated
+from geoservice.model.entity.ParcelRequestLog import ParcelRequestLog
+from geoservice.service.parcel_request_log_service import save_parcel_req_log
 
 
 router = APIRouter()
@@ -155,11 +158,41 @@ def find_parcel_info_by_centroid_api_get(request: Request,
 def find_parcel_info_by_centroid_api_post(request: Request,
                                           parcel_info_request: ParcelInfoRequest = Depends()):
     centroid: CentoridDTO = parcel_info_request.body
+    header: RequestHeader = parcel_info_request.header
     point = Point_T(centroid.longtitude,
                     centroid.latitude,
                     centroid.srid)
     parcel = find_parcel_info_by_centroid(point)
     parcel_info = assemble_parcel_info_response(parcel)
+
+    national_id = None
+    first_name = None
+    last_name = None
+
+    try:
+        national_id = header.params['nationalId']
+    except KeyError:
+        pass
+
+    try:
+        first_name = header.params['firstName']
+    except KeyError:
+        pass
+
+    try:
+        last_name = header.params['lastName']
+    except KeyError:
+        pass
+
+    parcel_request_log = ParcelRequestLog(
+        national_id=national_id,
+        first_name=first_name,
+        last_name=last_name,
+        request_time=datetime.now(),
+        search_point=point
+    )
+    save_parcel_req_log(parcel_request_log)
+
     response = ParcelInfoResponse(parcel_info)
     return handle_response(request, response)
 

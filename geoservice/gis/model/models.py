@@ -20,11 +20,12 @@ class GISModel(ABC):
 
 class Point_T(GISModel):
 
-    def __init__(self, x, y, srid="32638") -> None:
+    def __init__(self, x, y, srid="32638", wkt=None) -> None:
         super().__init__()
         self.x = x
         self.y = y
         self.srid = srid
+        self.wkt = wkt
         
     def to_shapely(self):
         return loads(f'POINT ({self.x} {self.y})')

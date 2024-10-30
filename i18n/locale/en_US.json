@@ -7,5 +7,8 @@
     "ERROR_CODE_400": "Bad Request!",
     "ERROR_CODE_404": "No Record Found",
     "ERROR_CODE_500": "General System Error",
-    "VALIDATION_NATIONAL_ID_REQUIRED": "natinalId is required in header params field."
+    "VALIDATION_NATIONAL_ID_REQUIRED": "natinalId is required in header params field.",
+    "VALIDATION_FIRST_NAME_REQUIRED": "firstName is required in header params field.",
+    "VALIDATION_LAST_NAME_REQUIRED": "lastName is required in header params field.",
+    "VALIDATION_EMPTY_REQUEST_FIELDS": "all request fields are empty"
 }
