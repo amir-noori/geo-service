@@ -50,7 +50,16 @@ class DBLogMiddleware:
                 response_txt = str(response_body[0].decode())
 
             if method != "GET":
-                request_body = request.scope["request_body"]
+                try:
+                    request_body = request.scope["request_body"]
+                except KeyError as e:
+                    """
+                        cause for some reason (probably auth failure) request_body is not available
+                        we can await the body in order to get the request json.
+                        This might not be an issue (since the request can be read only once) cause 
+                        DB log middleware must be tha last thing to be called on teh stack.
+                    """
+                    request_body = await request.json()
 
         except Exception as e:
             exception = e
