@@ -78,13 +78,24 @@ def find_parcel_req_log_list(parcel_request_detail: ParcelRequestDetail) -> list
 
     if parcel_request_detail.first_name:
         query_parcel_req_log = query_parcel_req_log + \
-            f" and first_name = '{parcel_request_detail.first_name}' "
+            f" and first_name like '%{parcel_request_detail.first_name}%' "
+            
     if parcel_request_detail.last_name:
         query_parcel_req_log = query_parcel_req_log + \
-            f" and last_name = '{parcel_request_detail.last_name}' "
+            f" and last_name like '%{parcel_request_detail.last_name}%' "
+            
     if parcel_request_detail.national_id:
         query_parcel_req_log = query_parcel_req_log + \
             f" and national_id = '{parcel_request_detail.national_id}' "
+                        
+    if parcel_request_detail.from_date:
+        query_parcel_req_log = query_parcel_req_log + \
+            f" and REQUEST_TIMESTAMP >= TO_DATE('{parcel_request_detail.from_date.strftime("%Y-%m-%d")}', 'YYYY-MM-DD') "          
+
+    if parcel_request_detail.to_date:
+        query_parcel_req_log = query_parcel_req_log + \
+            f" and REQUEST_TIMESTAMP <= TO_DATE('{parcel_request_detail.to_date.strftime("%Y-%m-%d")}', 'YYYY-MM-DD') "          
+
 
     parcel_request_log_list = execute_query(query_parcel_req_log, run)
     return parcel_request_log_list

@@ -6,6 +6,7 @@ from geoservice.exception.service_exception import ValidationException
 from geoservice.exception.common import ErrorCodes
 from pydantic import BaseModel, field_validator
 from typing import Optional, Any
+from datetime import datetime
 
 
 class ParcelRequestDetail(BaseModel):
@@ -19,6 +20,8 @@ class ParcelRequestDetail(BaseModel):
     national_id: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    from_date: Optional[datetime] = None
+    to_date: Optional[datetime] = None
 
 
 class ParcelReqLogRequest(BaseModel):

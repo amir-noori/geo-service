@@ -34,7 +34,7 @@ def find_parcel_info_by_centroid_api_post(request: Request,
     print(f"parcel_req_log_request: {parcel_req_log_request}")
     body: ParcelRequestDetail = parcel_req_log_request.body
     
-    # TODO: support time based and like based search
+    # TODO: support jalali date
     parcel_request_log_list = find_parcel_req_log_list(body)
     
     parcel_req_log_list: list[ParcelReqLog] = [] 
