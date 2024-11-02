@@ -10,5 +10,6 @@
     "VALIDATION_NATIONAL_ID_REQUIRED": "nationalId : فیلد وارد نشده",
     "VALIDATION_FIRST_NAME_REQUIRED": "firstName : فیلد وارد نشده",
     "VALIDATION_LAST_NAME_REQUIRED": "lastName : فیلد وارد نشده",
-    "VALIDATION_EMPTY_REQUEST_FIELDS": "تمام ورودی ها خالی هستند"
+    "VALIDATION_EMPTY_REQUEST_FIELDS": "تمام ورودی ها خالی هستند",
+    "VALIDATION_NO_STATE_CODE_IN_HEADER": "کد استان در هدر ورودی خالی است"
 }

@@ -10,5 +10,6 @@
     "VALIDATION_NATIONAL_ID_REQUIRED": "natinalId is required in header params field.",
     "VALIDATION_FIRST_NAME_REQUIRED": "firstName is required in header params field.",
     "VALIDATION_LAST_NAME_REQUIRED": "lastName is required in header params field.",
-    "VALIDATION_EMPTY_REQUEST_FIELDS": "all request fields are empty"
+    "VALIDATION_EMPTY_REQUEST_FIELDS": "all request fields are empty",
+    "VALIDATION_NO_STATE_CODE_IN_HEADER": "no state code is defined in the header"
 }

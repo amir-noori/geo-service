@@ -26,6 +26,9 @@ insert into TBL_API_DESCRIPTION
 (api_name, api_url, is_enabled, is_mocked, is_log_enabled, bypass_auth, api_description, mocked_response)
 values ('find_parcel_request', '/report/find_parcel_request', 1, 0, 1, 0, '', '{"mocked": "true", "status": "OK"}');
 
+insert into TBL_API_DESCRIPTION
+(api_name, api_url, is_enabled, is_mocked, is_log_enabled, bypass_auth, api_description, mocked_response)
+values ('find_unit_by_cmd', '/unit/find_unit_by_cmd', 1, 0, 0, 1, '', null);
 
 -- channels
 
