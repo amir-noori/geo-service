@@ -7,6 +7,7 @@ from datetime import datetime
 import traceback
 import json
 from log.logger import logger
+from starlette.responses import Response
 
 
 class DBLogMiddleware:
@@ -24,7 +25,7 @@ class DBLogMiddleware:
 
         exception = None
         request_time = None
-        response = None
+        response: Response = None
         response_time = None
         response_body = None
         request_body = None
@@ -103,8 +104,20 @@ class DBLogMiddleware:
 
         db_message_log.request_time = request_time
         db_message_log.response_time = response_time
-        save_db_message_log(db_message_log)
-        self.log.debug("insert service log to DB.")
+        
+
+        do_log = True
+        try:        
+            # to ignore db log for redirect requests
+            if response.headers['content-length'] == '0' and not request_txt and not response_txt:
+                do_log = False
+        except KeyError:
+            pass
+
+        if do_log:
+            save_db_message_log(db_message_log)
+            self.log.debug("insert service log to DB.")        
+        
         if exception:
             raise exception
 
