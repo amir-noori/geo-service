@@ -13,8 +13,8 @@ log = logger()
 QUERIES = {
     "insert_db_parcel_req_log": """
         insert into GIS.TBL_PARCEL_REQ_LOG
-        (NATIONAL_ID, FIRST_NAME, LAST_NAME, REQUEST_TIMESTAMP, search_point, PARAMS)
-        values (:NATIONAL_ID, :FIRST_NAME, :LAST_NAME, :REQUEST_TIMESTAMP, 
+        (ID, NATIONAL_ID, FIRST_NAME, LAST_NAME, REQUEST_TIMESTAMP, search_point, PARAMS)
+        values (GIS.TBL_PARCEL_REQ_SEQ.NEXTVAL, :NATIONAL_ID, :FIRST_NAME, :LAST_NAME, :REQUEST_TIMESTAMP, 
             SDO_UTIL.FROM_WKTGEOMETRY('POINT ({x} {y})'), :PARAMS)
     """,
     
