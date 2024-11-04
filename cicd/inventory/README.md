@@ -1,0 +1,1 @@
+inventory file location

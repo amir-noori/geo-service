@@ -1,0 +1,40 @@
+---
+
+- name: Deploy Apps
+  hosts: apps
+  remote_user: vagrant
+  vars:
+    base_dir: /opt/director
+    dest_src_dir: /vagrant/src/gis/qgis/qgis-server/py
+
+  tasks:
+  
+  # - copy:
+  #     src: "{{ base_dir }}/src/"
+  #     dest: /tmp/src
+  #     mode: "755"
+      
+  - name: check docker container status
+    shell: sudo docker ps | grep geoubuntu_app | head -n 1 | awk '{print $1}'
+    register: app_container_id
+
+  - name: stop app container
+    shell: echo "stopping -> {{ app_container_id.stdout }}"
+    register: stop_container_out
+
+  # - debug: var=stop_container_out.stdout_lines
+
+  - name: build docker image
+    shell: sudo docker build . -t geoubuntu_app -f "{{ dest_src_dir }}/geoservice/docker/BUILD_APP.Dockerfile" --build-arg mode=run
+    register: docker_build_result
+  
+  # - debug: var=docker_build_result.stdout_lines
+
+  - name: remove dangling containers
+    shell: sudo docker ps -a -q | xargs -r sudo docker rm > /dev/null 2>&1
+    ignore_errors: True
+
+  - name: remove dangling docker images
+    shell: sudo docker image ls -f"dangling=true" -q | xargs -r sudo docker image rm > /dev/null 2>&1
+    ignore_errors: True
+
