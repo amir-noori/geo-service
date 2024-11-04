@@ -5,28 +5,51 @@
   remote_user: vagrant
   vars:
     base_dir: /opt/director
-    dest_src_dir: /vagrant/src/gis/qgis/qgis-server/py
+    app_src_dir: "{{ base_dir }}/app_src"
+    dest_src_dir: /opt/src/geo
 
   tasks:
+
+  - name: set state code
+    set_fact: state_code="{{ hostvars[inventory_hostname].state_code }}"
   
-  # - copy:
-  #     src: "{{ base_dir }}/src/"
-  #     dest: /tmp/src
-  #     mode: "755"
-      
+  - name: set state code
+    set_fact: env_file="{{ dest_src_dir }}"/cicd/config/"{{ state_code }}".env.app.list
+
+  - name: "remove source on destination"
+    shell: rm -rf "{{ dest_src_dir }}"/*
+
+  - copy:
+      src: "{{ base_dir }}/app_src.tar.gz"
+      dest: "{{ dest_src_dir }}"
+      mode: "777"
+
+  - name: "unzip on destination"
+    shell: tar -xvzf "{{ dest_src_dir }}"/app_src.tar.gz -C "{{ dest_src_dir }}"
+
+  - name: "move files"
+    shell: mv "{{ dest_src_dir }}"/app_src/* "{{ dest_src_dir }}"
+
   - name: check docker container status
     shell: sudo docker ps | grep geoubuntu_app | head -n 1 | awk '{print $1}'
     register: app_container_id
 
   - name: stop app container
-    shell: echo "stopping -> {{ app_container_id.stdout }}"
+    shell: sudo docker ps | grep geoubuntu_app | awk '{print $1}'| xargs -r sudo docker stop
     register: stop_container_out
+
+  - name: stop app container by port
+    shell: sudo docker ps | grep '9001->9001' | awk '{print $1}' | xargs -r sudo docker stop
+    register: stop_container_by_port_out  
 
   # - debug: var=stop_container_out.stdout_lines
 
   - name: build docker image
-    shell: sudo docker build . -t geoubuntu_app -f "{{ dest_src_dir }}/geoservice/docker/BUILD_APP.Dockerfile" --build-arg mode=run
+    shell: sudo docker build . -t geoubuntu_app -f ./geoservice/docker/BUILD_APP.Dockerfile --build-arg mode=run
+    args:
+      chdir: "{{ dest_src_dir }}"
     register: docker_build_result
+    
   
   # - debug: var=docker_build_result.stdout_lines
 
@@ -36,5 +59,9 @@
 
   - name: remove dangling docker images
     shell: sudo docker image ls -f"dangling=true" -q | xargs -r sudo docker image rm > /dev/null 2>&1
+    ignore_errors: True
+
+  - name: run app
+    shell: sudo docker run -d -p 9001:9001 --env-file "{{ env_file }}" -t geoubuntu_app:latest
     ignore_errors: True
 

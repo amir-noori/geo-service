@@ -26,6 +26,7 @@ ping:
     ansible -i inventory apps -a "rm -rf /tmp/src/src" -u vagrant
 
     # run playbook
+    tar -cvzf app_src.tar.gz app_src
     ansible-playbook cicd/playbooks/deploy_apps.yaml -i cicd/inventory/dev.inv
 
 
