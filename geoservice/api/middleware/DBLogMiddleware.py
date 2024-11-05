@@ -2,6 +2,7 @@ from fastapi import Request
 from starlette.concurrency import iterate_in_threadpool
 
 from integration.service.message_log_service import save_db_message_log
+from integration.service.api_description_service import find_api_description
 from integration.model.entity.DbMessageLog import DbMessageLog
 from datetime import datetime
 import traceback
@@ -30,12 +31,20 @@ class DBLogMiddleware:
         response_body = None
         request_body = None
         request_txt = None
+        
+        api_key = request.url.path
+        if api_key.endswith("/"):
+            api_key = api_key[:-1]
+
+        api_desc = find_api_description(api_key)
 
         try:
 
             try:
                 request_time = datetime.now()
                 response = await call_next(request)
+                if not api_desc.is_log_enabled:
+                    return response
                 response_time = datetime.now()
             except Exception as e:
                 exception = e
