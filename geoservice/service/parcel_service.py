@@ -18,7 +18,7 @@ from log.logger import logger
 
 log = logger()
 
-
+# noinspection SqlNoDataSourceInspection
 QUERIES = {
     "query_centroid_by_point": """
         SELECT SDO_UTIL.TO_WKTGEOMETRY(c.POLY) as POLY,

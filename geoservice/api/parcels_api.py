@@ -1,27 +1,24 @@
-from geoservice.service.parcel_service import *
-# from geoservice.utilgis_util import transform_point
-from geoservice.common.constants import UTM_ZONE_38_SRID
-from geoservice.gis.model.models import Point_T
-from geoservice.api.common import handle_response
-from geoservice.util.common_util import get_state_code_by_name
-from geoservice.model.dto.ParcelDtoResponse import *
-from geoservice.model.dto.ParcelDtoRequest import *
-from geoservice.event.Event import Event
-from geoservice.common.ApplicationContext import ApplicationContext
-from fastapi import APIRouter, Request, Depends
-from geoservice.dispatcher.dispatcher import dispatch
-from geoservice.exception.common import ErrorCodes
-from geoservice.common.states import state_to_db_mapping
-from geoservice.gis.model.models import Poly_T
-from geoservice.api.route import route
-from log.logger import logger
-import requests
 import json
 from datetime import datetime
+
+import requests
+from fastapi import APIRouter, Request, Depends
+
+from common.ApplicationContext import ApplicationContext
 from common.annotations import deprecated
+from geoservice.api.common import handle_response
+from geoservice.api.route import route
+from geoservice.common.states import state_to_db_mapping
+from geoservice.dispatcher.dispatcher import dispatch, get_header_for_dispatcher
+from geoservice.event.Event import Event
+from geoservice.gis.model.models import Poly_T
+from geoservice.model.dto.ParcelDtoRequest import *
+from geoservice.model.dto.ParcelDtoResponse import *
 from geoservice.model.entity.ParcelRequestLog import ParcelRequestLog
 from geoservice.service.parcel_request_log_service import save_parcel_req_log
-
+from geoservice.service.parcel_service import *
+from geoservice.util.common_util import get_state_code_by_name
+from log.logger import logger
 
 router = APIRouter()
 log = logger()
@@ -58,9 +55,9 @@ def get_state_code(event):
 
 def load_states_polygons_list():
     state_polygon_map = {}
-    dispatcher_http_channel = os.environ['dispatcher_http_channel']
-    dispatcher_http_password = os.environ['dispatcher_http_password']
+    header = get_header_for_dispatcher()
 
+    # TODO: use call_all_service_providers
     for state_code, address in state_to_db_mapping.items():
         if address:
             address_split = address.split(":")
@@ -69,8 +66,7 @@ def load_states_polygons_list():
             url = f"http://{ip}:{port}/parcels/find_state_polygon?state_code={state_code}"
             log.debug(f"calling URL: {url} to get state polygon.")
             try:
-                response = requests.get(url, headers={
-                                        "Authorization": f"{dispatcher_http_channel}:{dispatcher_http_password}"})
+                response = requests.get(url, headers=header)
                 if response.status_code == 200:
                     response_dict = json.loads(
                         response.content.decode('utf-8'))
@@ -81,11 +77,7 @@ def load_states_polygons_list():
                 else:
                     log.debug(f"{response.status_code} , {response.content}")
             except Exception as e:
-                log.error(f"""
-                        *********************************************
-                                            ERROR
-                        *********************************************
-                        
+                log.error_bold(f"""                        
                         error connecting to server {url}
                         Exception: {e}
                       """)
@@ -94,28 +86,10 @@ def load_states_polygons_list():
     return {}
 
 
-# @router.get("/find_polygon_by_centroid")
-@route(router=router, method="get", path="/find_polygon_by_centroid")
-@dispatch
-def find_polygon_by_centroid_api(request: Request, longtitude: float, latitude: float, srid="4326"):
-    """
-        lat/lon CRS is 4326
-    """
-
-    point = Point_T(longtitude, latitude, srid)
-    # if srid != "4326":
-    #     point = transform_point(point, "4326")
-    geometry_wkt = find_polygon_by_centroid(point)
-
-    return handle_response({"parcel": str(geometry_wkt)})
-
-
-# TODO: handle invalid request
 # @router.get("/find_parcel_list_by_centroid", response_model=ParcelListResponse)
 @route(router=router, method="get", path="/find_parcel_list_by_centroid", response_model=ParcelListResponse)
 @dispatch(dispatch_event=Event(find_state_for_dispatch_get))
 def find_parcel_list_by_centroid_api(request: Request, parcel_request_dto: ParcelInfoRequestDTO = Depends()):
-
     point = Point_T(parcel_request_dto.longtitude,
                     parcel_request_dto.latitude,
                     parcel_request_dto.srid)
@@ -137,7 +111,6 @@ def find_parcel_list_by_centroid_api(request: Request, parcel_request_dto: Parce
     return handle_response(request, parcel_list_response)
 
 
-# TODO: handle invalid request
 # @router.get("/find_parcel_info_by_centroid", response_model=ParcelInfoResponse)
 @deprecated("use post version")
 @route(router=router, method="get", path="/find_parcel_info_by_centroid", response_model=ParcelInfoResponse)

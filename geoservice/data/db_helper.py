@@ -1,7 +1,7 @@
 
 from geoservice.data.db import get_connection, get_connection_pool
 from geoservice.data.DBResult import DBResult
-from geoservice.common.ApplicationContext import ApplicationContext
+from common.ApplicationContext import ApplicationContext
 from geoservice.config import db
 from log.logger import logger
 

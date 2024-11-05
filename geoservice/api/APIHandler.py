@@ -5,6 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from geoservice.api.parcels_api import router as parcel_router
 from geoservice.api.units_api import router as unit_router
 from geoservice.api.report_api import router as report_router
+from geoservice.api.platform_api import router as platform_router
 
 from geoservice.exception.service_exception import ServiceException, ValidationException, CustomException
 from geoservice.exception.common import ErrorCodes
@@ -74,6 +75,13 @@ class APIHandler:
             tags=["report"],
             dependencies=[Depends(set_request_body_in_scope)]
         )
+        
+        self.app.include_router(
+            platform_router,
+            prefix="/platform",
+            tags=["platform"],
+            dependencies=[Depends(set_request_body_in_scope)]
+        )
 
     def handle_exceptions(self):
 
@@ -99,7 +107,7 @@ class APIHandler:
             return response
 
         @self.app.exception_handler(ValidationException)
-        def service_exception_handler(request: Request, ex: ValueError):
+        def service_exception_handler(request: Request, ex: CustomException):
             response = get_custom_exception_response(request, ex)
 
             return JSONResponse(

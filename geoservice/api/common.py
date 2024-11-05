@@ -1,14 +1,18 @@
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
+import os
+
+import requests
 from fastapi import Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
+from geoservice.common.states import state_to_db_mapping
+from geoservice.exception.common import ErrorCodes
+from geoservice.exception.service_exception import ValidationException
 from geoservice.model.dto.BaseDTO import Header, BaseResponse
+from geoservice.model.dto.BaseDTO import RequestHeader
 from i18n.locale import get_locale
 from log.logger import logger
-from pydantic import BaseModel
-from geoservice.model.dto.BaseDTO import RequestHeader
-from geoservice.exception.service_exception import ValidationException
-from geoservice.exception.common import ErrorCodes
-
 
 log = logger()
 
@@ -21,12 +25,10 @@ class ResponseCode:
 
 
 class ResponseCodes:
-
     SUCCESS = ResponseCode(200, "SUCCESS")
 
 
 def handle_response(request: Request, response: BaseResponse, exclude_unset=True, exclude_none=True):
-
     lang = request.scope["lang"]
     response_message = get_locale(ResponseCodes.SUCCESS.message_key, lang)
 
@@ -61,3 +63,5 @@ def find_state_for_dispatch_by_header(event):
             ErrorCodes.VALIDATION_NO_STATE_CODE_IN_HEADER)
 
     return state_code
+
+

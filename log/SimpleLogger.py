@@ -56,7 +56,7 @@ class SimpleLogger(BaseLogger):
         log_dir = os.environ['LOG_DIR']
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
-        
+
         log_dir = os.path.join(log_dir, 'debug.log')
         file_handler = logging.FileHandler(log_dir, mode='a')
         file_handler.setLevel(level)
@@ -80,6 +80,16 @@ class SimpleLogger(BaseLogger):
         self._logger.warning(message)
 
     def error(self, message: str):
+        self._logger.error(message)
+
+    def error_bold(self, message: str):
+        message = f"""
+            *********************************************
+                                ERROR
+            *********************************************
+    
+            {message}
+        """
         self._logger.error(message)
 
     def critical(self, message: str):

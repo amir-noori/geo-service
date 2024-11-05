@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import os
 
 from geoservice.api.APIHandler import APIHandler
-from geoservice.common.ApplicationContext import ApplicationContext
+from common.ApplicationContext import ApplicationContext
 from geoservice.data.db_helper import get_db_connection_pool
 
 

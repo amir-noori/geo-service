@@ -31,6 +31,7 @@ class DBLogMiddleware:
         response_body = None
         request_body = None
         request_txt = None
+        response_txt = None
         
         api_key = request.url.path
         if api_key.endswith("/"):
@@ -43,7 +44,7 @@ class DBLogMiddleware:
             try:
                 request_time = datetime.now()
                 response = await call_next(request)
-                if not api_desc.is_log_enabled:
+                if api_desc and not api_desc.is_log_enabled:
                     return response
                 response_time = datetime.now()
             except Exception as e:
@@ -55,7 +56,7 @@ class DBLogMiddleware:
                 response.body_iterator = iterate_in_threadpool(
                     iter(response_body))
 
-            response_txt = None
+
             if response_body:
                 response_txt = str(response_body[0].decode())
 
@@ -118,7 +119,7 @@ class DBLogMiddleware:
         do_log = True
         try:        
             # to ignore db log for redirect requests
-            if response.headers['content-length'] == '0' and not request_txt and not response_txt:
+            if response and response.headers['content-length'] == '0' and not request_txt and not response_txt:
                 do_log = False
         except KeyError:
             pass

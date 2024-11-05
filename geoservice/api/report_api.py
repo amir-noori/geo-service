@@ -19,7 +19,6 @@ log = logger()
 def find_parcel_info_by_centroid_api_post(request: Request,
                                           parcel_req_log_request: ParcelReqLogRequest = Depends()):
 
-    print(f"parcel_req_log_request: {parcel_req_log_request}")
     body: ParcelRequestDetail = parcel_req_log_request.body
 
     # TODO: support jalali date

@@ -30,6 +30,10 @@ insert into TBL_API_DESCRIPTION
 (api_name, api_url, is_enabled, is_mocked, is_log_enabled, bypass_auth, api_description, mocked_response)
 values ('find_unit_by_cmd', '/unit/find_unit_by_cmd', 1, 0, 0, 1, '', null);
 
+insert into TBL_API_DESCRIPTION
+(api_name, api_url, is_enabled, is_mocked, is_log_enabled, bypass_auth, api_description, mocked_response)
+values ('clear_all_cache', '/platform/clear_all_cache', 1, 0, 0, 1, '', null);
+
 -- channels
 
 insert into TBL_CHANNEL (auth_key, channel_id, channel_name, description) VALUES

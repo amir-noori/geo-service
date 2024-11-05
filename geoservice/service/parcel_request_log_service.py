@@ -10,6 +10,7 @@ import json
 
 log = logger()
 
+# noinspection SqlNoDataSourceInspection
 QUERIES = {
     "insert_db_parcel_req_log": """
         insert into GIS.TBL_PARCEL_REQ_LOG
@@ -90,11 +91,11 @@ def find_parcel_req_log_list(parcel_request_detail: ParcelRequestDetail) -> list
                         
     if parcel_request_detail.from_date:
         query_parcel_req_log = query_parcel_req_log + \
-            f" and REQUEST_TIMESTAMP >= TO_DATE('{parcel_request_detail.from_date.strftime("%Y-%m-%d")}', 'YYYY-MM-DD') "          
+            f" and REQUEST_TIMESTAMP >= TO_DATE('{parcel_request_detail.from_date.strftime('%Y-%m-%d')}', 'YYYY-MM-DD') "
 
     if parcel_request_detail.to_date:
         query_parcel_req_log = query_parcel_req_log + \
-            f" and REQUEST_TIMESTAMP <= TO_DATE('{parcel_request_detail.to_date.strftime("%Y-%m-%d")}', 'YYYY-MM-DD') "          
+            f" and REQUEST_TIMESTAMP <= TO_DATE('{parcel_request_detail.to_date.strftime('%Y-%m-%d')}', 'YYYY-MM-DD') "
 
 
     parcel_request_log_list = execute_query(query_parcel_req_log, run)
