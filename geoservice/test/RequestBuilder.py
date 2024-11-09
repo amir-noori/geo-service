@@ -1,3 +1,4 @@
+from json import dumps
 class ParcelRequestBuilder:
     @staticmethod
     def build_headers(auth_token):
@@ -5,6 +6,14 @@ class ParcelRequestBuilder:
             "Authorization": f"Basic {auth_token}"
         }
     
+    @staticmethod
+    def build_header_params(national_id, first_name, last_name):
+        return {
+            "nationalId": national_id,
+            "firstName": first_name,
+            "lastName": last_name
+        }
+        
     @staticmethod
     def build_find_parcel_info_by_centroid(longitude, latitude, srid="4326", distance=200):
         return {
@@ -28,18 +37,9 @@ class ParcelRequestBuilder:
         return {
             "header": {
                 "lang": lang,
-                "params": {
-                    "nationalId": national_id,
-                    "firstName": first_name,
-                    "lastName": last_name
-                }
+                "params": ParcelRequestBuilder.build_header_params(national_id, first_name, last_name)
             },
-            "body": {
-                "longtitude": longitude,
-                "latitude": latitude,
-                "srid": srid,
-                "distance": distance
-            }
+            "body": ParcelRequestBuilder.build_find_parcel_info_by_centroid(longitude, latitude, srid, distance)
         }
     
     @staticmethod
@@ -47,16 +47,7 @@ class ParcelRequestBuilder:
         return {
             "header": {
                 "lang": lang,
-                "params": {
-                    "nationalId": national_id,
-                    "firstName": first_name,
-                    "lastName": last_name
-                }
+                "params": ParcelRequestBuilder.build_header_params(national_id, first_name, last_name)
             },
-            "body": {
-                "longtitude": longitude,
-                "latitud": latitude,
-                "srid": srid,
-                "distance": distance
-            }
+            "body": ParcelRequestBuilder.build_wrong_find_parcel_info_by_centroid(longitude, latitude, srid, distance)
         }

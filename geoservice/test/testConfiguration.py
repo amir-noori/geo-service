@@ -1,10 +1,10 @@
 import os
 import pytest
 from fastapi.testclient import TestClient
-from geoservice.app import app  # Import the app from your app.py
+from geoservice.app import app
 
 @pytest.fixture(scope="module")
-def client():
+def createTestClient():
     """
     Creates a TestClient for FastAPI app, used to simulate HTTP requests during testing.
     """    
