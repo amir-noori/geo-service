@@ -75,7 +75,8 @@ def find_deed(deed: Deed):
 
     deed = execute_query(query_deed, run)
     parts = find_deed_parts(deed)
-    deed.deed_parts = parts
+    if deed:
+        deed.deed_parts = parts
 
     return deed
 

@@ -69,7 +69,7 @@ QUERIES = {
             and poly is not null
     """,
 
-    "query_centorid_polygon_list_by_point": """
+    "query_centroid_polygon_list_by_point": """
         select SDO_UTIL.TO_WKTGEOMETRY(c.POLY) as POLY
         from gis.CENTROID c
         where SDO_RELATE(c.POLY,
@@ -122,7 +122,7 @@ QUERIES = {
 }
 
 
-def find_state_polygon(state_code: str) -> str:
+def find_state_polygon(state_code: str) -> Parcel:
 
     def run(db_result: DBResult):
         results = db_result.results
@@ -187,16 +187,18 @@ def find_polygon_by_centroid(centroid: Point_T) -> Parcel:
         log.warning(f"multiple polygons found for centroid {centroid}. ignoring shape!")
         shape_parcel.polygon = None
         # raise ServiceException(ErrorCodes.MULTIPLE_PARCEL_FOUND)
-    else:
-        if shape_parcel.polygon:
-            return shape_parcel
-        elif centroid_parcel.polygon:
-            return centroid_parcel
+
+    if shape_parcel.polygon:
+        return shape_parcel
+    elif centroid_parcel.polygon:
+        return centroid_parcel
 
 
 def find_parcel_info_by_centroid(centroid: Point_T) -> Parcel:
     parcel = find_polygon_by_centroid(centroid)
     deed = find_deed(parcel.deed)
+    if not deed:
+        deed = Deed() # let's have an empty deed if there is none
 
     # : must be set in find_deed
     parcel.deed.address_text = deed.address_text
@@ -204,7 +206,7 @@ def find_parcel_info_by_centroid(centroid: Point_T) -> Parcel:
     parcel.deed.partitioned = deed.partitioned
     parcel.deed.segment = deed.segment
 
-    if deed.state and deed.state != None:
+    if deed.state and deed.state is not None:
         parcel.deed.state = deed.state
     else:
         current_state_code = os.environ["current_state_code"]
@@ -232,7 +234,7 @@ def find_parcel_list_by_centroid(centroid: Point_T, distance: float):
 
         return buffer
 
-    query_centorid_polygon_list = QUERIES['query_centorid_polygon_list_by_point'].format(
+    query_centroid_polygon_list = QUERIES['query_centroid_polygon_list_by_point'].format(
         x=centroid.x, y=centroid.y, srid=centroid.srid, distance=distance)
 
     query_shape_polygon_list = QUERIES['query_shape_polygon_list_by_point'].format(
@@ -241,7 +243,7 @@ def find_parcel_list_by_centroid(centroid: Point_T, distance: float):
     query_buffer = QUERIES['query_point_buffer'].format(
         x=centroid.x, y=centroid.y, srid=centroid.srid, distance=distance)
 
-    centroid_polygon_list = execute_query(query_centorid_polygon_list, run_poly)
+    centroid_polygon_list = execute_query(query_centroid_polygon_list, run_poly)
     shape_polygon_list = execute_query(query_shape_polygon_list, run_poly)
     buffer = execute_query(query_buffer, run_buffer)
 
