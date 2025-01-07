@@ -1,7 +1,17 @@
 FROM ubuntu:latest
 SHELL ["/bin/bash", "-c"]
 
+
+
+
 RUN apt update
+
+
+RUN apt install net-tools -y; \
+    apt install vim -y; \
+    apt install telnet -y; \
+    apt install curl -y;
+
 
 # Oracle client libaio1t64
 RUN apt install libaio1t64 unzip wget -y 
