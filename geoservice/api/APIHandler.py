@@ -83,6 +83,13 @@ class APIHandler:
             dependencies=[Depends(set_request_body_in_scope)]
         )
 
+        self.app.include_router(
+            platform_router,
+            prefix="/claim",
+            tags=["claim"],
+            dependencies=[Depends(set_request_body_in_scope)]
+        )
+
     def handle_exceptions(self):
 
         def get_custom_exception_response(request: Request, ex: CustomException):
