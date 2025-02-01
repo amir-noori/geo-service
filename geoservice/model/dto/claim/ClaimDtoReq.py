@@ -1,32 +1,38 @@
+from pydantic import field_validator
+
 from typing import Any
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict
+from pydantic import field_validator
+from pydantic.alias_generators import to_camel
 
 from geoservice.exception.common import ErrorCodes
 from geoservice.exception.service_exception import ValidationException
-from geoservice.model.dto.BaseDTO import BaseDTO, RequestHeader, partial_model
+from geoservice.model.dto.BaseDTO import BaseDTO, RequestHeader
 
 
-@partial_model
-class ClaimRequestDTO(BaseDTO):
+class ClaimRequestDTO(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+        arbitrary_types_allowed=True
+    )
+
     claim_trace_id: str
     claimed_content_type: str
     claimed_content: str
-
-    def __init__(self, claim_trace_id: str = None, claimed_content_type: str = None,
-                 claimed_content: str = None) -> None:
-        super().__init__()
-        self.claim_trace_id = claim_trace_id
-        self.claimed_content_type = claimed_content_type
-        self.claimed_content = claimed_content
-
-    def get_service_key(self):
-        return f"{self.claim_trace_id}"
 
 
 class ClaimRequest(BaseModel):
     body: ClaimRequestDTO
     header: RequestHeader
+
+    def get_service_key(self):
+        if self.body:
+            return f"{self.body.claim_trace_id}"
+        else:
+            return None
 
     @field_validator('body')
     @classmethod
@@ -50,16 +56,8 @@ class ClaimRequest(BaseModel):
         return b
 
 
-@partial_model
 class ClaimParcelQueryRequestDTO(BaseDTO):
     claim_trace_id: str
-
-    def __init__(self, claim_trace_id: str = None) -> None:
-        super().__init__()
-        self.claim_trace_id = claim_trace_id
-
-    def get_service_key(self):
-        return f"{self.claim_trace_id}"
 
 
 class ClaimParcelQueryRequest(BaseModel):
@@ -74,3 +72,9 @@ class ClaimParcelQueryRequest(BaseModel):
                                       error_message="claim_trace_id is required!")
 
         return b
+
+    def get_service_key(self):
+        if self.body:
+            return self.body.claim_trace_id
+        else:
+            return None

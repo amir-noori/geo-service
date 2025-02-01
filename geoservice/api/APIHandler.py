@@ -6,6 +6,7 @@ from geoservice.api.parcels_api import router as parcel_router
 from geoservice.api.units_api import router as unit_router
 from geoservice.api.report_api import router as report_router
 from geoservice.api.platform_api import router as platform_router
+from geoservice.api.claim_api import router as claim_router
 
 from geoservice.exception.service_exception import ServiceException, ValidationException, CustomException
 from geoservice.exception.common import ErrorCodes
@@ -84,7 +85,7 @@ class APIHandler:
         )
 
         self.app.include_router(
-            platform_router,
+            claim_router,
             prefix="/claim",
             tags=["claim"],
             dependencies=[Depends(set_request_body_in_scope)]

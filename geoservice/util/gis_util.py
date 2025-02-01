@@ -1,10 +1,16 @@
 # from osgeo import ogr
 # from osgeo import osr
 
-from shapely.wkt import loads
+import os
+import tempfile
+import uuid
+from zipfile import ZipFile
+from pykml import parser
+import fiona
 from shapely import union_all
-from shapely.geometry import Polygon, Point
-
+from shapely.geometry import shape
+from shapely.wkt import loads
+from shapely.geometry import Point, LineString, Polygon
 from geoservice.gis.model.models import Point_T, Poly_T
 
 
@@ -19,6 +25,77 @@ def union_polygons_by_wkt(polygon_list: list[str]):
         poly_list.append(poly)
     return union_all(poly_list)
 
+def load_kml_data(kml_string):
+    geometries = []
+    kml_doc = parser.fromstring(kml_string.encode('utf-8'))
+    placemark = kml_doc.Document.Folder.Placemark
+    for child in placemark.MultiGeometry.getchildren():
+        if child.tag.endswith('Polygon'):
+            # Extract coordinates for Polygon
+            coords = child.outerBoundaryIs.LinearRing.coordinates.text.strip().split()
+            polygons = [tuple(map(float, c.split(','))) for c in coords]
+            geometries.append(Polygon(polygons))
+        elif child.tag.endswith('Point'):
+            # Extract coordinates for Point
+            coords = child.coordinates.text.strip().split(',')
+            point = tuple(map(float, coords))
+            geometries.append(Point(point))
+        elif child.tag.endswith('LineString'):
+            # Extract coordinates for LineString
+            coords = child.coordinates.text.strip().split()
+            lines = [tuple(map(float, c.split(','))) for c in coords]
+            geometries.append(LineString(lines))
+
+    return geometries
+
+
+def load_shp_data(binary_data):
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Save the binary data to a temporary ZIP file
+        filename = str(uuid.uuid4()) + ".zip"
+        temp_zip_path = os.path.join(temp_dir, filename)
+        with open(temp_zip_path, "wb") as f:
+            f.write(binary_data)
+
+        # Extract the ZIP file
+        with ZipFile(temp_zip_path, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
+
+        # Find the .shp file in the extracted files
+        shp_file = None
+        for file in os.listdir(temp_dir):
+            if file.endswith(".shp"):
+                shp_file = os.path.join(temp_dir, file)
+                break
+
+        if not shp_file:
+            raise FileNotFoundError("No .shp file found in the extracted data.")
+
+        # Open the Shapefile using Fiona
+        data_map = {}
+        with fiona.open(shp_file) as src:
+            # Iterate over each feature in the Shapefile
+            index = 0
+            for feature in src:
+                # Convert the feature's geometry to a Shapely geometry
+                geom = shape(feature['geometry'])
+
+                # Access the feature's properties (attributes)
+                properties = feature['properties']
+
+                data_map[index] = (geom, properties)
+
+                index = index + 1
+
+        return data_map
+
+
+def is_polygon(geom):
+    """
+        geom: is of shapely geometry
+    """
+    geom_type = geom.geom_type
+    return geom_type == "MultiPolygon" or geom_type == "Polygon"
 
 # def transform_point(p: Point_T, to_srid):
 

@@ -35,4 +35,7 @@ RUN cd /opt/app && source bin/activate && \
     pip install "fastapi[standard]" && \
     pip install shapely && \
     pip install requests && \
+    pip install geopandas && \
+    pip install shapely fiona && \
+    pip install pykml && \
     deactivate

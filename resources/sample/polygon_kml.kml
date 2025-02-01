@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<kml
+	xmlns="http://www.opengis.net/kml/2.2">
+	<Document id="root_doc">
+		<Schema name="test_layer2" id="test_layer2">
+			<SimpleField name="id" type="float"></SimpleField>
+		</Schema>
+		<Folder>
+			<name>test_layer2</name>
+			<Placemark>
+				<Style>
+					<LineStyle>
+						<color>ff0000ff</color>
+					</LineStyle>
+					<PolyStyle>
+						<fill>0</fill>
+					</PolyStyle>
+				</Style>
+				<ExtendedData>
+					<SchemaData schemaUrl="#test_layer2">
+						<SimpleData name="id">100</SimpleData>
+					</SchemaData>
+				</ExtendedData>
+				<MultiGeometry>
+					<Polygon>
+						<outerBoundaryIs>
+							<LinearRing>
+								<coordinates>46.3965784890679,33.6364000305666 46.3995590341668,33.6373587908242 46.4021105614105,33.6348772717478 46.3972558856813,33.6338244844768 46.3965784890679,33.6364000305666</coordinates>
+							</LinearRing>
+						</outerBoundaryIs>
+					</Polygon>
+				</MultiGeometry>
+			</Placemark>
+		</Folder>
+	</Document>
+</kml>
