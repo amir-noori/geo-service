@@ -23,9 +23,9 @@ class ClaimParcelQueryResponseDTO(BaseDTO):
     polygon: str
 
     def __init__(self, claim_trace_id, polygon) -> None:
+        super().__init__()
         self.claim_trace_id = claim_trace_id
         self.polygon = polygon
-        super().__init__()
 
 
 @partial_model

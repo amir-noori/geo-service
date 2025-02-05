@@ -35,6 +35,15 @@ QUERIES = {
             TBL_LAND_CLAIM
         where 
             claim_trace_id = {claim_trace_id}
+    """,
+
+    "query_claim_count_by_trace_id": """
+        select 
+            count(*) as CLAIM_COUNT
+        from
+            TBL_LAND_CLAIM
+        where 
+            claim_trace_id = {claim_trace_id}
     """
 
 }
@@ -59,8 +68,28 @@ def query_claim_parcel(claim_query_request: ClaimParcelQueryRequestDTO) -> Claim
         claim_trace_id=claim_trace_id
     )
 
-    return execute_query(query_claim, run)
+    claim = execute_query(query_claim, run)
+    if not claim:
+        raise ServiceException(ErrorCodes.NO_CLAIM_FOUND)
+    else:
+        return claim
 
+
+def query_claim_parcel_count(claim_trace_id: str) -> int:
+    def run(db_result: DBResult):
+        results = db_result.results
+
+        for result in results:
+            count = str(result['CLAIM_COUNT'])
+            return int(count)
+
+        return None
+
+    query_claim = QUERIES['query_claim_count_by_trace_id'].format(
+        claim_trace_id=claim_trace_id
+    )
+
+    return execute_query(query_claim, run)
 
 def create_new_claim_request(claim_request: ClaimRequestDTO):
     def check_len(obj):
@@ -113,5 +142,10 @@ def create_new_claim_request(claim_request: ClaimRequestDTO):
     insert_claim_sql = QUERIES['insert_claim'].format(
         polygon=polygon
     )
+
+    claim_count = query_claim_parcel_count(claim_request.claim_trace_id)
+
+    if claim_count > 0:
+        raise ServiceException(ErrorCodes.VALIDATION_CLAIM_TRACE_ID_EXISTS)
 
     execute_insert(insert_claim_sql, params)

@@ -1,4 +1,4 @@
-from pydantic import field_validator
+from typing import Any
 
 from typing import Any
 
@@ -8,7 +8,7 @@ from pydantic.alias_generators import to_camel
 
 from geoservice.exception.common import ErrorCodes
 from geoservice.exception.service_exception import ValidationException
-from geoservice.model.dto.BaseDTO import BaseDTO, RequestHeader
+from geoservice.model.dto.BaseDTO import RequestHeader
 
 
 class ClaimRequestDTO(BaseModel):
@@ -56,7 +56,14 @@ class ClaimRequest(BaseModel):
         return b
 
 
-class ClaimParcelQueryRequestDTO(BaseDTO):
+class ClaimParcelQueryRequestDTO(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+        arbitrary_types_allowed=True
+    )
+
     claim_trace_id: str
 
 

@@ -25,3 +25,6 @@ or edit the `startup.sh` and simply run:
     # to copy files to container
     docker cp HOST_PATH CONTAINER_ID:CONTAINER_PATH
 
+    # to save images:
+    docker save -o /vagrant/geoubuntu.tar geoubuntu
+    docker save -o /vagrant/geoubuntu_app.tar geoubuntu_app
