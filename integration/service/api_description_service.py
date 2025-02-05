@@ -9,7 +9,7 @@ QUERIES = {
         select  
             ID, API_NAME, API_URL, IS_ENABLED, IS_MOCKED, IS_LOG_ENABLED,
             BYPASS_AUTH, API_DESCRIPTION, MOCKED_RESPONSE
-        from GIS.TBL_API_DESCRIPTION
+        from TBL_API_DESCRIPTION
     """
 }
 

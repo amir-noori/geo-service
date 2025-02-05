@@ -8,14 +8,19 @@ from log.logger import logger
 log = logger()
 
 def get_db_connection():
-    return get_connection(db['username'], db['password'], db['url'])    
+    connection = get_connection(db['username'], db['password'], db['url'])
+    connection.current_schema = db['schema']
+    return connection
 
 def get_db_connection_pool():
-    return get_connection_pool(db['username'], db['password'], db['url'])    
+    connection = get_connection_pool(db['username'], db['password'], db['url'])
+    connection.current_schema = db['schema']
+    return connection
 
 def execute_query(query, func):
     log.debug(query)
     connection = ApplicationContext.connection_pool.acquire()
+    connection.current_schema = db['schema']
     cursor = connection.cursor()
     cursor.execute(query)
     rows = cursor.fetchall()

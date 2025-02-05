@@ -17,7 +17,7 @@ QUERIES = {
             a11 as SUBSIDIARY_PLATE_NUMBER,
             a12 as PARTITIONED,
             a13 as SEGMENT
-        from gis.DEEDS1 d1
+        from DEEDS1 d1
         WHERE 
             a28 is null and
             a0 = '{volume_code}' and 
@@ -30,7 +30,7 @@ QUERIES = {
             i71 as LEGAL_AREA, 
             i64 as SEGMENT, 
             i75 as SUBSIDIARY_PLATE_NUMBER
-        from gis.DEEDS9 d9
+        from DEEDS9 d9
         WHERE 
             i89 is null and
             i0 = '{volume_code}' and 

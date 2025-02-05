@@ -13,9 +13,9 @@ log = logger()
 # noinspection SqlNoDataSourceInspection
 QUERIES = {
     "insert_db_parcel_req_log": """
-        insert into GIS.TBL_PARCEL_REQ_LOG
+        insert into TBL_PARCEL_REQ_LOG
         (ID, NATIONAL_ID, FIRST_NAME, LAST_NAME, REQUEST_TIMESTAMP, search_point, PARAMS)
-        values (GIS.TBL_PARCEL_REQ_SEQ.NEXTVAL, :NATIONAL_ID, :FIRST_NAME, :LAST_NAME, :REQUEST_TIMESTAMP, 
+        values (TBL_PARCEL_REQ_SEQ.NEXTVAL, :NATIONAL_ID, :FIRST_NAME, :LAST_NAME, :REQUEST_TIMESTAMP, 
             SDO_UTIL.FROM_WKTGEOMETRY('POINT ({x} {y})'), :PARAMS)
     """,
     
@@ -26,7 +26,7 @@ QUERIES = {
             FIRST_NAME,
             LAST_NAME,
             REQUEST_TIMESTAMP
-        from gis.TBL_PARCEL_REQ_LOG
+        from TBL_PARCEL_REQ_LOG
         where 
             1 = 1
     """

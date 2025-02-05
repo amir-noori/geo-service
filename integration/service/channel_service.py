@@ -8,7 +8,7 @@ QUERIES = {
     "query_channels": """
         select  
             ID, AUTH_KEY, CHANNEL_ID, CHANNEL_NAME, DESCRIPTION
-        from GIS.TBL_CHANNEL
+        from TBL_CHANNEL
     """
 }
 

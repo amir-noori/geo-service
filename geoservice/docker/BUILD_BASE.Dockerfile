@@ -39,3 +39,5 @@ RUN cd /opt/app && source bin/activate && \
     pip install shapely fiona && \
     pip install pykml && \
     deactivate
+
+

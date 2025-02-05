@@ -27,7 +27,7 @@ QUERIES = {
                SUBSTR(substr(TXT_LABLE, 8), INSTR(substr(TXT_LABLE, 8), 'BB') + 2,
                       INSTR(substr(TXT_LABLE, 8), 'EE') - INSTR(substr(TXT_LABLE, 8), 'BB') - 2), 0
            ) AS AREA
-        from gis.CENTROID c
+        from CENTROID c
         WHERE 
         DEL_USER is null and DEL_DATE is null and
         TXT_LABLE like '%*' and
@@ -45,7 +45,7 @@ QUERIES = {
                SUBSTR(substr(lable1, 8), INSTR(substr(lable1, 8), 'BB') + 2,
                       INSTR(substr(lable1, 8), 'EE') - INSTR(substr(lable1, 8), 'BB') - 2), 0
            ) AS AREA
-        from gis.SHAPE s
+        from SHAPE s
         WHERE 
             DEL_USER is null and DEL_DATE is null and
             LABLE1 like '%*' and
@@ -61,7 +61,7 @@ QUERIES = {
 
     "query_state_polygon": """
         select SDO_UTIL.TO_WKTGEOMETRY(poly) as STATE_POLY
-        from gis.shape
+        from shape
         where cms = lable1
             and area > 0
             and LEVEL1 || COLOR1 || STYLE1 || WEIGHT1 = '41503'
@@ -71,7 +71,7 @@ QUERIES = {
 
     "query_centroid_polygon_list_by_point": """
         select SDO_UTIL.TO_WKTGEOMETRY(c.POLY) as POLY
-        from gis.CENTROID c
+        from CENTROID c
         where SDO_RELATE(c.POLY,
                         SDO_GEOM.SDO_BUFFER(
                                 SDO_GEOMETRY('POINT({x} {y})', {srid}),
@@ -90,7 +90,7 @@ QUERIES = {
 
     "query_shape_polygon_list_by_point": """
         select SDO_UTIL.TO_WKTGEOMETRY(c.POLY) as POLY
-        from gis.SHAPE c
+        from SHAPE c
         where SDO_RELATE(c.POLY,
                         SDO_GEOM.SDO_BUFFER(
                                 SDO_GEOMETRY('POINT({x} {y})', {srid}),
