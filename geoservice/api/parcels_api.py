@@ -180,7 +180,36 @@ def find_state_polygon_api(request: Request, state_code: str):
     return handle_response(request, state_polygon_response)
 
 
-# @router.get("/get_states_polygons")
+@route(router=router, method="post", path="/find_polygon_wrapper_cms", response_model=WrapperCmsResponse)
+@dispatch(dispatch_event=Event(get_state_code))
+def find_polygon_wrapper_cms_api(request: Request, wrapper_cms_request: WrapperCmsRequest = Depends()):
+    polygon_wrapper_cms_req = wrapper_cms_request.body
+    cms_unit = find_polygon_wrapper_cms(polygon_wrapper_cms_req.polygon_wkt)
+    if cms_unit is None or not cms_unit.cms:
+        raise ServiceException(ErrorCodes.NO_CONTAINING_CMS_FOUND)
+
+    response_dto = WrapperCmsResponseDTO(cms=cms_unit.cms, cms_polygon_wkt=cms_unit.polygon_wkt)
+    response = WrapperCmsResponse(body=response_dto)
+    return handle_response(request, response)
+
+
+@route(router=router, method="post", path="/find_overlapping_parcels", response_model=OverlappingResponse)
+@dispatch(dispatch_event=Event(get_state_code))
+def find_overlapping_parcels_api(request: Request,
+                                 overlapping_parcels_request: GetOverlappingParcelsRequest = Depends()):
+    overlapping_parcels_req_dto = overlapping_parcels_request.body
+    overlapping_parcels = find_overlapping_parcels_by_polygon(overlapping_parcels_req_dto.polygon_wkt)
+
+    response_dto_list = []
+    for parcel in overlapping_parcels:
+        overlapping_dto = OverlappingResponseDTO(polygon_wkt=str(parcel.polygon), cms=parcel.cms,
+                                                 layer_name=parcel.layer_name, is_documented=parcel.is_documented)
+        response_dto_list.append(overlapping_dto)
+
+    response = OverlappingResponse(body=response_dto_list)
+    return handle_response(request, response)
+
+
 @route(router=router, method="get", path="/get_states_polygons")
 def get_states_polygons_api(request: Request):
     load_states_polygons_list()

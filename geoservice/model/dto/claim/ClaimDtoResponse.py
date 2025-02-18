@@ -1,11 +1,14 @@
 from geoservice.model.dto.BaseDTO import BaseDTO, BaseResponse, partial_model
+from geoservice.model.dto.ParcelDtoResponse import OverlappingResponseDTO
 
 
 @partial_model
 class ClaimResponseDTO(BaseDTO):
+    overlapping_parcels: list[OverlappingResponseDTO]
 
-    def __init__(self) -> None:
+    def __init__(self, overlapping_parcels: list[OverlappingResponseDTO]) -> None:
         super().__init__()
+        self.overlapping_parcels = overlapping_parcels
 
 
 @partial_model

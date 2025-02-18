@@ -2,17 +2,16 @@ from enum import Enum
 
 from geoservice.gis.model.models import Point_T
 from geoservice.model.entity.common import BaseEntity
-from geoservice.util.object_util import toJSON
+
 
 class Direction(Enum):
     NORTH = 1
     SOUTH = 2
     EAST = 3
     WEST = 4
-    
+
 
 class Deed(BaseEntity):
-    
     volume_code: str
     volume_number: str
     page_number: str
@@ -71,7 +70,6 @@ class DeedPart(BaseEntity):
     def __init__(self, volume_code=None, volume_number=None, page_number=None,
                  legal_area=None, subsidiary_plate_number=None,
                  segment=None, partitioned=None, cms=None) -> None:
-        
         self.volume_code = volume_code
         self.volume_number = volume_number
         self.page_number = page_number
@@ -79,7 +77,7 @@ class DeedPart(BaseEntity):
         self.subsidiary_plate_number = subsidiary_plate_number
         self.segment = segment
         self.partitioned = partitioned
-        self.cms=cms
+        self.cms = cms
 
 
 class CardinalRecord(BaseEntity):
@@ -91,17 +89,23 @@ class CardinalRecord(BaseEntity):
 
 
 class Parcel(BaseEntity):
-    
     polygon: str
     centroid: Point_T
     cardinals: str
     deed: Deed
     cms: str
+    layer_id: str
+    layer_name: str
+    is_documented: bool
 
     def __init__(self, polygon=None, centroid: Point_T = None, deed: Deed = None,
-                 cardinals=None, cms=None) -> None:
+                 cardinals=None, cms=None, layer_id=None, layer_name=None,
+                 is_documented: bool = False) -> None:
         self.polygon = polygon
         self.centroid = centroid
         self.cardinals = cardinals
         self.deed = deed
         self.cms = cms
+        self.layer_id = layer_id
+        self.layer_name = layer_name
+        self.is_documented = is_documented

@@ -1,6 +1,7 @@
 from fastapi import Request, Depends, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 
 from geoservice.api.parcels_api import router as parcel_router
 from geoservice.api.units_api import router as unit_router
@@ -131,6 +132,15 @@ class APIHandler:
                 # TODO: maybe we should return proper http response
                 status_code=ResponseCodes.SUCCESS.code,
                 content=jsonable_encoder(response),
+            )
+
+        @self.app.exception_handler(RequestValidationError)
+        async def validation_exception_handler(request: Request, exc: RequestValidationError):
+            request_body = await request.body()
+            request.scope["request_body"] = request_body
+            return JSONResponse(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                content={"detail": exc.errors()},
             )
 
         @self.app.exception_handler(Exception)

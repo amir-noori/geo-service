@@ -18,6 +18,7 @@ def init_session(connection, requestedTag):
 def get_connection(uname, pwd, url):
     init()
     connection = oracledb.connect(user=uname, password=pwd, dsn=url)
+    init_session(connection, None)
     connection.current_schema = db['schema']
     return connection
 

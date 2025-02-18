@@ -1,12 +1,8 @@
-import os
-
-import requests
 from fastapi import Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from geoservice.common.states import state_to_db_mapping
 from geoservice.exception.common import ErrorCodes
 from geoservice.exception.service_exception import ValidationException
 from geoservice.model.dto.BaseDTO import Header, BaseResponse
@@ -30,12 +26,17 @@ class ResponseCodes:
 
 def handle_response(request: Request, response: BaseResponse, exclude_unset=True, exclude_none=True):
     lang = request.scope["lang"]
-    response_message = get_locale(ResponseCodes.SUCCESS.message_key, lang)
 
-    header = Header(
-        result_code=ResponseCodes.SUCCESS.code,
-        result_message=response_message
-    )
+    header = response.header
+    if header is None:
+        response_message = get_locale(ResponseCodes.SUCCESS.message_key, lang)
+        header = Header(
+            result_code=ResponseCodes.SUCCESS.code,
+            result_message=response_message
+        )
+    else:
+        response_message = get_locale(header.result_message, lang)
+        header.result_message = response_message
 
     response.header = header
     content = jsonable_encoder(
@@ -63,5 +64,3 @@ def find_state_for_dispatch_by_header(event):
             ErrorCodes.VALIDATION_NO_STATE_CODE_IN_HEADER)
 
     return state_code
-
-

@@ -13,6 +13,9 @@
     "VALIDATION_EMPTY_REQUEST_FIELDS": "all request fields are empty.",
     "VALIDATION_NO_STATE_CODE_IN_HEADER": "no state code is defined in the header.",
     "VALIDATION_CLAIM_TRACE_ID_EXISTS": "claim trace id already exists.",
-    "NO_CLAIM_FOUND": "no claim found."
+    "NO_CLAIM_FOUND": "no claim found.",
+    "NO_CONTAINING_CMS_FOUND": "no containing CMS found.",
+    "CLAIM_POLYGON_NOT_FOUND_IN_STATES_CMS": "claimed polygon is not contained in any CMS.",
+    "CLAIM_POLYGON_HAS_OVERLAP_WITH_DOCUMENTED_PARCEL": "claimed polygon has overlap with documented parcel."
 
 }

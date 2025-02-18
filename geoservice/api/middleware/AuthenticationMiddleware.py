@@ -1,42 +1,53 @@
+import base64
+import hashlib
+
 from fastapi import Request
-from starlette.concurrency import iterate_in_threadpool
+from fastapi import status
 from fastapi.responses import JSONResponse
+
 from integration.service.api_description_service import find_api_description
 from integration.service.channel_service import find_channel
 from log.logger import logger
-from fastapi import status
-import hashlib
 
 
 class AuthenticationMiddleware:
-
     log = logger()
 
     def __init__(self):
         pass
 
-    async def __call__(self, request: Request, call_next):
-        self.log.debug("auth middleware called")
+    def retrieve_auth_header(self, request: Request):
         headers = request.headers
         self.log.debug("headers are " + f"{headers}")
 
         auth_header = None
-        auth_type = None
         channel_id = None
         auth_key = None
         try:
+            # if the credentials is passed as clear text Authorization header (Basic aaa:123)
             auth_header = headers['Authorization']
             if auth_header:
                 if auth_header.lower().startswith("basic"):
-                    auth_type = "BASIC"
                     auth_header = auth_header[5:len(auth_header)].strip()
 
             auth_header_split = auth_header.split(":")
             channel_id = auth_header_split[0]
-            request.scope["channel_id"] = channel_id
             auth_key = auth_header_split[1]
         except (KeyError, IndexError):
-            pass
+            try:
+                # if the credentials is passed as base64 Authorization header (Basic YWFhOjEyMw==)
+                channel_id, auth_key = base64.b64decode(auth_header).decode().split(":")
+            except (UnicodeDecodeError, IndexError, TypeError):
+                pass
+
+        request.scope["channel_id"] = channel_id
+
+        return auth_header, channel_id, auth_key
+
+    async def __call__(self, request: Request, call_next):
+        self.log.debug("auth middleware called")
+
+        auth_header, channel_id, auth_key = self.retrieve_auth_header(request)
 
         api_key = request.url.path
         if api_key.endswith("/"):
@@ -67,7 +78,6 @@ class AuthenticationMiddleware:
                     not auth_key or \
                     not channel or \
                     channel.auth_key != hashlib.md5(f"[{channel_id}:{auth_key.strip()}]".encode()).hexdigest():
-
                 self.log.debug(
                     f"authentication failed for auth_header: {auth_header}, channel_id: {channel_id}, channel: {channel}")
                 response = {

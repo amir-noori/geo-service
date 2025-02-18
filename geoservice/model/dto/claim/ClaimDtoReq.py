@@ -1,11 +1,10 @@
 from typing import Any
 
-from typing import Any
-
 from pydantic import BaseModel, ConfigDict
 from pydantic import field_validator
 from pydantic.alias_generators import to_camel
 
+from geoservice.common.states import states
 from geoservice.exception.common import ErrorCodes
 from geoservice.exception.service_exception import ValidationException
 from geoservice.model.dto.BaseDTO import RequestHeader
@@ -22,6 +21,7 @@ class ClaimRequestDTO(BaseModel):
     claim_trace_id: str
     claimed_content_type: str
     claimed_content: str
+    state_code: str
 
 
 class ClaimRequest(BaseModel):
@@ -52,6 +52,10 @@ class ClaimRequest(BaseModel):
         if b.claimed_content_type.upper() not in ("KML", "GEOJSON", "SHP"):
             raise ValidationException(ErrorCodes.VALIDATION_EMPTY_REQUEST_FIELDS,
                                       error_message="no a valid claimed_content_type!")
+
+        if b.state_code.upper() not in states:
+            raise ValidationException(ErrorCodes.VALIDATION_INVALID_REQUEST_FIELDS,
+                                      error_message="no a valid state code!")
 
         return b
 

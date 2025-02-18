@@ -65,10 +65,12 @@ class DBLogMiddleware:
                     request_body = request.scope["request_body"]
                 except KeyError as e:
                     """
-                        cause for some reason (probably auth failure) request_body is not available
+                        1- cause for some reason (probably auth failure) request_body is not available
                         we can await the body in order to get the request json.
                         This might not be an issue (since the request can be read only once) cause 
                         DB log middleware must be tha last thing to be called on teh stack.
+                        
+                        2- KeyError happens when input json is malformed
                     """
                     request_body = await request.json()
 
@@ -76,7 +78,10 @@ class DBLogMiddleware:
             exception = e
 
         if request_body:
-            request_txt = json.dumps(request_body)
+            try:
+                request_txt = json.dumps(request_body)
+            except TypeError: # malformed json
+                request_txt = str(request_body)
 
         db_message_log = DbMessageLog(request=request_txt,
                                       response=response_txt,

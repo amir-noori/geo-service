@@ -1,11 +1,13 @@
-from geoservice.model.dto.BaseDTO import BaseDTO, RequestHeader, partial_model
-from geoservice.common.constants import GLOBAL_SRID
-from pydantic import BaseModel, ConfigDict
-from pydantic.alias_generators import to_camel
-from pydantic import Field, BaseModel, field_validator
 from typing import Optional, Any
-from geoservice.exception.service_exception import ValidationException
+
+from pydantic import ConfigDict
+from pydantic import Field, BaseModel, field_validator
+from pydantic.alias_generators import to_camel
+
+from geoservice.common.constants import GLOBAL_SRID, UTM_ZONE_38_SRID
 from geoservice.exception.common import ErrorCodes
+from geoservice.exception.service_exception import ValidationException
+from geoservice.model.dto.BaseDTO import BaseDTO, RequestHeader, partial_model
 
 
 @partial_model
@@ -32,8 +34,9 @@ class ParcelInfoRequestDTO(BaseDTO):
         return f"({self.longtitude},{self.latitude})"
 
 
-class CentoridDTO(BaseModel):
+### parcel centroid
 
+class CentoridDTO(BaseModel):
     model_config = ConfigDict(
         alias_generator=to_camel,
         populate_by_name=True,
@@ -50,10 +53,9 @@ class CentoridDTO(BaseModel):
 
 
 class ParcelInfoRequest(BaseModel):
-
     body: CentoridDTO
     header: RequestHeader
-    
+
     @field_validator('header')
     @classmethod
     def validate_header_params(cls, h: Any):
@@ -62,21 +64,67 @@ class ParcelInfoRequest(BaseModel):
                 raise ValidationException(ErrorCodes.VALIDATION_NATIONAL_ID_REQUIRED)
         except KeyError:
             raise ValidationException(ErrorCodes.VALIDATION_NATIONAL_ID_REQUIRED)
-        
+
         try:
             if not h.params['firstName']:
                 raise ValidationException(ErrorCodes.VALIDATION_FIRST_NAME_REQUIRED)
         except KeyError:
             raise ValidationException(ErrorCodes.VALIDATION_FIRST_NAME_REQUIRED)
-        
+
         try:
             if not h.params['lastName']:
                 raise ValidationException(ErrorCodes.VALIDATION_LAST_NAME_REQUIRED)
         except KeyError:
             raise ValidationException(ErrorCodes.VALIDATION_LAST_NAME_REQUIRED)
-        
+
         return h
 
     def get_service_key(self):
         service_key = f"nationalId:{self.header.params['nationalId']}"
+        return service_key
+
+
+### wrapper cms
+
+class PolygonWrapperCmsDTO(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+    state_code: str
+    polygon_wkt: str
+    srid: Optional[str] = Field(default=str(UTM_ZONE_38_SRID))
+
+
+class WrapperCmsRequest(BaseModel):
+    body: PolygonWrapperCmsDTO
+    header: RequestHeader
+
+    def get_service_key(self):
+        service_key = f"state_code:{self.body.state_code}"
+        return service_key
+
+
+### overlapping parcels
+
+class GetOverlappingParcelsDTO(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+    state_code: str
+    polygon_wkt: str
+    srid: Optional[str] = Field(default=str(UTM_ZONE_38_SRID))
+
+
+class GetOverlappingParcelsRequest(BaseModel):
+    body: GetOverlappingParcelsDTO
+    header: RequestHeader
+
+    def get_service_key(self):
+        service_key = f"state_code:{self.body.state_code}"
         return service_key

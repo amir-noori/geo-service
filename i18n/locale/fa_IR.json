@@ -13,5 +13,9 @@
     "VALIDATION_EMPTY_REQUEST_FIELDS": "تمام ورودی ها خالی هستند",
     "VALIDATION_NO_STATE_CODE_IN_HEADER": "کد استان در هدر ورودی خالی است",
     "VALIDATION_CLAIM_TRACE_ID_EXISTS": "کد رهگیری ادعای ملک قبلا ثبت شده است.",
-    "NO_CLAIM_FOUND": "هیچ ادعایی یافت نشد."
+    "NO_CLAIM_FOUND": "هیچ ادعایی یافت نشد.",
+    "NO_CONTAINING_CMS_FOUND": "هیچ واحد ثبتی مربوطه پیدا نشد.",
+    "CLAIM_POLYGON_NOT_FOUND_IN_STATES_CMS": "پولیگون ادعا شده در هیچ واحد ثبتی قرار نمی گیرد.",
+    "CLAIM_POLYGON_HAS_OVERLAP_WITH_DOCUMENTED_PARCEL": "پولیگون مورد ادعا با قطعه سند دار تداخل دارد."
+
 }
