@@ -95,7 +95,7 @@ class PolygonWrapperCmsDTO(BaseModel):
 
     state_code: str
     polygon_wkt: str
-    srid: Optional[str] = Field(default=str(UTM_ZONE_38_SRID))
+    srid: str
 
 
 class WrapperCmsRequest(BaseModel):

@@ -184,7 +184,7 @@ def find_state_polygon_api(request: Request, state_code: str):
 @dispatch(dispatch_event=Event(get_state_code))
 def find_polygon_wrapper_cms_api(request: Request, wrapper_cms_request: WrapperCmsRequest = Depends()):
     polygon_wrapper_cms_req = wrapper_cms_request.body
-    cms_unit = find_polygon_wrapper_cms(polygon_wrapper_cms_req.polygon_wkt)
+    cms_unit = find_polygon_wrapper_cms(polygon_wrapper_cms_req.polygon_wkt, polygon_wrapper_cms_req.srid)
     if cms_unit is None or not cms_unit.cms:
         raise ServiceException(ErrorCodes.NO_CONTAINING_CMS_FOUND)
 
@@ -202,8 +202,11 @@ def find_overlapping_parcels_api(request: Request,
 
     response_dto_list = []
     for parcel in overlapping_parcels:
-        overlapping_dto = OverlappingResponseDTO(polygon_wkt=str(parcel.polygon), cms=parcel.cms,
-                                                 layer_name=parcel.layer_name, is_documented=parcel.is_documented)
+        overlapping_dto = OverlappingResponseDTO(polygon_wkt=str(parcel.polygon),
+                                                 cms=parcel.cms,
+                                                 layer_id=parcel.layer_id,
+                                                 layer_name=parcel.layer_name,
+                                                 is_documented=parcel.is_documented)
         response_dto_list.append(overlapping_dto)
 
     response = OverlappingResponse(body=response_dto_list)

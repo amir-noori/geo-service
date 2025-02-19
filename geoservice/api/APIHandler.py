@@ -134,6 +134,16 @@ class APIHandler:
                 content=jsonable_encoder(response),
             )
 
+        @self.app.exception_handler(ServiceException)
+        def custom_exception_handler(request: Request, ex: CustomException):
+            response = get_custom_exception_response(request, ex)
+
+            return JSONResponse(
+                # TODO: maybe we should return proper http response
+                status_code=ResponseCodes.SUCCESS.code,
+                content=jsonable_encoder(response),
+            )
+
         @self.app.exception_handler(RequestValidationError)
         async def validation_exception_handler(request: Request, exc: RequestValidationError):
             request_body = await request.body()

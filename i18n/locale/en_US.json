@@ -16,6 +16,9 @@
     "NO_CLAIM_FOUND": "no claim found.",
     "NO_CONTAINING_CMS_FOUND": "no containing CMS found.",
     "CLAIM_POLYGON_NOT_FOUND_IN_STATES_CMS": "claimed polygon is not contained in any CMS.",
-    "CLAIM_POLYGON_HAS_OVERLAP_WITH_DOCUMENTED_PARCEL": "claimed polygon has overlap with documented parcel."
+    "CLAIM_POLYGON_HAS_OVERLAP_WITH_DOCUMENTED_PARCEL": "claimed polygon has overlap with documented parcel.",
+    "VALIDATION_INVALID_FIELD_CONTENT": "invalid field content",
+    "CLAIM_POLYGON_FILE_NOT_PROCESSABLE": "polygon content is not processable",
+    "INVALID_POLYGON_FOUND": "invalid polygon found."
 
 }

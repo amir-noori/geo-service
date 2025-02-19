@@ -48,3 +48,14 @@ or edit the `startup.sh` and simply run:
     grant select on gis.TBL_LAND_CLAIM_SEQ to test_user;
     grant select on gis.TBL_MESSAGE_LOG_SEQ to test_user;
 
+
+
+
+## services:
+
+### claim service:
+    
+    commands:
+    
+    # to create input for claim service:
+    base64 -w 0 data.geojson

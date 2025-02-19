@@ -240,7 +240,7 @@ def find_cms_polygon(cms: str) -> Parcel:
     return Parcel(polygon=geometry_wkt)
 
 
-def find_polygon_wrapper_cms(polygon_wkt, srid=UTM_ZONE_38_SRID) -> CmsUnit:
+def find_polygon_wrapper_cms(polygon_wkt, srid) -> CmsUnit:
     def run(db_result: DBResult):
         results = db_result.results
         wkt_str = None
@@ -376,7 +376,8 @@ def find_overlapping_parcels_by_polygon(target_polygon_wkt: str, srid=UTM_ZONE_3
             if label is not None and label.endswith("*"):
                 is_documented = True
             layer_name = Layers.get_layer(level1, color1, style1, weight1)
-            parcel = Parcel(polygon=geometry, cms=cms,
+            layer_id = f"{level1}_{color1}_{style1}_{weight1}"
+            parcel = Parcel(polygon=geometry, cms=cms, layer_id=layer_id,
                             layer_name=layer_name, is_documented=is_documented)
             parcel_list.append(parcel)
 

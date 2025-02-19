@@ -16,6 +16,9 @@
     "NO_CLAIM_FOUND": "هیچ ادعایی یافت نشد.",
     "NO_CONTAINING_CMS_FOUND": "هیچ واحد ثبتی مربوطه پیدا نشد.",
     "CLAIM_POLYGON_NOT_FOUND_IN_STATES_CMS": "پولیگون ادعا شده در هیچ واحد ثبتی قرار نمی گیرد.",
-    "CLAIM_POLYGON_HAS_OVERLAP_WITH_DOCUMENTED_PARCEL": "پولیگون مورد ادعا با قطعه سند دار تداخل دارد."
+    "CLAIM_POLYGON_HAS_OVERLAP_WITH_DOCUMENTED_PARCEL": "پولیگون مورد ادعا با قطعه سند دار تداخل دارد.",
+    "VALIDATION_INVALID_FIELD_CONTENT": "محتوای فیلد اشتباه است.",
+    "CLAIM_POLYGON_FILE_NOT_PROCESSABLE": "محتوای پولیگون قابل پردازش نیست.",
+    "INVALID_POLYGON_FOUND": "پولیگون ناصحیح است."
 
 }

@@ -91,10 +91,12 @@ def create_new_claim_request(content, content_type, polygon, claim_trace_id):
     insert_claim_sql = QUERIES['insert_claim'].format(
         polygon=polygon
     )
+    check_trace_id_exists(claim_trace_id)
+    execute_insert(insert_claim_sql, params)
 
+
+def check_trace_id_exists(claim_trace_id):
     claim_count = query_claim_parcel_count(claim_trace_id)
 
     if claim_count > 0:
         raise ServiceException(ErrorCodes.VALIDATION_CLAIM_TRACE_ID_EXISTS)
-
-    execute_insert(insert_claim_sql, params)

@@ -1,4 +1,7 @@
 import base64
+import binascii
+
+from geoservice.exception.common import CustomException, ErrorCodes
 
 
 def stringToBase64(s):

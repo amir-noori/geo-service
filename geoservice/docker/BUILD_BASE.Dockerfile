@@ -38,6 +38,7 @@ RUN cd /opt/app && source bin/activate && \
     pip install geopandas && \
     pip install shapely fiona && \
     pip install pykml && \
+    pip install apscheduler && \
     deactivate
 
 

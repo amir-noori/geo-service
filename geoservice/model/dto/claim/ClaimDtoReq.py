@@ -22,6 +22,7 @@ class ClaimRequestDTO(BaseModel):
     claimed_content_type: str
     claimed_content: str
     state_code: str
+    srid: str
 
 
 class ClaimRequest(BaseModel):
