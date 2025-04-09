@@ -1,0 +1,639 @@
+openapi: 3.0.0
+info:
+  title: Land Survey Services API
+  version: 1.0.0
+  description: API for managing land survey processes
+
+paths:
+  /assignSurveyor:
+    post:
+      tags:
+        - Survey
+      summary: Assign a surveyor to a claim request
+      operationId: assignSurveyor
+      x-provider: TOM
+      x-consumer: Elzam
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignSurveyorRequest'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignSurveyorResponse'
+          headers:
+            responseCode:
+              schema:
+                type: integer
+                enum: [0, 10001]
+                description: |
+                  Response codes:
+                  - 0: Success
+                  - 10001: No such surveyor
+
+  /assignSurveyorCallback:
+    post:
+      tags:
+        - Survey
+      summary: Callback for survey assignment
+      operationId: assignSurveyorCallback
+      x-provider: Elzam
+      x-consumer: Elzam
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignSurveyorCallbackRequest'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+          headers:
+            responseCode:
+              schema:
+                type: integer
+                enum: [0]
+                description: |
+                  Response codes:
+                  - 0: Success
+
+  /newClaimRequest:
+    post:
+      tags:
+        - Claim
+      summary: Create a new claim request
+      operationId: newClaimRequest
+      x-provider: Elzam
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewClaimRequest'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewClaimResponse'
+          headers:
+            responseCode:
+              schema:
+                type: integer
+                enum: [0, 40100]
+                description: |
+                  Response codes:
+                  - 0: Success
+                  - 40100: Claim request ID already exists
+
+  /surveyStatusUpdate:
+    post:
+      tags:
+        - Survey
+      summary: Update survey status
+      operationId: surveyStatusUpdate
+      x-provider: Kateb
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurveyStatusUpdateRequest'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+          headers:
+            responseCode:
+              schema:
+                type: integer
+                enum: [0]
+                description: |
+                  Response codes:
+                  - 0: Success
+
+  /claimSurveyQuery:
+    post:
+      tags:
+        - Survey
+      summary: Query survey details
+      operationId: claimSurveyQuery
+      x-provider: Elzam
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimSurveyQueryRequest'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimSurveyQueryResponse'
+          headers:
+            responseCode:
+              schema:
+                type: integer
+                enum: [0]
+                description: |
+                  Response codes:
+                  - 0: Success
+
+components:
+  schemas:
+    # Request Schemas
+    AssignSurveyorRequest:
+      type: object
+      properties:
+        surveyor:
+          $ref: '#/components/schemas/Person'
+        requestId:
+          type: string
+        cms:
+          type: string
+        claimant:
+          $ref: '#/components/schemas/Person'
+        neighborhoodPoint:
+          $ref: '#/components/schemas/Point'
+      required:
+        - requestId
+        - cms
+        - claimant
+
+    AssignSurveyorCallbackRequest:
+      type: object
+      properties:
+        requestId:
+          type: string
+        surveyStatus:
+          type: string
+        surveyor:
+          $ref: '#/components/schemas/Person'
+        neighborhoodPoint:
+          $ref: '#/components/schemas/Point'
+        surveyParcel:
+          type: object
+          format: json
+          description: GeoJSON format
+        surveyParcelMetadata:
+          $ref: '#/components/schemas/ParcelMetadata'
+        
+      required:
+        - requestId
+        - surveyStatus
+        - surveyor
+        - surveyParcel
+        - surveyParcelMetadata
+
+    NewClaimRequest:
+      type: object
+      properties:
+        surveyor:
+          $ref: '#/components/schemas/Person'
+        requestId:
+          type: string
+        neighborhoodPoint:
+          $ref: '#/components/schemas/Point'
+        claimant:
+          $ref: '#/components/schemas/Person'
+      required:
+        - requestId
+        - neighborhoodPoint
+        - claimant
+
+    SurveyStatusUpdateRequest:
+      type: object
+      properties:
+        requestId:
+          type: string
+        claimTracingId:
+          type: string
+        status:
+          type: integer
+          enum: [1, -1]
+          description: |
+            Survey status:
+            - 1: OK
+            - -1: Failed
+      required:
+        - requestId
+        - claimTracingId
+        - status
+
+    ClaimSurveyQueryRequest:
+      type: object
+      properties:
+        requestId:
+          type: string
+        claimTracingId:
+          type: string
+      required:
+        - claimTracingId
+
+    # Response Schemas
+    AssignSurveyorResponse:
+      type: object
+      properties:
+        responseCode:
+          type: integer
+        responseMessage:
+          type: string
+        surveyor:
+          $ref: '#/components/schemas/Person'
+      required:
+        - responseCode
+        - responseMessage
+        - surveyor
+
+    NewClaimResponse:
+      type: object
+      properties:
+        responseCode:
+          type: integer
+        responseMessage:
+          type: string
+        surveyor:
+          $ref: '#/components/schemas/Person'
+      required:
+        - responseCode
+        - responseMessage
+        - surveyor
+
+    BaseResponse:
+      type: object
+      properties:
+        responseCode:
+          type: integer
+        responseMessage:
+          type: string
+      required:
+        - responseCode
+        - responseMessage
+
+    ClaimSurveyQueryResponse:
+      type: object
+      properties:
+        responseCode:
+          type: integer
+        responseMessage:
+          type: string
+        requestId:
+          type: string
+        claimId:
+          type: string
+        cms:
+          type: string
+        area:
+          type: number
+        stateCode:
+          type: string
+        county:
+          type: string
+          description: shahrestan 
+        mainPlateNumber:
+          type: string
+        subsidiaryPlateNumber:
+          type: string
+        section:
+          type: string
+          description: bakhsh
+        district:
+          type: string
+          description: nahieh
+        status:
+          type: integer
+          enum: [1, -1]
+          description: |
+            Survey status:
+            - 1: OK
+            - -1: Failed
+        surveyor:
+          $ref: '#/components/schemas/Person'
+        neighborhoodPoint:
+          $ref: '#/components/schemas/Point'
+        claimant:
+          $ref: '#/components/schemas/Person'
+        parcel:
+          type: object
+          format: json
+          description: GeoJSON format
+        overlappingParcels:
+          type: object
+          format: json
+          description: GeoJSON format
+      required:
+        - responseCode
+        - responseMessage
+        - status
+        - neighborhoodPoint
+        - claimant
+      example:
+        {
+          "responseCode": -15738817,
+          "responseMessage": "ipsum",
+          "status": 1,
+          "requestId": "32131232",
+          "claimId": "1231231",
+          "cms": "G22",
+          "area": "10.2",
+          "county": "some county",
+          "stateCode": "J",
+          "mainPlateNumber": "1",
+          "subsidiaryPlateNumber": "1",
+          "section": "1",
+          "district": "2",
+          "neighborhoodPoint": {
+              "x": -48425851.64293078,
+              "y": 2018395.3302414566,
+              "SRS": "4326"
+          },
+          "claimant": {
+              "firstName": "amet",
+              "lastName": "est officia",
+              "nationalId": "sed",
+              "phoneNumber": "non enim ut dolor",
+              "birthday": "1988-07-22"
+          },
+          "surveyor": {
+              "firstName": "et exercitation",
+              "lastName": "laborum eu ullamco aliquip",
+              "nationalId": "exercitation magna dolore et",
+              "phoneNumber": "incididunt aliqua sit",
+              "birthday": "2023-11-30"
+          },
+          "parcel": {
+              "type": "Feature",
+              "properties": {
+                  "beneficiaryRights": "Sample Quadrilateral",
+                  "accommodationRights": "Sample Quadrilateral",
+                  "isApartment": false,
+                  "floorNumber": 2,
+                  "unitNumber": 2,
+                  "orientation": 2,
+                  "edges": [
+                      {
+                          "lineIndex": 0,
+                          "lenght": 77734258.68410593,
+                          "orientation": 8,
+                          "boundray": "Excepteur non dolore fugiat",
+                          "startingPoint": {
+                              "x": -89602802.67694105,
+                              "y": -91375034.49051145,
+                              "SRS": "4326"
+                          },
+                          "endingPoint": {
+                              "x": -73420195.01850255,
+                              "y": -27172181.421365857,
+                              "SRS": "4326"
+                          },
+                          "isAdjacentToPlateNumber": true,
+                          "isAdjacentToPasssage": false,
+                          "passageName": true,
+                          "passageWidth": 18347813.178749606
+                      },
+                      {
+                          "lineIndex": 1,
+                          "lenght": 77734258.68410593,
+                          "orientation": 8,
+                          "boundray": "Excepteur non dolore fugiat",
+                          "startingPoint": {
+                              "x": -89602802.67694105,
+                              "y": -91375034.49051145,
+                              "SRS": "4326"
+                          },
+                          "endingPoint": {
+                              "x": -73420195.01850255,
+                              "y": -27172181.421365857,
+                              "SRS": "4326"
+                          },
+                          "isAdjacentToPlateNumber": true,
+                          "isAdjacentToPasssage": false,
+                          "passageName": true,
+                          "passageWidth": 18347813.178749606
+                      },
+                      {
+                          "lineIndex": 2,
+                          "lenght": 77734258.68410593,
+                          "orientation": 8,
+                          "boundray": "Excepteur non dolore fugiat",
+                          "startingPoint": {
+                              "x": -89602802.67694105,
+                              "y": -91375034.49051145,
+                              "SRS": "4326"
+                          },
+                          "endingPoint": {
+                              "x": -73420195.01850255,
+                              "y": -27172181.421365857,
+                              "SRS": "4326"
+                          },
+                          "isAdjacentToPlateNumber": true,
+                          "isAdjacentToPasssage": false,
+                          "passageName": true,
+                          "passageWidth": 18347813.178749606
+                      },
+                      {
+                          "lineIndex": 3,
+                          "lenght": 77734258.68410593,
+                          "orientation": 8,
+                          "boundray": "Excepteur non dolore fugiat",
+                          "startingPoint": {
+                              "x": -89602802.67694105,
+                              "y": -91375034.49051145,
+                              "SRS": "4326"
+                          },
+                          "endingPoint": {
+                              "x": -73420195.01850255,
+                              "y": -27172181.421365857,
+                              "SRS": "4326"
+                          },
+                          "isAdjacentToPlateNumber": true,
+                          "isAdjacentToPasssage": false,
+                          "passageName": true,
+                          "passageWidth": 18347813.178749606
+                      }
+                  ]
+              },
+              "geometry": {
+                  "type": "Polygon",
+                  "coordinates": [
+                      [
+                          [0,0],
+                          [1,0],
+                          [1,1],
+                          [0,1],
+                          [0,0]
+                      ]
+                  ]
+              }
+          },
+          "overlappingParcels": {
+            "type": "FeatureCollection",
+            "features": [
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Polygon",
+                  "coordinates": [
+                    [
+                      [4.81137, 52.442],
+                      [4.81357, 52.442],
+                      [4.81357, 52.444],
+                      [4.81137, 52.444],
+                      [4.81137, 52.442]
+                    ]
+                  ]
+                },
+                "properties": {
+                  "layerId": "some layer",
+                  "isDocumented": false
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Polygon",
+                  "coordinates": [
+                    [
+                      [4.81137, 52.442],
+                      [4.81357, 52.442],
+                      [4.81357, 52.444],
+                      [4.81137, 52.444],
+                      [4.81137, 52.442]
+                    ]
+                  ]
+                },
+                "properties": {
+                  "layerId": "some layer 2",
+                  "isDocumented": false
+                }
+              }
+            ]
+          }
+      }
+
+    # Data Models
+    Person:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        nationalId:
+          type: string
+        phoneNumber:
+          type: string
+        birthday:
+          type: string
+          format: date
+
+    Point:
+      type: object
+      properties:
+        x:
+          type: number
+          format: number
+        y:
+          type: number
+          format: number
+        SRS:
+          type: string
+          default: '4326'
+      required:
+        - x
+        - y
+
+    ParcelMetadata:
+      type: object
+      properties:
+        metadata:
+          type: object
+          properties:
+            beneficiaryRights:
+              type: string
+              description: hoghughe entefaei
+            accommodationRights:
+              type: string
+              description: hoghughe ertefaghi
+            area:
+              type: number
+            isApartment:
+              type: boolean
+            floorNumber:
+              type: number
+              format: number
+            unitNumber:
+              type: integer
+              description: vahed
+            orientation:
+              type: integer
+              enum: [1, 2, 3, 4, 6, 7, 8, 9]
+              description: |
+                Compass orientation:
+                - 1: South-West
+                - 2: South
+                - 3: South-East
+                - 4: West
+                - 6: East
+                - 7: North-West
+                - 8: North
+                - 9: North-East
+        edgeMetadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdgeMetadata'
+
+    EdgeMetadata:
+      type: object
+      properties:
+        lineIndex:
+          type: integer
+        lenght:
+          type: number
+          format: number
+        orientation:
+          type: integer
+          enum: [1, 2, 3, 4, 6, 7, 8, 9]
+          description: |
+            Compass orientation:
+            - 1: South-West
+            - 2: South
+            - 3: South-East
+            - 4: West
+            - 6: East
+            - 7: North-West
+            - 8: North
+            - 9: North-East
+        boundray:
+          type: string
+          description: hade fasel
+        startingPoint:
+          $ref: '#/components/schemas/Point'
+        endingPoint:
+          $ref: '#/components/schemas/Point'
+        isAdjacentToPlateNumber:
+          type: boolean
+          description: mojaver plak
+        isAdjacentToPasssage:
+          type: boolean
+          description: mojaver mabar
+        passageName:
+          type: boolean
+        passageWidth:
+          type: number
+          format: number
