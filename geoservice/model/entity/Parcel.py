@@ -11,6 +11,17 @@ class Direction(Enum):
     WEST = 4
 
 
+class Orientation(Enum):
+    SOUTH_WEST = 1
+    SOUTH = 2
+    SOUTH_EAST = 3
+    WEST = 4
+    EAST = 6
+    NORTH_WEST = 7
+    NORTH = 8
+    NORTH_EAST = 9
+
+
 class Deed(BaseEntity):
     volume_code: str
     volume_number: str

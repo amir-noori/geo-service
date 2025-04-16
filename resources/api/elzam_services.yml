@@ -30,7 +30,7 @@ paths:
             responseCode:
               schema:
                 type: integer
-                enum: [0, 10001]
+                enum: [ 0, 10001 ]
                 description: |
                   Response codes:
                   - 0: Success
@@ -61,7 +61,7 @@ paths:
             responseCode:
               schema:
                 type: integer
-                enum: [0]
+                enum: [ 0 ]
                 description: |
                   Response codes:
                   - 0: Success
@@ -90,7 +90,7 @@ paths:
             responseCode:
               schema:
                 type: integer
-                enum: [0, 40100]
+                enum: [ 0, 40100 ]
                 description: |
                   Response codes:
                   - 0: Success
@@ -120,7 +120,7 @@ paths:
             responseCode:
               schema:
                 type: integer
-                enum: [0]
+                enum: [ 0 ]
                 description: |
                   Response codes:
                   - 0: Success
@@ -149,7 +149,7 @@ paths:
             responseCode:
               schema:
                 type: integer
-                enum: [0]
+                enum: [ 0 ]
                 description: |
                   Response codes:
                   - 0: Success
@@ -192,7 +192,7 @@ components:
           description: GeoJSON format
         surveyParcelMetadata:
           $ref: '#/components/schemas/ParcelMetadata'
-        
+
       required:
         - requestId
         - surveyStatus
@@ -225,7 +225,7 @@ components:
           type: string
         status:
           type: integer
-          enum: [1, -1]
+          enum: [ 1, -1 ]
           description: |
             Survey status:
             - 1: OK
@@ -304,7 +304,7 @@ components:
           type: string
         county:
           type: string
-          description: shahrestan 
+          description: shahrestan
         mainPlateNumber:
           type: string
         subsidiaryPlateNumber:
@@ -317,7 +317,7 @@ components:
           description: nahieh
         status:
           type: integer
-          enum: [1, -1]
+          enum: [ 1, -1 ]
           description: |
             Survey status:
             - 1: OK
@@ -336,12 +336,6 @@ components:
           type: object
           format: json
           description: GeoJSON format
-      required:
-        - responseCode
-        - responseMessage
-        - status
-        - neighborhoodPoint
-        - claimant
       example:
         {
           "responseCode": -15738817,
@@ -358,128 +352,142 @@ components:
           "section": "1",
           "district": "2",
           "neighborhoodPoint": {
-              "x": -48425851.64293078,
-              "y": 2018395.3302414566,
-              "SRS": "4326"
+            "x": -48425851.64293078,
+            "y": 2018395.3302414566,
+            "SRS": "4326"
           },
           "claimant": {
-              "firstName": "amet",
-              "lastName": "est officia",
-              "nationalId": "sed",
-              "phoneNumber": "non enim ut dolor",
-              "birthday": "1988-07-22"
+            "firstName": "amet",
+            "lastName": "est officia",
+            "nationalId": "sed",
+            "phoneNumber": "non enim ut dolor",
+            "birthday": "1988-07-22"
           },
           "surveyor": {
-              "firstName": "et exercitation",
-              "lastName": "laborum eu ullamco aliquip",
-              "nationalId": "exercitation magna dolore et",
-              "phoneNumber": "incididunt aliqua sit",
-              "birthday": "2023-11-30"
+            "firstName": "et exercitation",
+            "lastName": "laborum eu ullamco aliquip",
+            "nationalId": "exercitation magna dolore et",
+            "phoneNumber": "incididunt aliqua sit",
+            "birthday": "2023-11-30"
           },
           "parcel": {
-              "type": "Feature",
-              "properties": {
-                  "beneficiaryRights": "Sample Quadrilateral",
-                  "accommodationRights": "Sample Quadrilateral",
-                  "isApartment": false,
-                  "floorNumber": 2,
-                  "unitNumber": 2,
-                  "orientation": 2,
-                  "edges": [
-                      {
-                          "lineIndex": 0,
-                          "lenght": 77734258.68410593,
-                          "orientation": 8,
-                          "boundray": "Excepteur non dolore fugiat",
-                          "startingPoint": {
-                              "x": -89602802.67694105,
-                              "y": -91375034.49051145,
-                              "SRS": "4326"
-                          },
-                          "endingPoint": {
-                              "x": -73420195.01850255,
-                              "y": -27172181.421365857,
-                              "SRS": "4326"
-                          },
-                          "isAdjacentToPlateNumber": true,
-                          "isAdjacentToPasssage": false,
-                          "passageName": true,
-                          "passageWidth": 18347813.178749606
-                      },
-                      {
-                          "lineIndex": 1,
-                          "lenght": 77734258.68410593,
-                          "orientation": 8,
-                          "boundray": "Excepteur non dolore fugiat",
-                          "startingPoint": {
-                              "x": -89602802.67694105,
-                              "y": -91375034.49051145,
-                              "SRS": "4326"
-                          },
-                          "endingPoint": {
-                              "x": -73420195.01850255,
-                              "y": -27172181.421365857,
-                              "SRS": "4326"
-                          },
-                          "isAdjacentToPlateNumber": true,
-                          "isAdjacentToPasssage": false,
-                          "passageName": true,
-                          "passageWidth": 18347813.178749606
-                      },
-                      {
-                          "lineIndex": 2,
-                          "lenght": 77734258.68410593,
-                          "orientation": 8,
-                          "boundray": "Excepteur non dolore fugiat",
-                          "startingPoint": {
-                              "x": -89602802.67694105,
-                              "y": -91375034.49051145,
-                              "SRS": "4326"
-                          },
-                          "endingPoint": {
-                              "x": -73420195.01850255,
-                              "y": -27172181.421365857,
-                              "SRS": "4326"
-                          },
-                          "isAdjacentToPlateNumber": true,
-                          "isAdjacentToPasssage": false,
-                          "passageName": true,
-                          "passageWidth": 18347813.178749606
-                      },
-                      {
-                          "lineIndex": 3,
-                          "lenght": 77734258.68410593,
-                          "orientation": 8,
-                          "boundray": "Excepteur non dolore fugiat",
-                          "startingPoint": {
-                              "x": -89602802.67694105,
-                              "y": -91375034.49051145,
-                              "SRS": "4326"
-                          },
-                          "endingPoint": {
-                              "x": -73420195.01850255,
-                              "y": -27172181.421365857,
-                              "SRS": "4326"
-                          },
-                          "isAdjacentToPlateNumber": true,
-                          "isAdjacentToPasssage": false,
-                          "passageName": true,
-                          "passageWidth": 18347813.178749606
-                      }
-                  ]
-              },
-              "geometry": {
-                  "type": "Polygon",
-                  "coordinates": [
-                      [
-                          [0,0],
-                          [1,0],
-                          [1,1],
-                          [0,1],
-                          [0,0]
-                      ]
-                  ]
-              }
+            "type": "Feature",
+            "properties": {
+              "beneficiaryRights": "Sample Quadrilateral",
+              "accommodationRights": "Sample Quadrilateral",
+              "isApartment": false,
+              "floorNumber": 2,
+              "unitNumber": 2,
+              "orientation": 2,
+              "edges": [
+                {
+                  "lineIndex": 0,
+                  "length": 77734258.68410593,
+                  "orientation": 8,
+                  "boundary": "Excepteur non dolore fugiat",
+                  "startingPoint": {
+                    "x": -89602802.67694105,
+                    "y": -91375034.49051145,
+                    "SRS": "4326"
+                  },
+                  "endingPoint": {
+                    "x": -73420195.01850255,
+                    "y": -27172181.421365857,
+                    "SRS": "4326"
+                  },
+                  "isAdjacentToPlateNumber": true,
+                  "isAdjacentToPassage": false,
+                  "passageName": true,
+                  "passageWidth": 18347813.178749606
+                },
+                {
+                  "lineIndex": 1,
+                  "length": 77734258.68410593,
+                  "orientation": 8,
+                  "boundary": "Excepteur non dolore fugiat",
+                  "startingPoint": {
+                    "x": -89602802.67694105,
+                    "y": -91375034.49051145,
+                    "SRS": "4326"
+                  },
+                  "endingPoint": {
+                    "x": -73420195.01850255,
+                    "y": -27172181.421365857,
+                    "SRS": "4326"
+                  },
+                  "isAdjacentToPlateNumber": true,
+                  "isAdjacentToPassage": false,
+                  "passageName": true,
+                  "passageWidth": 18347813.178749606
+                },
+                {
+                  "lineIndex": 2,
+                  "length": 77734258.68410593,
+                  "orientation": 8,
+                  "boundary": "Excepteur non dolore fugiat",
+                  "startingPoint": {
+                    "x": -89602802.67694105,
+                    "y": -91375034.49051145,
+                    "SRS": "4326"
+                  },
+                  "endingPoint": {
+                    "x": -73420195.01850255,
+                    "y": -27172181.421365857,
+                    "SRS": "4326"
+                  },
+                  "isAdjacentToPlateNumber": true,
+                  "isAdjacentToPassage": false,
+                  "passageName": true,
+                  "passageWidth": 18347813.178749606
+                },
+                {
+                  "lineIndex": 3,
+                  "length": 77734258.68410593,
+                  "orientation": 8,
+                  "boundary": "Excepteur non dolore fugiat",
+                  "startingPoint": {
+                    "x": -89602802.67694105,
+                    "y": -91375034.49051145,
+                    "SRS": "4326"
+                  },
+                  "endingPoint": {
+                    "x": -73420195.01850255,
+                    "y": -27172181.421365857,
+                    "SRS": "4326"
+                  },
+                  "isAdjacentToPlateNumber": true,
+                  "isAdjacentToPassage": false,
+                  "passageName": true,
+                  "passageWidth": 18347813.178749606
+                }
+              ],
+              "attachmentProperties": [
+                {
+                  "title": "storage",
+                  "description": "storage room",
+                  "attachmentCode": "A",
+                  "area": 5.3
+                },
+                {
+                  "title": "parking",
+                  "description": "parking spot",
+                  "attachmentCode": "B",
+                  "area": 6.7
+                },
+              ]
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [ 0,0 ],
+                  [ 1,0 ],
+                  [ 1,1 ],
+                  [ 0,1 ],
+                  [ 0,0 ]
+                ]
+              ]
+            }
           },
           "overlappingParcels": {
             "type": "FeatureCollection",
@@ -490,11 +498,11 @@ components:
                   "type": "Polygon",
                   "coordinates": [
                     [
-                      [4.81137, 52.442],
-                      [4.81357, 52.442],
-                      [4.81357, 52.444],
-                      [4.81137, 52.444],
-                      [4.81137, 52.442]
+                      [ 4.81137, 52.442 ],
+                      [ 4.81357, 52.442 ],
+                      [ 4.81357, 52.444 ],
+                      [ 4.81137, 52.444 ],
+                      [ 4.81137, 52.442 ]
                     ]
                   ]
                 },
@@ -509,11 +517,11 @@ components:
                   "type": "Polygon",
                   "coordinates": [
                     [
-                      [4.81137, 52.442],
-                      [4.81357, 52.442],
-                      [4.81357, 52.444],
-                      [4.81137, 52.444],
-                      [4.81137, 52.442]
+                      [ 4.81137, 52.442 ],
+                      [ 4.81357, 52.442 ],
+                      [ 4.81357, 52.444 ],
+                      [ 4.81137, 52.444 ],
+                      [ 4.81137, 52.442 ]
                     ]
                   ]
                 },
@@ -524,7 +532,13 @@ components:
               }
             ]
           }
-      }
+        }
+      required:
+        - responseCode
+        - responseMessage
+        - status
+        - neighborhoodPoint
+        - claimant
 
     # Data Models
     Person:
@@ -582,7 +596,7 @@ components:
               description: vahed
             orientation:
               type: integer
-              enum: [1, 2, 3, 4, 6, 7, 8, 9]
+              enum: [ 1, 2, 3, 4, 6, 7, 8, 9 ]
               description: |
                 Compass orientation:
                 - 1: South-West
@@ -597,18 +611,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdgeMetadata'
+        attachmentProperties:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttachmentProperty'
 
     EdgeMetadata:
       type: object
       properties:
         lineIndex:
           type: integer
-        lenght:
+        length:
           type: number
           format: number
         orientation:
           type: integer
-          enum: [1, 2, 3, 4, 6, 7, 8, 9]
+          enum: [ 1, 2, 3, 4, 6, 7, 8, 9 ]
           description: |
             Compass orientation:
             - 1: South-West
@@ -619,7 +637,7 @@ components:
             - 7: North-West
             - 8: North
             - 9: North-East
-        boundray:
+        boundary:
           type: string
           description: hade fasel
         startingPoint:
@@ -629,7 +647,7 @@ components:
         isAdjacentToPlateNumber:
           type: boolean
           description: mojaver plak
-        isAdjacentToPasssage:
+        isAdjacentToPassage:
           type: boolean
           description: mojaver mabar
         passageName:
@@ -637,3 +655,19 @@ components:
         passageWidth:
           type: number
           format: number
+
+    AttachmentProperty:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        attachmentCode:
+          type: string
+        area:
+          type: number
+          format: number
+      required:
+        - title
+        - area
