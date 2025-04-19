@@ -38,3 +38,58 @@ class ClaimParcelQueryResponse(BaseResponse):
     def __init__(self, body: ClaimParcelQueryResponseDTO = None, header=None) -> None:
         super().__init__(header=header)
         self.body = body
+
+
+@partial_model
+class RegisterNewClaimResponseDTO(BaseDTO):
+    request_id: str
+
+    def __init__(self, request_id: str) -> None:
+        super().__init__()
+        self.request_id = request_id
+
+
+@partial_model
+class RegisterNewClaimResponse(BaseResponse):
+    body: RegisterNewClaimResponseDTO
+
+    def __init__(self, body: RegisterNewClaimResponseDTO = None, header=None) -> None:
+        super().__init__(header=header)
+        self.body = body
+
+
+@partial_model
+class RegisterNewClaimCallbackResponseDTO(BaseDTO):
+    request_id: str
+
+    def __init__(self, request_id: str) -> None:
+        super().__init__()
+        self.request_id = request_id
+
+
+@partial_model
+class RegisterNewClaimCallbackResponse(BaseResponse):
+    body: RegisterNewClaimCallbackResponseDTO
+
+    def __init__(self, body: RegisterNewClaimCallbackResponseDTO = None, header=None) -> None:
+        super().__init__(header=header)
+        self.body = body
+
+
+
+@partial_model
+class ClaimParcelSurveyQueryResponseDTO(BaseDTO):
+    request_id: str
+
+    def __init__(self, request_id: str) -> None:
+        super().__init__()
+        self.request_id = request_id
+
+
+@partial_model
+class ClaimParcelSurveyQueryResponse(BaseResponse):
+    body: ClaimParcelSurveyQueryResponseDTO
+
+    def __init__(self, body: ClaimParcelSurveyQueryResponseDTO = None, header=None) -> None:
+        super().__init__(header=header)
+        self.body = body

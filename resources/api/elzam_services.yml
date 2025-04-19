@@ -203,6 +203,8 @@ components:
     NewClaimRequest:
       type: object
       properties:
+        cms:
+          type: string
         surveyor:
           $ref: '#/components/schemas/Person'
         requestId:
@@ -263,16 +265,8 @@ components:
     NewClaimResponse:
       type: object
       properties:
-        responseCode:
-          type: integer
-        responseMessage:
+        requestId:
           type: string
-        surveyor:
-          $ref: '#/components/schemas/Person'
-      required:
-        - responseCode
-        - responseMessage
-        - surveyor
 
     BaseResponse:
       type: object

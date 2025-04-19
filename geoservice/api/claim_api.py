@@ -1,14 +1,18 @@
 import base64
 import json
+import os
 
+import requests.auth
 from fastapi import APIRouter, Depends
 from fastapi import Request
+from pycamunda.processdef import StartInstance
 from shapely.geometry import shape
 
 from common.str_util import base64ToString
 from geoservice.api.common import handle_response
 from geoservice.api.route import route
 from geoservice.api.utils import call_cadastre_api
+from geoservice.common.constants import GLOBAL_SRID
 from geoservice.exception.common import ErrorCodes
 from geoservice.exception.service_exception import ServiceException
 from geoservice.model.dto.BaseDTO import Header
@@ -16,12 +20,17 @@ from geoservice.model.dto.BaseDTO import RequestHeader
 from geoservice.model.dto.ParcelDtoRequest import PolygonWrapperCmsDTO, WrapperCmsRequest, GetOverlappingParcelsDTO, \
     GetOverlappingParcelsRequest
 from geoservice.model.dto.ParcelDtoResponse import WrapperCmsResponse, OverlappingResponse, OverlappingResponseDTO
-from geoservice.model.dto.claim.ClaimDtoReq import ClaimRequest, ClaimParcelQueryRequest
+from geoservice.model.dto.claim.ClaimDtoReq import ClaimRequest, ClaimParcelQueryRequest, RegisterNewClaimRequest, \
+    RegisterNewClaimRequestDTO, RegisterNewClaimCallbackRequestDTO, RegisterNewClaimCallbackRequest, \
+    ClaimParcelSurveyQueryRequest, ClaimParcelSurveyQueryRequestDTO
 from geoservice.model.dto.claim.ClaimDtoReq import ClaimRequestDTO, ClaimParcelQueryRequestDTO
 from geoservice.model.dto.claim.ClaimDtoResponse import ClaimResponse, ClaimParcelQueryResponse, \
-    ClaimParcelQueryResponseDTO, ClaimResponseDTO
-from geoservice.model.entity.Claim import Claim
-from geoservice.service.claim_service import create_new_claim_request, query_claim_parcel, check_trace_id_exists
+    ClaimParcelQueryResponseDTO, ClaimResponseDTO, RegisterNewClaimResponseDTO, RegisterNewClaimResponse, \
+    RegisterNewClaimCallbackResponse, RegisterNewClaimCallbackResponseDTO, ClaimParcelSurveyQueryResponse, \
+    ClaimParcelSurveyQueryResponseDTO
+from geoservice.model.entity.Claim import Claim, ParcelClaim, RegisteredClaim
+from geoservice.service.claim_service import create_new_claim_request, query_claim_parcel, check_trace_id_exists, \
+    query_parcel_claim_request, query_registered_parcel_claim_request
 from geoservice.util.gis_util import is_polygon, load_shp_data, load_kml_data
 from log.logger import logger
 
@@ -46,7 +55,8 @@ async def claim_parcel_api(request: Request, parcel_request: ClaimRequest = Depe
 
     check_trace_id_exists(body.claim_trace_id)
 
-    overlapping_response_dto_list: list[OverlappingResponseDTO] = validate_claim_parcel(polygon, body.srid, body.state_code)
+    overlapping_response_dto_list: list[OverlappingResponseDTO] = validate_claim_parcel(polygon, body.srid,
+                                                                                        body.state_code)
     claim_response_dto = ClaimResponseDTO(overlapping_parcels=overlapping_response_dto_list)
 
     for overlapping_response_dto in overlapping_response_dto_list:
@@ -152,3 +162,61 @@ def validate_claim_parcel(polygon_wkt, srid, state_code):
             OverlappingResponseDTO(is_documented=is_documented, cms=cms, polygon_wkt=polygon_wkt))
 
     return overlapping_response_dto_list
+
+
+@route(router=router, method="post", path="/register_new_claim", response_model=RegisterNewClaimResponse)
+async def register_new_claim_api(request: Request, register_new_claim_request: RegisterNewClaimRequest = Depends()):
+    body: RegisterNewClaimRequestDTO = register_new_claim_request.body
+    request_id = body.request_id
+    neighborhood_point = body.neighborhood_point
+
+    # 1- check duplicate request_id in database
+    parcel_claim: ParcelClaim = query_parcel_claim_request(request_id)
+    if parcel_claim and parcel_claim.request_id:
+        raise ServiceException(ErrorCodes.VALIDATION_CLAIM_REQUEST_ID_ALREADY_EXISTS)
+
+    # 2- start claim process
+    camunda_url = os.environ.get("CAMUNDA_URL", "http://localhost:7171/engine-rest")
+    camunda_user = os.environ.get("CAMUNDA_USER", "demo")
+    camunda_password = os.environ.get("CAMUNDA_PASSWORD", "demo")
+    auth = requests.auth.HTTPBasicAuth(username=camunda_user, password=camunda_password)
+    start_instance = StartInstance(
+        url=camunda_url,
+        key='ClaimParcelRequestProcess'
+    )
+    start_instance.auth = auth
+
+    variables = {
+        'request_id': request_id,
+        'claimant': body.claimant,
+        'surveyor': body.surveyor,
+        'cms': body.cms,
+        'neighborhoodPoint': f'SRID={GLOBAL_SRID};POINT({neighborhood_point.x} {neighborhood_point.y})'
+    }
+
+    process_instance = start_instance(variables=variables)
+
+    register_new_claim_response_dto = RegisterNewClaimResponseDTO(request_id=request_id)
+    return handle_response(request, RegisterNewClaimResponse(body=register_new_claim_response_dto))
+
+
+@route(router=router, method="post", path="/assign_surveyor_callback", response_model=RegisterNewClaimCallbackResponse)
+async def assign_surveyor_callback_api(request: Request,
+                                       register_new_claim_callback_request: RegisterNewClaimCallbackRequest = Depends()):
+    body: RegisterNewClaimCallbackRequestDTO = register_new_claim_callback_request.body
+    request_id = body.request_id
+    # TODO: save survey results in database
+    register_new_claim_callback_response_dto = RegisterNewClaimCallbackResponseDTO(request_id=request_id)
+    return handle_response(request, RegisterNewClaimCallbackResponse(body=register_new_claim_callback_response_dto))
+
+
+@route(router=router, method="post", path="/claim_parcel_survey_query", response_model=ClaimParcelSurveyQueryResponse)
+async def claim_parcel_survey_query_api(request: Request,
+                                        claim_parcel_survey_query_request: ClaimParcelSurveyQueryRequest = Depends()):
+    body: ClaimParcelSurveyQueryRequestDTO = claim_parcel_survey_query_request.body
+    request_id = body.request_id
+    claim_tracing_id = body.claim_tracing_id
+    query_registered_parcel_claim_request(RegisteredClaim(request_id=request_id, claim_tracing_id=claim_tracing_id))
+    # TODO: assemble response
+    claim_parcel_survey_query_response_dto = ClaimParcelSurveyQueryResponseDTO(request_id=request_id)
+    return handle_response(request, ClaimParcelSurveyQueryResponse(body=claim_parcel_survey_query_response_dto))

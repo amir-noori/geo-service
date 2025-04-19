@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import traceback
 from typing import Dict, Any, List, Callable, Optional
 
 import pycamunda.externaltask
@@ -115,7 +116,7 @@ class CamundaTaskHandler:
             # Check if we have a handler for this topic
             if topic_name not in self.task_handlers:
                 self.logger.warning(f"No handler registered for topic {topic_name}")
-                await self._handle_failure(task, f"No handler registered for topic {topic_name}")
+                await self._handle_failure(task, error_message=f"No handler registered for topic {topic_name}")
                 return
 
             # Get the handler for this topic
@@ -129,7 +130,7 @@ class CamundaTaskHandler:
 
         except Exception as e:
             self.logger.error(f"Error processing task {task_id}: {str(e)}")
-            await self._handle_failure(task, str(e))
+            await self._handle_failure(task, e)
 
     async def _complete_task(self, task: ExternalTask, variables: Optional[Dict[str, Any]] = None):
         """
@@ -149,25 +150,31 @@ class CamundaTaskHandler:
             self.logger.error(f"Error completing task {task.id_}: {str(e)}")
             raise
 
-    async def _handle_failure(self, task: ExternalTask, error_message: str, retries: int = 0, retry_timeout: int = 0):
+    async def _handle_failure(self, task: ExternalTask, ex: Exception = None, error_message="", retries: int = 0,
+                              retry_timeout: int = 0):
         """
         Handle a task failure in Camunda.
 
         Args:
             task: The task that failed
-            error_message: Message describing the error
+            ex: exception
             retries: Number of retries left
             retry_timeout: Timeout in milliseconds before retrying
         """
         try:
+            if not error_message:
+                error_message = str(ex)
+            trace_log = traceback.format_exc()
             failure = pycamunda.externaltask.HandleFailure(url=self.camunda_url, id_=task.id_, worker_id=self.worker_id,
                                                            error_message=error_message,
                                                            retries=retries,
-                                                           error_details="TODO", # TODO
+                                                           error_details=trace_log,
                                                            retry_timeout=retry_timeout)
             # TODO: add variable?
             failure()
             self.logger.debug(f"Reported failure for task {task.id_}: {error_message}")
+            self.logger.debug(f"stack trace: {traceback.format_exc()}")
         except Exception as e:
             self.logger.error(f"Error reporting failure for task {task.id_}: {str(e)}")
+            self.logger.error(f"stack trace: {traceback.format_exc()}")
             raise

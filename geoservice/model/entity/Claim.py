@@ -26,10 +26,13 @@ class ParcelClaim(BaseEntity):
     neighbouring_point: str  # wkt
     request_timestamp: str
     modify_timestamp: str
+    cms: str
+    process_instance_id: str
 
     def __init__(self, id: int = None, request_id: str = None, surveyor_id: str = None,
                  claimant_id: str = None, neighbouring_point: str = None,
-                 request_timestamp: str = None, modify_timestamp: str = None) -> None:
+                 request_timestamp: str = None, modify_timestamp: str = None, cms: str=None,
+                 process_instance_id: str=None) -> None:
         super().__init__()
         self.id = id
         self.request_id = request_id
@@ -38,12 +41,15 @@ class ParcelClaim(BaseEntity):
         self.neighbouring_point = neighbouring_point
         self.request_timestamp = request_timestamp
         self.modify_timestamp = modify_timestamp
+        self.cms = cms
+        self.process_instance_id = process_instance_id
 
 
 class RegisteredClaim(BaseEntity):
     id: int
     request_id: str  # a Person id
     surveyor_id: str  # a Person id
+    claim_tracing_id: str  # a Person id
     create_timestamp: str
     modify_timestamp: str
     status: int
@@ -64,7 +70,7 @@ class RegisteredClaim(BaseEntity):
     unit_number: float
     orientation: int # refer to Parcel.Orientation enum
 
-    def __init__(self, id: int = None, request_id: str = None, surveyor_id: str = None,
+    def __init__(self, id: int = None, request_id: str = None, surveyor_id: str = None, claim_tracing_id: str = None,
                  create_timestamp: str = None, modify_timestamp: str = None, status: int = None,
                  cms: str = None, area: float = None, county: str = None, state_code: str = None,
                  main_plate_number: str = None, subsidiary_plate_number: str = None, section: str = None,
@@ -76,6 +82,7 @@ class RegisteredClaim(BaseEntity):
         self.id = id
         self.request_id = request_id
         self.surveyor_id = surveyor_id
+        self.claim_tracing_id = claim_tracing_id
         self.create_timestamp = create_timestamp
         self.modify_timestamp = modify_timestamp
         self.status = status

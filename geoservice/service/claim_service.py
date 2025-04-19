@@ -4,8 +4,9 @@ from geoservice.data.DBResult import DBResult
 from geoservice.data.db_helper import execute_insert, execute_query
 from geoservice.exception.common import ErrorCodes
 from geoservice.exception.service_exception import ServiceException
+from geoservice.model.dto.PersonDTO import PersonDTO
 from geoservice.model.dto.claim.ClaimDtoReq import ClaimParcelQueryRequestDTO
-from geoservice.model.entity.Claim import Claim
+from geoservice.model.entity.Claim import Claim, ParcelClaim, RegisteredClaim
 from log.logger import logger
 
 log = logger()
@@ -100,3 +101,27 @@ def check_trace_id_exists(claim_trace_id):
 
     if claim_count > 0:
         raise ServiceException(ErrorCodes.VALIDATION_CLAIM_TRACE_ID_EXISTS)
+
+
+def save_new_claim_request(request_id: str, claimant: PersonDTO, surveyor: PersonDTO,
+                           cms: str, neighbouring_point_wkt: str):
+    # TODO
+    # TODO also insert create date
+    raise Exception("fake error")
+
+
+def query_parcel_claim_request(request_id: str) -> ParcelClaim:
+    # TODO
+    return ParcelClaim()
+
+def update_parcel_claim_request(parcel_claim: ParcelClaim) -> ParcelClaim:
+    # TODO
+    return ParcelClaim()
+
+def save_new_registered_parcel_claim_request(registered_claim: RegisteredClaim) -> RegisteredClaim:
+    # TODO
+    return RegisteredClaim()
+
+def query_registered_parcel_claim_request(registered_claim: RegisteredClaim) -> RegisteredClaim:
+    # TODO
+    return RegisteredClaim()

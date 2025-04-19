@@ -1,83 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1sceyoz" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.0.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.17.0">
-  <bpmn:process id="Process_0rln8i8" isExecutable="true">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1sceyoz" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.0.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.17.0">
+  <bpmn:process id="Parcel_Claim_Process" name="Parcel Claim Process " isExecutable="true">
     <bpmn:startEvent id="StartEvent_1" name="new claim request from Kateb">
-      <bpmn:outgoing>Flow_1deaf79</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0gcbwye</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:task id="Activity_1m4qjn2" name="send request to TOM">
-      <bpmn:incoming>Flow_1deaf79</bpmn:incoming>
-      <bpmn:outgoing>Flow_03cezuu</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:sequenceFlow id="Flow_1deaf79" sourceRef="StartEvent_1" targetRef="Activity_1m4qjn2" />
-    <bpmn:sequenceFlow id="Flow_03cezuu" sourceRef="Activity_1m4qjn2" targetRef="Event_03cky85" />
-    <bpmn:intermediateCatchEvent id="Event_03cky85" name="wait for TOM response">
+    <bpmn:sequenceFlow id="Flow_03cezuu" sourceRef="inform_kateb_about_surveyor" targetRef="Event_03cky85" />
+    <bpmn:intermediateCatchEvent id="Event_03cky85" name="wait for TOM survey response">
       <bpmn:incoming>Flow_03cezuu</bpmn:incoming>
       <bpmn:outgoing>Flow_0u9e52t</bpmn:outgoing>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_0aesezf" />
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0aesezf" messageRef="Message_3aifee6" />
     </bpmn:intermediateCatchEvent>
-    <bpmn:task id="Activity_0blu88i" name="Receive TOM response and store in DB">
-      <bpmn:incoming>Flow_0u9e52t</bpmn:incoming>
-      <bpmn:outgoing>Flow_0hlfl0t</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:sequenceFlow id="Flow_0u9e52t" sourceRef="Event_03cky85" targetRef="Activity_0blu88i" />
-    <bpmn:task id="Activity_0i97df7" name="notify Kateb about survey status.">
-      <bpmn:incoming>Flow_0hlfl0t</bpmn:incoming>
-      <bpmn:outgoing>Flow_1skz3qg</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:sequenceFlow id="Flow_0hlfl0t" sourceRef="Activity_0blu88i" targetRef="Activity_0i97df7" />
+    <bpmn:sequenceFlow id="Flow_0u9e52t" sourceRef="Event_03cky85" targetRef="notify_kateb_about_claim_survey" />
     <bpmn:endEvent id="Event_1hnggjj">
       <bpmn:incoming>Flow_1skz3qg</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1skz3qg" sourceRef="Activity_0i97df7" targetRef="Event_1hnggjj" />
+    <bpmn:sequenceFlow id="Flow_1skz3qg" sourceRef="notify_kateb_about_claim_survey" targetRef="Event_1hnggjj" />
+    <bpmn:sequenceFlow id="Flow_0t30s3e" sourceRef="persist_claim_request" targetRef="send_request_to_tom" />
+    <bpmn:sequenceFlow id="Flow_0ljzkvl" sourceRef="send_request_to_tom" targetRef="inform_kateb_about_surveyor" />
+    <bpmn:serviceTask id="persist_claim_request" name="persist claim request" camunda:type="external" camunda:topic="persist-claim-request">
+      <bpmn:incoming>Flow_18v4obz</bpmn:incoming>
+      <bpmn:outgoing>Flow_0t30s3e</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="send_request_to_tom" name="send request to TOM" camunda:type="external" camunda:topic="send-request-to-tom">
+      <bpmn:incoming>Flow_0t30s3e</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ljzkvl</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="inform_kateb_about_surveyor" name="inform kateb about surveyor detail" camunda:type="external" camunda:topic="inform-kateb-about-surveyor">
+      <bpmn:incoming>Flow_0ljzkvl</bpmn:incoming>
+      <bpmn:outgoing>Flow_03cezuu</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="notify_kateb_about_claim_survey" name="notify Kateb about survey status." camunda:type="external" camunda:topic="notify-kateb-about-claim-survey">
+      <bpmn:incoming>Flow_0u9e52t</bpmn:incoming>
+      <bpmn:outgoing>Flow_1skz3qg</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Activity_0u7qjrt" name="User task will be removed later">
+      <bpmn:incoming>Flow_0gcbwye</bpmn:incoming>
+      <bpmn:outgoing>Flow_18v4obz</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0gcbwye" sourceRef="StartEvent_1" targetRef="Activity_0u7qjrt" />
+    <bpmn:sequenceFlow id="Flow_18v4obz" sourceRef="Activity_0u7qjrt" targetRef="persist_claim_request" />
   </bpmn:process>
+  <bpmn:message id="Message_3aifee6" name="waitTomSurveyerResponse-${requestId}" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_0rln8i8">
-      <bpmndi:BPMNEdge id="Flow_1deaf79_di" bpmnElement="Flow_1deaf79">
-        <di:waypoint x="215" y="117" />
-        <di:waypoint x="270" y="117" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_03cezuu_di" bpmnElement="Flow_03cezuu">
-        <di:waypoint x="370" y="117" />
-        <di:waypoint x="432" y="117" />
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Parcel_Claim_Process">
+      <bpmndi:BPMNEdge id="Flow_1skz3qg_di" bpmnElement="Flow_1skz3qg">
+        <di:waypoint x="1240" y="117" />
+        <di:waypoint x="1332" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0u9e52t_di" bpmnElement="Flow_0u9e52t">
-        <di:waypoint x="468" y="117" />
-        <di:waypoint x="530" y="117" />
+        <di:waypoint x="1068" y="117" />
+        <di:waypoint x="1140" y="117" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0hlfl0t_di" bpmnElement="Flow_0hlfl0t">
-        <di:waypoint x="630" y="117" />
-        <di:waypoint x="700" y="117" />
+      <bpmndi:BPMNEdge id="Flow_03cezuu_di" bpmnElement="Flow_03cezuu">
+        <di:waypoint x="940" y="117" />
+        <di:waypoint x="1032" y="117" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1skz3qg_di" bpmnElement="Flow_1skz3qg">
-        <di:waypoint x="800" y="117" />
-        <di:waypoint x="872" y="117" />
+      <bpmndi:BPMNEdge id="Flow_0t30s3e_di" bpmnElement="Flow_0t30s3e">
+        <di:waypoint x="570" y="117" />
+        <di:waypoint x="670" y="117" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-        <dc:Bounds x="179" y="99" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="152" y="142" width="90" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1m4qjn2_di" bpmnElement="Activity_1m4qjn2">
-        <dc:Bounds x="270" y="77" width="100" height="80" />
-        <bpmndi:BPMNLabel />
+      <bpmndi:BPMNEdge id="Flow_0ljzkvl_di" bpmnElement="Flow_0ljzkvl">
+        <di:waypoint x="770" y="117" />
+        <di:waypoint x="840" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0gcbwye_di" bpmnElement="Flow_0gcbwye">
+        <di:waypoint x="218" y="117" />
+        <di:waypoint x="310" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18v4obz_di" bpmnElement="Flow_18v4obz">
+        <di:waypoint x="410" y="117" />
+        <di:waypoint x="470" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_1hnggjj_di" bpmnElement="Event_1hnggjj">
+        <dc:Bounds x="1332" y="99" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0gmbjte_di" bpmnElement="Event_03cky85">
-        <dc:Bounds x="432" y="99" width="36" height="36" />
+        <dc:Bounds x="1032" y="99" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="419" y="142" width="62" height="27" />
+          <dc:Bounds x="1010" y="142" width="81" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0blu88i_di" bpmnElement="Activity_0blu88i">
-        <dc:Bounds x="530" y="77" width="100" height="80" />
+      <bpmndi:BPMNShape id="Activity_08lteg1_di" bpmnElement="inform_kateb_about_surveyor">
+        <dc:Bounds x="840" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1c5m6xa_di" bpmnElement="send_request_to_tom">
+        <dc:Bounds x="670" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0od97bt_di" bpmnElement="persist_claim_request">
+        <dc:Bounds x="470" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ckcxfd_di" bpmnElement="Activity_0u7qjrt">
+        <dc:Bounds x="310" y="77" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0i97df7_di" bpmnElement="Activity_0i97df7">
-        <dc:Bounds x="700" y="77" width="100" height="80" />
-        <bpmndi:BPMNLabel />
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="182" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="155" y="142" width="90" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1hnggjj_di" bpmnElement="Event_1hnggjj">
-        <dc:Bounds x="872" y="99" width="36" height="36" />
+      <bpmndi:BPMNShape id="Activity_1oye9r4_di" bpmnElement="notify_kateb_about_claim_survey">
+        <dc:Bounds x="1140" y="77" width="100" height="80" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
