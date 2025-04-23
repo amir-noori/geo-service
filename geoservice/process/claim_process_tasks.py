@@ -11,7 +11,7 @@ from geoservice.exception.common import ErrorCodes
 from geoservice.exception.service_exception import ServiceException
 from geoservice.model.entity.Claim import ParcelClaim, RegisteredClaim
 from geoservice.model.entity.Person import Person
-from geoservice.service.claim_service import save_new_claim_request, query_parcel_claim_request, \
+from geoservice.service.claim_service import save_new_claim_parcel_request, query_parcel_claim_request, \
     update_parcel_claim_request, query_registered_parcel_claim_request
 from geoservice.service.person_service import query_person, create_person
 
@@ -27,9 +27,18 @@ async def query_surveyor(parcel_claim: ParcelClaim):
 
     return surveyor
 
+async def query_claim(request_id) -> ParcelClaim:
+    parcel_claim_list = List[ParcelClaim] = query_parcel_claim_request(request_id)
+    parcel_claim: ParcelClaim = parcel_claim_list[0] if len(parcel_claim_list) > 0 else None
+    if not parcel_claim:
+        raise ServiceException(ErrorCodes.PROCESS_CLAIM_DATA_NOT_FOUND,
+                               error_message=f"cannot find claim by request id {request_id}")
+
+    return parcel_claim
+
 
 async def handle_persist_claim_request_task(task) -> Dict[str, Any]:
-    logger.info(f"Processing persist claimrequest task {task.id_}")
+    logger.info(f"Processing persist claim request task {task.id_}")
 
     try:
         variables = task.variables
@@ -45,7 +54,8 @@ async def handle_persist_claim_request_task(task) -> Dict[str, Any]:
             error_message = f"claim data not found: request_id: {request_id}, claimant: {claimant}"
             raise ServiceException(ErrorCodes.PROCESS_CLAIM_DATA_NOT_FOUND, error_message=error_message)
 
-        save_new_claim_request(request_id, claimant, surveyor, cms, neighbouring_point_wkt)
+        save_new_claim_parcel_request(request_id, claimant, surveyor, cms,
+                                      neighbouring_point_wkt, task.process_instance_id)
 
         return {
             "status": "SUCCESS",
@@ -69,7 +79,7 @@ async def handle_send_request_to_tom_task(task) -> Dict[str, Any]:
         logger.debug(f"Processing test task {variables}")
         request_claim_data = variables.get("requestClaimData", {})
         request_id = request_claim_data.get("requestId")
-        parcel_claim: ParcelClaim = query_parcel_claim_request(request_id)
+        parcel_claim: ParcelClaim = await query_claim(request_id)
         neighbouring_point_wkt = parcel_claim.neighbouring_point
         neighbouring_point = wkt.loads(neighbouring_point_wkt)
         claimant_id = parcel_claim.claimant_id
@@ -133,10 +143,10 @@ async def handle_inform_kateb_about_surveyor_task(task) -> Dict[str, Any]:
         logger.debug(f"Processing test task {variables}")
         request_claim_data = variables.get("requestClaimData", {})
         request_id = request_claim_data.get("requestId")
-        parcel_claim: ParcelClaim = query_parcel_claim_request(request_id)
+        parcel_claim: ParcelClaim = await query_claim(request_id)
         surveyor: Person = await query_surveyor(parcel_claim)
 
-        url = os.environ.get("KATEB_NOTIFY_SURVEYOR_SERVICE_URL", "http://localhost:5003/surveyorStatusUpdate")
+        url = os.environ.get("KATEB_NOTIFY_SURVEYOR_SERVICE_URL", "https://26dc4823-95ee-4f4c-8c90-e33fdcc32993.mock.pstmn.io/surveyorStatusUpdate")
         response = requests.post(url, json={
             "requestId": request_id,
             "surveyor": surveyor
@@ -174,7 +184,7 @@ async def handle_notify_kateb_about_survey_status_task(task) -> Dict[str, Any]:
         registered_claim: RegisteredClaim = query_registered_parcel_claim_request(
             RegisteredClaim(request_id=request_id))
 
-        url = os.environ.get("KATEB_NOTIFY_SURVEY_STATUS_SERVICE_URL", "http://localhost:5003/surveyStatusUpdate")
+        url = os.environ.get("KATEB_NOTIFY_SURVEY_STATUS_SERVICE_URL", "https://26dc4823-95ee-4f4c-8c90-e33fdcc32993.mock.pstmn.io/surveyStatusUpdate")
         response = requests.post(url, json={
             "requestId": request_id,
             "claimTracingId": registered_claim.claim_tracing_id,

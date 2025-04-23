@@ -1,0 +1,5 @@
+
+
+class CustomerExistsException(Exception):
+    pass
+

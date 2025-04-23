@@ -1,3 +1,5 @@
+from typing import List
+
 from geoservice.model.entity.common import BaseEntity
 
 
@@ -18,6 +20,26 @@ class Claim(BaseEntity):
         self.request_timestamp = request_timestamp
 
 
+class ClaimParcelAttachment(BaseEntity):
+    """
+        entry for each attachment piece (@finglish: monzam) for a claim parcel
+    """
+
+    id: int
+    request_id: str
+    title: str
+    area: float
+    description: str
+
+    def __init__(self, id: int, request_id: str = None, title: str = None, area: float = None,
+                 description: str = None) -> None:
+        self.id = id
+        self.request_id = request_id
+        self.title = title
+        self.area = area
+        self.description = description
+
+
 class ParcelClaim(BaseEntity):
     id: int
     request_id: str  # a Person id
@@ -31,8 +53,8 @@ class ParcelClaim(BaseEntity):
 
     def __init__(self, id: int = None, request_id: str = None, surveyor_id: str = None,
                  claimant_id: str = None, neighbouring_point: str = None,
-                 request_timestamp: str = None, modify_timestamp: str = None, cms: str=None,
-                 process_instance_id: str=None) -> None:
+                 request_timestamp: str = None, modify_timestamp: str = None, cms: str = None,
+                 process_instance_id: str = None) -> None:
         super().__init__()
         self.id = id
         self.request_id = request_id
@@ -68,7 +90,8 @@ class RegisteredClaim(BaseEntity):
     is_apartment: bool
     floor_number: float
     unit_number: float
-    orientation: int # refer to Parcel.Orientation enum
+    orientation: int  # refer to Parcel.Orientation enum
+    attachments: List[ClaimParcelAttachment]
 
     def __init__(self, id: int = None, request_id: str = None, surveyor_id: str = None, claim_tracing_id: str = None,
                  create_timestamp: str = None, modify_timestamp: str = None, status: int = None,
@@ -77,7 +100,7 @@ class RegisteredClaim(BaseEntity):
                  district: str = None, polygon: str = None, edges: str = None,
                  beneficiary_rights: str = None, accommodation_rights: str = None,
                  is_apartment: bool = None, floor_number: float = None,
-                 unit_number: float = None, orientation: int = None) -> None:
+                 unit_number: float = None, orientation: int = None, attachments=None) -> None:
         super().__init__()
         self.id = id
         self.request_id = request_id
@@ -97,11 +120,12 @@ class RegisteredClaim(BaseEntity):
         self.polygon = polygon
         self.edges = edges
         self.beneficiary_rights = beneficiary_rights
-        self.accommodation_rights = accommodation_rights 
+        self.accommodation_rights = accommodation_rights
         self.is_apartment = is_apartment
         self.floor_number = floor_number
         self.unit_number = unit_number
         self.orientation = orientation
+        self.attachments = attachments
 
 
 class ClaimParcelEdge(BaseEntity):
@@ -118,7 +142,7 @@ class ClaimParcelEdge(BaseEntity):
     passage_width: float
     boundary: str  # @finglish: hade fasel
 
-    def __init__(self, id: int , request_id: str = None, line_index: int = None, length: float = None,
+    def __init__(self, id: int, request_id: str = None, line_index: int = None, length: float = None,
                  orientation: int = None, starting_point: str = None, ending_point: str = None,
                  is_adjacent_to_plate_number: bool = None, is_adjacent_to_passage: bool = None,
                  passage_name: str = None, passage_width: float = None, boundary: str = None) -> None:
@@ -134,22 +158,3 @@ class ClaimParcelEdge(BaseEntity):
         self.passage_name = passage_name
         self.passage_width = passage_width
         self.boundary = boundary
-
-
-class ClaimParcelAttachment(BaseEntity):
-    """
-        entry for each attachment piece (@finglish: monzam) for a claim parcel
-    """
-
-    id: int
-    request_id: str
-    title: str
-    area: float
-    description: str
-
-    def __init__(self, id: int, request_id: str = None, title: str = None, area: float = None, description: str = None) -> None:
-        self.id = id
-        self.request_id = request_id
-        self.title = title
-        self.area = area
-        self.description = description

@@ -1,7 +1,10 @@
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
+from geoservice.model.dto.BaseDTO import partial_model
 
+
+@partial_model
 class PersonDTO(BaseModel):
     model_config = ConfigDict(
         alias_generator=to_camel,
@@ -18,3 +21,4 @@ class PersonDTO(BaseModel):
     birthday: str
     address: str
     father_name: str
+

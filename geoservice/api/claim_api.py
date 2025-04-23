@@ -1,10 +1,13 @@
 import base64
 import json
 import os
+import uuid
+from typing import List
 
 import requests.auth
 from fastapi import APIRouter, Depends
 from fastapi import Request
+from pycamunda.message import CorrelateSingle
 from pycamunda.processdef import StartInstance
 from shapely.geometry import shape
 
@@ -30,7 +33,7 @@ from geoservice.model.dto.claim.ClaimDtoResponse import ClaimResponse, ClaimParc
     ClaimParcelSurveyQueryResponseDTO
 from geoservice.model.entity.Claim import Claim, ParcelClaim, RegisteredClaim
 from geoservice.service.claim_service import create_new_claim_request, query_claim_parcel, check_trace_id_exists, \
-    query_parcel_claim_request, query_registered_parcel_claim_request
+    query_parcel_claim_request, query_registered_parcel_claim_request, save_new_registered_parcel_claim_request
 from geoservice.util.gis_util import is_polygon, load_shp_data, load_kml_data
 from log.logger import logger
 
@@ -171,8 +174,8 @@ async def register_new_claim_api(request: Request, register_new_claim_request: R
     neighborhood_point = body.neighborhood_point
 
     # 1- check duplicate request_id in database
-    parcel_claim: ParcelClaim = query_parcel_claim_request(request_id)
-    if parcel_claim and parcel_claim.request_id:
+    parcel_claims: List[ParcelClaim] = query_parcel_claim_request(request_id)
+    if parcel_claims and parcel_claims[0].request_id:
         raise ServiceException(ErrorCodes.VALIDATION_CLAIM_REQUEST_ID_ALREADY_EXISTS)
 
     # 2- start claim process
@@ -182,7 +185,8 @@ async def register_new_claim_api(request: Request, register_new_claim_request: R
     auth = requests.auth.HTTPBasicAuth(username=camunda_user, password=camunda_password)
     start_instance = StartInstance(
         url=camunda_url,
-        key='ClaimParcelRequestProcess'
+        key=os.environ.get("CLAIM_PARCEL_PROCESS_NAME", "Parcel_Claim_Process"),
+        tenant_id=os.environ.get("CAMUNDA_TENANT_ID", 300)
     )
     start_instance.auth = auth
 
@@ -205,7 +209,34 @@ async def assign_surveyor_callback_api(request: Request,
                                        register_new_claim_callback_request: RegisterNewClaimCallbackRequest = Depends()):
     body: RegisterNewClaimCallbackRequestDTO = register_new_claim_callback_request.body
     request_id = body.request_id
-    # TODO: save survey results in database
+
+    # check if the survey result is already existing
+    registered_claim: RegisteredClaim = query_registered_parcel_claim_request(RegisteredClaim(request_id=request_id))
+    if registered_claim and registered_claim.request_id:
+        raise ServiceException(ErrorCodes.CLAIM_SURVEY_RESULT_ALREADY_EXISTS)
+
+    # persist the survey result
+    # TODO: complete the fields for registered_claim
+    claim_tracing_id = None
+    if not body.claim_tracing_id:
+        claim_tracing_id = str(uuid.uuid1())
+    registered_claim = RegisteredClaim(request_id=request_id, claim_tracing_id=claim_tracing_id)
+    save_new_registered_parcel_claim_request(registered_claim)
+
+    # proceed the camunda workflow
+    camunda_url = os.environ.get("CAMUNDA_URL", "http://localhost:7171/engine-rest")
+    camunda_user = os.environ.get("CAMUNDA_USER", "demo")
+    camunda_password = os.environ.get("CAMUNDA_PASSWORD", "demo")
+    auth = requests.auth.HTTPBasicAuth(username=camunda_user, password=camunda_password)
+
+    correlation = CorrelateSingle(
+        url=camunda_url,
+        tenant_id=os.environ.get("CAMUNDA_TENANT_ID", 300),
+        message_name=f"waitTomSurveyorResponse-{request_id}"
+    )
+    correlation.auth = auth
+    results = correlation()
+
     register_new_claim_callback_response_dto = RegisterNewClaimCallbackResponseDTO(request_id=request_id)
     return handle_response(request, RegisterNewClaimCallbackResponse(body=register_new_claim_callback_response_dto))
 

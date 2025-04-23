@@ -40,7 +40,7 @@
     <bpmn:sequenceFlow id="Flow_0gcbwye" sourceRef="StartEvent_1" targetRef="Activity_0u7qjrt" />
     <bpmn:sequenceFlow id="Flow_18v4obz" sourceRef="Activity_0u7qjrt" targetRef="persist_claim_request" />
   </bpmn:process>
-  <bpmn:message id="Message_3aifee6" name="waitTomSurveyerResponse-${requestId}" />
+  <bpmn:message id="Message_3aifee6" name="waitTomSurveyorResponse-${requestId}" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Parcel_Claim_Process">
       <bpmndi:BPMNEdge id="Flow_1skz3qg_di" bpmnElement="Flow_1skz3qg">

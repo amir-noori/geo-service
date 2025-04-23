@@ -42,3 +42,13 @@ def execute_insert(query, params):
     cursor.close()
     connection.close()
     return result
+
+def execute_update(query):
+    log.debug(query)
+    connection = ApplicationContext.connection_pool.acquire()
+    cursor = connection.cursor()
+    result = cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return result

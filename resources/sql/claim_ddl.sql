@@ -4,7 +4,7 @@
 CREATE TABLE TBL_LAND_CLAIM
 (
     id                        number(10,0) not null,
-    claim_trace_id            varchar2(2000 char),
+    claim_trace_id            varchar2(200 char),
     request_timestamp         DATE,
     claimed_file_content_type varchar2(10 char),
     claimed_file_content      CLOB,
@@ -80,12 +80,14 @@ CREATE TABLE TBL_PARCEL_CLAIM
 (
     ID                  NUMBER(19) NOT NULL PRIMARY KEY,
     REQUEST_ID          VARCHAR2(200) NOT NULL,
-    SURVEYOR_ID         VARCHAR2(200) NOT NULL,
+    CLAIM_TRACING_ID    VARCHAR2(200 char),
+    SURVEYOR_ID         VARCHAR2(200),
     CLAIMANT_ID         VARCHAR2(200) NOT NULL,
+    cms                 VARCHAR2(10 CHAR),
     NEIGHBOURING_POINT  SDO_GEOMETRY,
     REQUEST_TIMESTAMP   TIMESTAMP,
     MODIFY_TIMESTAMP    TIMESTAMP,
-    PROCESS_INSTANCE_ID VARCHAR2(200) NOT NULL,
+    PROCESS_INSTANCE_ID VARCHAR2(200) NOT NULL
 );
 
 -- create sequence for TBL_PARCEL_CLAIM
@@ -113,6 +115,7 @@ CREATE TABLE TBL_REGISTERED_CLAIM
 (
     ID                      NUMBER(19) NOT NULL PRIMARY KEY,
     REQUEST_ID              VARCHAR2(200) NOT NULL,
+    CLAIM_TRACING_ID            varchar2(200 char),
     SURVEYOR_ID             VARCHAR2(200) NOT NULL,
     CREATE_TIMESTAMP        TIMESTAMP,
     MODIFY_TIMESTAMP        TIMESTAMP,
@@ -132,7 +135,8 @@ CREATE TABLE TBL_REGISTERED_CLAIM
     IS_APARTMENT            NUMBER(1),
     FLOOR_NUMBER            FLOAT,
     UNIT_NUMBER             FLOAT,
-    ORIENTATION             NUMBER(10)
+    ORIENTATION             NUMBER(10),
+    ATTACHMENTS             CLOB
 );
 
 -- create sequence for TBL_REGISTERED_CLAIM
@@ -159,7 +163,7 @@ END;
 CREATE TABLE TBL_CLAIM_PARCEL_EDGE
 (
     ID                          NUMBER(19) NOT NULL PRIMARY KEY,
-    REQUEST_ID                  VARCHAR2(200) NOT NULL,
+    REQUEST_ID                  VARCHAR2(200),
     LINE_INDEX                  NUMBER(10) NOT NULL,
     LENGTH                      FLOAT,
     ORIENTATION                 NUMBER(10),
@@ -170,7 +174,7 @@ CREATE TABLE TBL_CLAIM_PARCEL_EDGE
     PASSAGE_NAME                VARCHAR2(300),
     PASSAGE_WIDTH               FLOAT,
     BOUNDARY                    VARCHAR2(4000)
-)
+);
 
 -- create sequence for TBL_CLAIM_PARCEL_EDGE
 declare
@@ -197,11 +201,11 @@ END;
 CREATE TABLE TBL_CLAIM_PARCEL_ATTACHMENT
 (
     ID          NUMBER(19) NOT NULL PRIMARY KEY,
-    REQUEST_ID  VARCHAR2(200) NOT NULL,
+    REQUEST_ID  VARCHAR2(200),
     TITLE       VARCHAR2(500),
     AREA        FLOAT,
     DESCRIPTION VARCHAR2(4000)
-)
+);
 
 -- create sequence for TBL_CLAIM_PARCEL_ATTACHMENT
 declare

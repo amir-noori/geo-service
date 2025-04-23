@@ -150,7 +150,7 @@ class APIHandler:
             request.scope["request_body"] = request_body
             return JSONResponse(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                content={"detail": exc.errors()},
+                content={"detail": str(exc.errors())},
             )
 
         @self.app.exception_handler(Exception)

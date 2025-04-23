@@ -2,6 +2,8 @@ from typing import List
 
 from geoservice.data.DBResult import DBResult
 from geoservice.data.db_helper import execute_query, execute_insert
+from geoservice.exception.persist_exception import CustomerExistsException
+from geoservice.model.dto.PersonDTO import PersonDTO
 from geoservice.model.entity.Person import Person
 from log.logger import logger
 
@@ -57,6 +59,11 @@ def query_person(person: Person) -> List[Person]:
 
 
 def create_person(person: Person) -> Person:
+    queried_person: List[Person] = query_person(Person(national_id=person.national_id))
+
+    if queried_person and queried_person[0].id:
+        raise CustomerExistsException()
+
     query = QUERIES['insert_person']
     params = {
         'FIRST_NAME': person.first_name,

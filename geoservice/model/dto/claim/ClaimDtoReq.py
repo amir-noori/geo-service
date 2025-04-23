@@ -7,7 +7,7 @@ from pydantic.alias_generators import to_camel
 from geoservice.common.states import states
 from geoservice.exception.common import ErrorCodes
 from geoservice.exception.service_exception import ValidationException
-from geoservice.model.dto.BaseDTO import RequestHeader
+from geoservice.model.dto.BaseDTO import RequestHeader, partial_model
 from geoservice.model.dto.PersonDTO import PersonDTO
 from geoservice.model.dto.common import PointDTO
 
@@ -93,7 +93,7 @@ class ClaimParcelQueryRequest(BaseModel):
         else:
             return None
 
-
+@partial_model
 class RegisterNewClaimRequestDTO(BaseModel):
     model_config = ConfigDict(
         alias_generator=to_camel,
@@ -204,4 +204,4 @@ class ClaimParcelSurveyQueryRequest(BaseModel):
         else:
             return None
 
-        
+

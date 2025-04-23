@@ -53,6 +53,22 @@ insert into TBL_API_DESCRIPTION
 values (TBL_API_DESCRIPTION_SEQ.NEXTVAL, 'claim_parcel', '/claim/claim_parcel_query', 1, 0, 1, 0, '', null);
 
 
+-- claims API
+
+insert into TBL_API_DESCRIPTION
+(id, api_name, api_url, is_enabled, is_mocked, is_log_enabled, bypass_auth, api_description, mocked_response)
+values (TBL_API_DESCRIPTION_SEQ.NEXTVAL, 'register_new_claim', '/claim/register_new_claim', 1, 0, 1, 1, '', null);
+
+insert into TBL_API_DESCRIPTION
+(id, api_name, api_url, is_enabled, is_mocked, is_log_enabled, bypass_auth, api_description, mocked_response)
+values (TBL_API_DESCRIPTION_SEQ.NEXTVAL, 'assign_surveyor_callback', '/claim/assign_surveyor_callback', 1, 0, 1, 1, '', null);
+
+insert into TBL_API_DESCRIPTION
+(id, api_name, api_url, is_enabled, is_mocked, is_log_enabled, bypass_auth, api_description, mocked_response)
+values (TBL_API_DESCRIPTION_SEQ.NEXTVAL, 'claim_parcel_survey_query', '/claim/claim_parcel_survey_query', 1, 0, 1, 1, '', null);
+
+
+
 -- channels
 
 insert into TBL_CHANNEL (id, auth_key, channel_id, channel_name, description) VALUES

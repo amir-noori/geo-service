@@ -13,3 +13,15 @@ def base64ToString(b):
 
 def base64Binary(b):
     return base64.b64decode(b)
+
+def parse_to_int(text, default=0):
+    try:
+        return int(text)
+    except (ValueError, TypeError):
+        return default
+
+def parse_to_float(text, default=0.0):
+    try:
+        return float(text)
+    except (ValueError, TypeError):
+        return default
