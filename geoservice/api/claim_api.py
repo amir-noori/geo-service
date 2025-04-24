@@ -7,11 +7,12 @@ from typing import List
 import requests.auth
 from fastapi import APIRouter, Depends
 from fastapi import Request
+from fastapi.encoders import jsonable_encoder
 from pycamunda.message import CorrelateSingle
 from pycamunda.processdef import StartInstance
 from shapely.geometry import shape
 
-from common.str_util import base64ToString
+from common.str_util import base64ToString, parse_to_int, parse_to_float
 from geoservice.api.common import handle_response
 from geoservice.api.route import route
 from geoservice.api.utils import call_cadastre_api
@@ -25,7 +26,7 @@ from geoservice.model.dto.ParcelDtoRequest import PolygonWrapperCmsDTO, WrapperC
 from geoservice.model.dto.ParcelDtoResponse import WrapperCmsResponse, OverlappingResponse, OverlappingResponseDTO
 from geoservice.model.dto.claim.ClaimDtoReq import ClaimRequest, ClaimParcelQueryRequest, RegisterNewClaimRequest, \
     RegisterNewClaimRequestDTO, RegisterNewClaimCallbackRequestDTO, RegisterNewClaimCallbackRequest, \
-    ClaimParcelSurveyQueryRequest, ClaimParcelSurveyQueryRequestDTO
+    ClaimParcelSurveyQueryRequest, ClaimParcelSurveyQueryRequestDTO, ParcelMetadataDTO
 from geoservice.model.dto.claim.ClaimDtoReq import ClaimRequestDTO, ClaimParcelQueryRequestDTO
 from geoservice.model.dto.claim.ClaimDtoResponse import ClaimResponse, ClaimParcelQueryResponse, \
     ClaimParcelQueryResponseDTO, ClaimResponseDTO, RegisterNewClaimResponseDTO, RegisterNewClaimResponse, \
@@ -172,6 +173,11 @@ async def register_new_claim_api(request: Request, register_new_claim_request: R
     body: RegisterNewClaimRequestDTO = register_new_claim_request.body
     request_id = body.request_id
     neighborhood_point = body.neighborhood_point
+    srs = None
+    if neighborhood_point.srs:
+        srs = neighborhood_point.srs
+    else:
+        srs = GLOBAL_SRID
 
     # 1- check duplicate request_id in database
     parcel_claims: List[ParcelClaim] = query_parcel_claim_request(request_id)
@@ -190,15 +196,14 @@ async def register_new_claim_api(request: Request, register_new_claim_request: R
     )
     start_instance.auth = auth
 
-    variables = {
-        'request_id': request_id,
-        'claimant': body.claimant,
-        'surveyor': body.surveyor,
-        'cms': body.cms,
-        'neighborhoodPoint': f'SRID={GLOBAL_SRID};POINT({neighborhood_point.x} {neighborhood_point.y})'
-    }
+    start_instance.add_variable(name="requestId", value=request_id)
+    start_instance.add_variable(name="claimant", value=jsonable_encoder(body.claimant))
+    start_instance.add_variable(name="surveyor", value=jsonable_encoder(body.surveyor))
+    start_instance.add_variable(name="cms", value=body.cms)
+    start_instance.add_variable(name="neighborhoodPoint", value=f'POINT({neighborhood_point.x} {neighborhood_point.y})')
+    start_instance.add_variable(name="srs", value=str(srs))
 
-    process_instance = start_instance(variables=variables)
+    process_instance = start_instance()
 
     register_new_claim_response_dto = RegisterNewClaimResponseDTO(request_id=request_id)
     return handle_response(request, RegisterNewClaimResponse(body=register_new_claim_response_dto))
@@ -215,12 +220,53 @@ async def assign_surveyor_callback_api(request: Request,
     if registered_claim and registered_claim.request_id:
         raise ServiceException(ErrorCodes.CLAIM_SURVEY_RESULT_ALREADY_EXISTS)
 
+    parcel_claim_request: ParcelClaim | None = None
+    parcel_claim_requests: List[ParcelClaim] = query_parcel_claim_request(request_id=request_id)
+    if not parcel_claim_requests:
+        raise ServiceException(ErrorCodes.NO_CLAIM_FOUND)
+    else:
+        parcel_claim_request = parcel_claim_requests[0]
+
     # persist the survey result
-    # TODO: complete the fields for registered_claim
+
+    survey_parcel: str = body.survey_parcel
+    geo_json = json.loads(survey_parcel)
+    features = geo_json["features"]
+    feature = features[0]
+    geometry_str = feature["geometry"]
+    geometry = shape(geometry_str)
+    survey_parcel_wkt = geometry.wkt
+
     claim_tracing_id = None
     if not body.claim_tracing_id:
         claim_tracing_id = str(uuid.uuid1())
-    registered_claim = RegisteredClaim(request_id=request_id, claim_tracing_id=claim_tracing_id)
+
+    metadata: ParcelMetadataDTO = body.survey_parcel_metadata.metadata
+
+    registered_claim = RegisteredClaim(request_id=request_id,
+                                       claim_tracing_id=claim_tracing_id,
+                                       surveyor_id=parcel_claim_request.surveyor_id,
+                                       cms=parcel_claim_request.cms,
+                                       status=parse_to_int(body.status),
+                                       area=parse_to_float(body.area),
+                                       county=body.county,
+                                       state_code=body.state_code,
+                                       main_plate_number=body.main_plate_number,
+                                       subsidiary_plate_number=body.subsidiary_plate_number,
+                                       section=body.section,
+                                       district=body.district,
+                                       edges=str(jsonable_encoder(body.survey_parcel_metadata.edge_metadata)),
+                                       beneficiary_rights=metadata.beneficiary_rights,
+                                       accommodation_rights=metadata.accommodation_rights,
+                                       is_apartment=metadata.is_apartment,
+                                       floor_number=parse_to_float(metadata.floor_number),
+                                       unit_number=parse_to_float(metadata.unit_number),
+                                       orientation=parse_to_int(metadata.orientation, 8),
+                                       polygon=survey_parcel_wkt,
+                                       attachments=str(
+                                           jsonable_encoder(body.survey_parcel_metadata.attachment_properties))
+                                       )
+
     save_new_registered_parcel_claim_request(registered_claim)
 
     # proceed the camunda workflow
@@ -235,7 +281,11 @@ async def assign_surveyor_callback_api(request: Request,
         message_name=f"waitTomSurveyorResponse-{request_id}"
     )
     correlation.auth = auth
-    results = correlation()
+    try:
+        results = correlation()
+    except Exception as e:
+        # TODO: why?
+        log.error(e)
 
     register_new_claim_callback_response_dto = RegisterNewClaimCallbackResponseDTO(request_id=request_id)
     return handle_response(request, RegisterNewClaimCallbackResponse(body=register_new_claim_callback_response_dto))

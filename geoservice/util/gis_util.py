@@ -9,6 +9,7 @@ from pykml import parser
 import fiona
 from shapely import union_all
 from shapely.geometry import shape
+from shapely import wkt
 from shapely.wkt import loads
 from shapely.geometry import Point, LineString, Polygon
 from geoservice.gis.model.models import Point_T, Poly_T
@@ -96,6 +97,30 @@ def is_polygon(geom):
     """
     geom_type = geom.geom_type
     return geom_type == "MultiPolygon" or geom_type == "Polygon"
+
+
+def polygon_wkt_to_oracle_sdo_geometry(polygon_wkt, srid=4326):
+    # Parse WKT to Shapely Polygon
+    polygon = wkt.loads(polygon_wkt)
+
+    # Get exterior coordinates and flatten into a single list
+    coords = []
+    for x, y in polygon.exterior.coords:
+        coords.extend([str(x), str(y)])
+
+    # Build the Oracle query
+    oracle_query = f"""SDO_GEOMETRY(
+      2003,        -- 2D polygon
+      {srid},      -- SRID
+      NULL,        -- No point data for polygons
+      SDO_ELEM_INFO_ARRAY(1, 1003, 1),  -- 1003 = exterior polygon ring
+      SDO_ORDINATE_ARRAY(
+        {', '.join(coords)}     -- Polygon vertices
+      )
+    )
+    """
+
+    return oracle_query
 
 # def transform_point(p: Point_T, to_srid):
 

@@ -1,7 +1,9 @@
 from datetime import datetime
 from typing import List
 
+from common.date_util import date_to_str
 from common.str_util import parse_to_int, parse_to_float
+from geoservice.common.constants import GLOBAL_SRID
 from geoservice.data.DBResult import DBResult
 from geoservice.data.db_helper import execute_insert, execute_query, execute_update
 from geoservice.exception.common import ErrorCodes
@@ -12,7 +14,10 @@ from geoservice.model.dto.claim.ClaimDtoReq import ClaimParcelQueryRequestDTO
 from geoservice.model.entity.Claim import Claim, ParcelClaim, RegisteredClaim
 from geoservice.model.entity.Person import Person
 from geoservice.service.person_service import create_person
+from geoservice.util.gis_util import polygon_wkt_to_oracle_sdo_geometry
 from log.logger import logger
+from shapely import wkt
+
 
 log = logger()
 
@@ -54,9 +59,15 @@ QUERIES = {
             :REQUEST_ID, 
             :SURVEYOR_ID, 
             :CLAIMANT_ID,
-            :NEIGHBOURING_POINT, 
+            SDO_GEOMETRY(
+                2001, -- Geometry Type (POINT)
+                {SRID}, -- SRID
+                SDO_POINT_TYPE({X}, {Y}, NULL), -- Z is NULL,
+                NULL,
+                NULL
+              ),
             :REQUEST_TIMESTAMP, 
-            null, -- MODIFY_TIMESTAMP
+            :MODIFY_TIMESTAMP,
             :CMS,
             :PROCESS_INSTANCE_ID
             )
@@ -64,7 +75,8 @@ QUERIES = {
 
     "query_parcel_claim": """
         SELECT
-            ID, REQUEST_ID, SURVEYOR_ID, CLAIMANT_ID, NEIGHBOURING_POINT, REQUEST_TIMESTAMP, MODIFY_TIMESTAMP, CMS, PROCESS_INSTANCE_ID
+            ID, REQUEST_ID, SURVEYOR_ID, CLAIMANT_ID, SDO_UTIL.TO_WKTGEOMETRY(NEIGHBOURING_POINT) as NEIGHBOURING_POINT, 
+            REQUEST_TIMESTAMP, MODIFY_TIMESTAMP, CMS, PROCESS_INSTANCE_ID
         FROM TBL_PARCEL_CLAIM
         WHERE 1=1
         
@@ -72,7 +84,7 @@ QUERIES = {
 
     "update_parcel_claim": """
         UPDATE TBL_PARCEL_CLAIM SET 
-            SURVEYOR_ID = '{SURVEYOR_ID}', CLAIMANT_ID = '{CLAIMANT_ID}', MODIFY_TIMESTAMP = '{MODIFY_TIMESTAMP}'
+            SURVEYOR_ID = '{SURVEYOR_ID}', CLAIMANT_ID = '{CLAIMANT_ID}', MODIFY_TIMESTAMP = TO_DATE('{MODIFY_TIMESTAMP}', 'YYYY-MM-DD')
         WHERE
             1=1
             
@@ -122,7 +134,7 @@ QUERIES = {
                 :SUBSIDIARY_PLATE_NUMBER, 
                 :SECTION, 
                 :DISTRICT, 
-                :POLYGON, 
+                {POLYGON}, 
                 :EDGES, 
                 :BENEFICIARY_RIGHTS, 
                 :ACCOMMODATION_RIGHTS, 
@@ -228,22 +240,27 @@ def check_trace_id_exists(claim_trace_id):
 ### parcel claim services:
 
 def save_new_claim_parcel_request(request_id: str, claimant: PersonDTO, surveyor: PersonDTO,
-                                  cms: str, neighbouring_point_wkt: str, process_instance_id: str):
+                                  cms: str, neighbouring_point_wkt: str, process_instance_id: str,
+                                  srs: int = GLOBAL_SRID):
     claimant_person = None
     surveyor_person = None
     try:
         claimant_person = create_person(person_dto_to_person(claimant))
-    except CustomerExistsException:
-        pass
+    except CustomerExistsException as e:
+        claimant_person = e.person
     try:
         surveyor_person = create_person(person_dto_to_person(surveyor))
-    except CustomerExistsException:
-        pass
+    except CustomerExistsException as e:
+        surveyor_person = e.person
 
-    params = [request_id, claimant_person.id, surveyor_person.id, neighbouring_point_wkt,
+    params = [request_id, claimant_person.id, surveyor_person.id,
               datetime.now(), None, cms, process_instance_id]
-    execute_insert(QUERIES['insert_parcel_claim'], params)
-    raise Exception("fake error")
+
+    point_geom = wkt.loads(neighbouring_point_wkt)
+
+    query = QUERIES['insert_parcel_claim'].format(X=point_geom.x, Y=point_geom.y, SRID=srs)
+    result = execute_insert(query, params)
+    return result
 
 
 def person_dto_to_person(person: PersonDTO) -> Person:
@@ -309,10 +326,10 @@ def update_parcel_claim_request(parcel_claim: ParcelClaim):
     query = QUERIES['update_parcel_claim'].format(
         SURVEYOR_ID=parcel_claim.surveyor_id,
         CLAIMANT_ID=parcel_claim.claimant_id,
-        MODIFY_TIMESTAMP=datetime.now()
+        MODIFY_TIMESTAMP=date_to_str(datetime.now())
     )
 
-    query = query + f" AND REQUEST_ID = {parcel_claim.request_id} "
+    query = query + f" AND REQUEST_ID = '{parcel_claim.request_id}' "
     execute_update(query)
 
 
@@ -322,11 +339,12 @@ def save_new_registered_parcel_claim_request(registered_claim: RegisteredClaim) 
               registered_claim.status, registered_claim.cms, registered_claim.area,
               registered_claim.county, registered_claim.state_code,
               registered_claim.main_plate_number, registered_claim.subsidiary_plate_number,
-              registered_claim.section, registered_claim.district, registered_claim.polygon,
+              registered_claim.section, registered_claim.district,
               registered_claim.edges, registered_claim.beneficiary_rights, registered_claim.accommodation_rights,
               registered_claim.is_apartment, registered_claim.floor_number, registered_claim.unit_number,
               registered_claim.orientation]
-    query = QUERIES['insert_registered_claim']
+    query = QUERIES['insert_registered_claim'].format(SRID=str(GLOBAL_SRID),
+                                                      POLYGON=polygon_wkt_to_oracle_sdo_geometry(registered_claim.polygon))
     execute_insert(query, params)
 
     return RegisteredClaim()
@@ -388,6 +406,10 @@ def query_registered_parcel_claim_request(registered_claim: RegisteredClaim) -> 
             registered_claim_list.append(result_registered_claim)
 
         return registered_claim_list
+
+    if not registered_claim.request_id:
+        raise ServiceException(ErrorCodes.VALIDATION_INVALID_REQUEST_FIELDS,
+                               error_message="claim request_id is empty!")
 
     query = QUERIES['query_registered_claim'].format(
         REQUEST_ID=registered_claim.request_id)

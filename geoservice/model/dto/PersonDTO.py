@@ -22,3 +22,16 @@ class PersonDTO(BaseModel):
     address: str
     father_name: str
 
+    @classmethod
+    def from_dict(cls, person_dict):
+        person_dto = PersonDTO()
+        person_dto.first_name = person_dict.get('first_name', person_dict.get('firstName'))
+        person_dto.last_name = person_dict.get('last_name', person_dict.get('lastName'))
+        person_dto.national_id = person_dict.get('national_id', person_dict.get('nationalId'))
+        person_dto.phone_number = person_dict.get('phone_number', person_dict.get('phoneNumber'))
+        person_dto.mobile_number = person_dict.get('mobile_number', person_dict.get('mobileNumber'))
+        person_dto.birthday = person_dict['birthday']
+        person_dto.address = person_dict['address']
+        person_dto.father_name = person_dict.get('father_name', person_dict.get('fatherName'))
+        return person_dto
+

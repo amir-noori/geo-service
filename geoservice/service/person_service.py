@@ -1,7 +1,8 @@
 from typing import List
 
+from common.date_util import str_to_date
 from geoservice.data.DBResult import DBResult
-from geoservice.data.db_helper import execute_query, execute_insert
+from geoservice.data.db_helper import execute_query, execute_insert, next_seq
 from geoservice.exception.persist_exception import CustomerExistsException
 from geoservice.model.dto.PersonDTO import PersonDTO
 from geoservice.model.entity.Person import Person
@@ -18,7 +19,7 @@ QUERIES = {
 
     "insert_person": """
         INSERT INTO TBL_PERSON (ID, FIRST_NAME, LAST_NAME, NATIONAL_ID, PHONE_NUMBER, MOBILE_NUMBER, FATHER_NAME, BIRTHDAY, ADDRESS)
-        VALUES(TBL_PERSON_SEQ.NEXTVAL, :FIRST_NAME, :LAST_NAME, :NATIONAL_ID, :PHONE_NUMBER, :MOBILE_NUMBER, :FATHER_NAME, :BIRTHDAY, :ADDRESS)
+        VALUES(:ID, :FIRST_NAME, :LAST_NAME, :NATIONAL_ID, :PHONE_NUMBER, :MOBILE_NUMBER, :FATHER_NAME, :BIRTHDAY, :ADDRESS)
     """
 }
 
@@ -62,7 +63,9 @@ def create_person(person: Person) -> Person:
     queried_person: List[Person] = query_person(Person(national_id=person.national_id))
 
     if queried_person and queried_person[0].id:
-        raise CustomerExistsException()
+        raise CustomerExistsException(queried_person[0])
+
+    id = next_seq("TBL_PERSON_SEQ")
 
     query = QUERIES['insert_person']
     params = {
@@ -72,7 +75,10 @@ def create_person(person: Person) -> Person:
         'PHONE_NUMBER': person.phone_number,
         'MOBILE_NUMBER': person.mobile_number,
         'FATHER_NAME': person.father_name,
-        'BIRTHDAY': person.birthday,
-        'ADDRESS': person.address
+        'BIRTHDAY': str_to_date(person.birthday),
+        'ADDRESS': person.address,
+        'ID': id
     }
-    return execute_insert(query, params)
+    execute_insert(query, params)
+    person.id = id
+    return person

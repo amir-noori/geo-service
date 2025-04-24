@@ -37,11 +37,10 @@ def execute_insert(query, params):
     log.debug(query)
     connection = ApplicationContext.connection_pool.acquire()
     cursor = connection.cursor()
-    result = cursor.execute(query, params)
+    cursor.execute(query, params)
     connection.commit()
     cursor.close()
     connection.close()
-    return result
 
 def execute_update(query):
     log.debug(query)
@@ -52,3 +51,14 @@ def execute_update(query):
     cursor.close()
     connection.close()
     return result
+
+def next_seq(seq_name):
+    log.debug(seq_name)
+    connection = ApplicationContext.connection_pool.acquire()
+    connection.current_schema = db['schema']
+    cursor = connection.cursor()
+    cursor.execute(f"SELECT {seq_name}.NEXTVAL FROM dual")
+    next_id = cursor.fetchone()[0]
+    cursor.close()
+    connection.close()
+    return next_id

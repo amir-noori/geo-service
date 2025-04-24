@@ -40,7 +40,7 @@ class CamundaTaskHandler:
         self.fetch_and_lock = pycamunda.externaltask.FetchAndLock(url=self.camunda_url, worker_id=self.worker_id,
                                                                   max_tasks=self.max_tasks)
         for topic in self.topics:
-            self.fetch_and_lock.add_topic(name=topic['topicName'], lock_duration=topic['lockDuration'])
+            self.fetch_and_lock.add_topic(name=topic['topicName'], lock_duration=topic['lockDuration'], deserialize_values=True)
 
     def register_task_handler(self, topic_name: str, handler_func: Callable):
         """

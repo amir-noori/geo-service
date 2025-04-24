@@ -1,5 +1,10 @@
+from geoservice.model.entity.Person import Person
 
 
 class CustomerExistsException(Exception):
-    pass
+
+    person: Person
+
+    def __init__(self, person):
+        self.person = person
 

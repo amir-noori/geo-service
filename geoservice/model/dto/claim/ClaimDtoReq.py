@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 
 from pydantic import BaseModel, ConfigDict
 from pydantic import field_validator
@@ -93,6 +93,7 @@ class ClaimParcelQueryRequest(BaseModel):
         else:
             return None
 
+
 @partial_model
 class RegisterNewClaimRequestDTO(BaseModel):
     model_config = ConfigDict(
@@ -139,6 +140,74 @@ class RegisterNewClaimRequest(BaseModel):
             return None
 
 
+@partial_model
+class SurveyParcelEdgeMetadataDTO(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+        arbitrary_types_allowed=True
+    )
+
+    lineIndex: int
+    length: float
+    orientation: int
+    boundary: str
+    is_adjacent_to_plate_number: bool
+    is_adjacent_to_passage: bool
+    passage_name: str
+    passage_width: float
+    starting_point: PointDTO
+    ending_point: PointDTO
+
+
+@partial_model
+class SurveyParcelAttachmentPropertiesDTO(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+        arbitrary_types_allowed=True
+    )
+
+    attachmentCode: str
+    title: str
+    area: float
+    description: str
+
+
+@partial_model
+class ParcelMetadataDTO(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+        arbitrary_types_allowed=True
+    )
+
+    beneficiary_rights: str
+    accommodation_rights: str
+    is_apartment: bool
+    floor_number: float
+    unit_number: float
+    orientation: int
+
+
+@partial_model
+class SurveyParcelMetadataDTO(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+        arbitrary_types_allowed=True
+    )
+
+    metadata: ParcelMetadataDTO
+    edge_metadata: List[SurveyParcelEdgeMetadataDTO]
+    attachment_properties: List[SurveyParcelAttachmentPropertiesDTO]
+
+
+@partial_model
 class RegisterNewClaimCallbackRequestDTO(BaseModel):
     model_config = ConfigDict(
         alias_generator=to_camel,
@@ -149,6 +218,17 @@ class RegisterNewClaimCallbackRequestDTO(BaseModel):
 
     request_id: str
     claim_tracing_id: str
+    status: int
+    cms: str
+    area: float
+    county: str
+    state_code: str
+    main_plate_number: str
+    subsidiary_plate_number: str
+    section: str
+    district: str
+    survey_parcel: str
+    survey_parcel_metadata: SurveyParcelMetadataDTO
 
 
 class RegisterNewClaimCallbackRequest(BaseModel):
@@ -168,7 +248,6 @@ class RegisterNewClaimCallbackRequest(BaseModel):
                 return f"reqId:{self.body.request_id}"
         else:
             return None
-
 
 
 class ClaimParcelSurveyQueryRequestDTO(BaseModel):
@@ -203,5 +282,3 @@ class ClaimParcelSurveyQueryRequest(BaseModel):
                 return f"reqId:{self.body.request_id}"
         else:
             return None
-
-

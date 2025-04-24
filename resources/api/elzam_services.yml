@@ -216,12 +216,10 @@ components:
         neighborhoodPoint:
           $ref: '#/components/schemas/Point'
         surveyParcel:
-          type: object
-          format: json
+          type: string
           description: GeoJSON format
         surveyApartmentParcel:
-          type: object
-          format: json
+          type: string
           description: GeoJSON format
         surveyParcelMetadata:
           $ref: '#/components/schemas/ParcelMetadata'
@@ -383,7 +381,7 @@ components:
           "neighborhoodPoint": {
             "x": -48425851.64293078,
             "y": 2018395.3302414566,
-            "SRS": "4326"
+            "srs": "4326"
           },
           "claimant": {
             "firstName": "amet",
@@ -417,16 +415,16 @@ components:
                   "startingPoint": {
                     "x": -89602802.67694105,
                     "y": -91375034.49051145,
-                    "SRS": "4326"
+                    "srs": "4326"
                   },
                   "endingPoint": {
                     "x": -73420195.01850255,
                     "y": -27172181.421365857,
-                    "SRS": "4326"
+                    "srs": "4326"
                   },
                   "isAdjacentToPlateNumber": true,
                   "isAdjacentToPassage": false,
-                  "passageName": true,
+                  "passageName": "a passage",
                   "passageWidth": 18347813.178749606
                 },
                 {
@@ -437,16 +435,16 @@ components:
                   "startingPoint": {
                     "x": -89602802.67694105,
                     "y": -91375034.49051145,
-                    "SRS": "4326"
+                    "srs": "4326"
                   },
                   "endingPoint": {
                     "x": -73420195.01850255,
                     "y": -27172181.421365857,
-                    "SRS": "4326"
+                    "srs": "4326"
                   },
                   "isAdjacentToPlateNumber": true,
                   "isAdjacentToPassage": false,
-                  "passageName": true,
+                  "passageName": "a passage",
                   "passageWidth": 18347813.178749606
                 },
                 {
@@ -457,16 +455,16 @@ components:
                   "startingPoint": {
                     "x": -89602802.67694105,
                     "y": -91375034.49051145,
-                    "SRS": "4326"
+                    "srs": "4326"
                   },
                   "endingPoint": {
                     "x": -73420195.01850255,
                     "y": -27172181.421365857,
-                    "SRS": "4326"
+                    "srs": "4326"
                   },
                   "isAdjacentToPlateNumber": true,
                   "isAdjacentToPassage": false,
-                  "passageName": true,
+                  "passageName": "a passage",
                   "passageWidth": 18347813.178749606
                 },
                 {
@@ -477,16 +475,16 @@ components:
                   "startingPoint": {
                     "x": -89602802.67694105,
                     "y": -91375034.49051145,
-                    "SRS": "4326"
+                    "srs": "4326"
                   },
                   "endingPoint": {
                     "x": -73420195.01850255,
                     "y": -27172181.421365857,
-                    "SRS": "4326"
+                    "srs": "4326"
                   },
                   "isAdjacentToPlateNumber": true,
                   "isAdjacentToPassage": false,
-                  "passageName": true,
+                  "passageName": "a passage",
                   "passageWidth": 18347813.178749606
                 }
               ],
@@ -680,7 +678,7 @@ components:
           type: boolean
           description: mojaver mabar
         passageName:
-          type: boolean
+          type: string
         passageWidth:
           type: number
           format: number
