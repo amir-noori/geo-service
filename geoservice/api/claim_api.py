@@ -10,7 +10,9 @@ from fastapi import Request
 from fastapi.encoders import jsonable_encoder
 from pycamunda.message import CorrelateSingle
 from pycamunda.processdef import StartInstance
+from shapely.geometry import Polygon, Point
 from shapely.geometry import shape
+from shapely.wkt import loads
 
 from common.str_util import base64ToString, parse_to_int, parse_to_float
 from geoservice.api.common import handle_response
@@ -297,7 +299,96 @@ async def claim_parcel_survey_query_api(request: Request,
     body: ClaimParcelSurveyQueryRequestDTO = claim_parcel_survey_query_request.body
     request_id = body.request_id
     claim_tracing_id = body.claim_tracing_id
-    query_registered_parcel_claim_request(RegisteredClaim(request_id=request_id, claim_tracing_id=claim_tracing_id))
-    # TODO: assemble response
+    registered_claim: RegisteredClaim = query_registered_parcel_claim_request(
+        RegisteredClaim(request_id=request_id, claim_tracing_id=claim_tracing_id))
+
+    polygon_coordinates = []
+    if registered_claim.polygon:
+        polygon = wkt.loads(registered_claim.polygon)
+        if isinstance(polygon, Polygon):
+            # Get coordinates and convert to list of [lon, lat] pairs
+            polygon_coordinates = [list(coord) for coord in polygon.exterior.coords]
+
+    parcel = {
+        "type": "FeatureCollection",
+        "name": "polygon_geojson",
+        "features": {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [polygon_coordinates] if polygon_coordinates else []
+            },
+            "properties": {
+                "beneficiaryRights": registered_claim.beneficiary_rights,
+                "accommodationRights": registered_claim.accommodation_rights,
+                "isApartment": registered_claim.is_apartment,
+                "floorNumber": registered_claim.floor_number,
+                "unitNumber": registered_claim.unit_number,
+                "orientation": registered_claim.orientation,
+                "edges": registered_claim.edges,
+                "attachmentProperties": registered_claim.attachments
+            }
+        }
+    }
+
+    # parcel = {
+    #     "type": "Feature",
+    #     "geometry": {
+    #         "type": "Polygon",
+    #         "coordinates": [polygon_coordinates] if polygon_coordinates else []
+    #     },
+    #     "properties": {
+    #         "beneficiaryRights": registered_claim.beneficiary_rights,
+    #         "accommodationRights": registered_claim.accommodation_rights,
+    #         "isApartment": registered_claim.is_apartment,
+    #         "floorNumber": registered_claim.floor_number,
+    #         "unitNumber": registered_claim.unit_number,
+    #         "orientation": registered_claim.orientation,
+    #         "edges": [ # maybe only putting registered_claim.edge will suffice
+    #             {
+    #                 "lineIndex": edge.line_index,
+    #                 "length": edge.length,
+    #                 "orientation": edge.orientation,
+    #                 "boundary": edge.boundary,
+    #                 "startingPoint": {
+    #                     "x": edge.starting_point.x,
+    #                     "y": edge.starting_point.y,
+    #                     "srs": edge.starting_point.srs
+    #                 },
+    #                 "endingPoint": {
+    #                     "x": edge.ending_point.x,
+    #                     "y": edge.ending_point.y,
+    #                     "srs": edge.ending_point.srs
+    #                 },
+    #                 "isAdjacentToPlateNumber": edge.is_adjacent_to_plate_number,
+    #                 "isAdjacentToPassage": edge.is_adjacent_to_passage,
+    #                 "passageName": edge.passage_name,
+    #                 "passageWidth": edge.passage_width
+    #             } for edge in registered_claim.edges
+    #         ],
+    #         "attachmentProperties": [ # maybe only putting registered_claim.edge will suffice
+    #             {
+    #                 "title": attachment.title,
+    #                 "description": attachment.description,
+    #                 "attachmentCode": attachment.attachment_code,
+    #                 "area": attachment.area
+    #             } for attachment in registered_claim.attachments
+    #         ]
+    #     }
+    # }
+
+    claim_parcel_survey_query_response_dto = ClaimParcelSurveyQueryResponseDTO(
+        request_id=request_id,
+        claim_tracing_id=registered_claim.claim_tracing_id,
+        area=registered_claim.area,
+        county=registered_claim.county,
+        state_code=registered_claim.state_code,
+        main_plate_number=registered_claim.main_plate_number,
+        subsidiary_plate_number=registered_claim.subsidiary_plate_number,
+        section=registered_claim.section,
+        district=registered_claim.district,
+        polygon=json.dumps(parcel)
+    )
+
     claim_parcel_survey_query_response_dto = ClaimParcelSurveyQueryResponseDTO(request_id=request_id)
     return handle_response(request, ClaimParcelSurveyQueryResponse(body=claim_parcel_survey_query_response_dto))

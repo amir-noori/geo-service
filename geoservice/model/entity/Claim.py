@@ -91,7 +91,7 @@ class RegisteredClaim(BaseEntity):
     floor_number: float
     unit_number: float
     orientation: int  # refer to Parcel.Orientation enum
-    attachments: List[ClaimParcelAttachment]
+    attachments: str # CLOB in DB, maybe should be changed into List[ClaimParcelAttachment] later
 
     def __init__(self, id: int = None, request_id: str = None, surveyor_id: str = None, claim_tracing_id: str = None,
                  create_timestamp: str = None, modify_timestamp: str = None, status: int = None,

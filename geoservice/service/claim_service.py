@@ -162,17 +162,18 @@ QUERIES = {
             SUBSIDIARY_PLATE_NUMBER, 
             SECTION, 
             DISTRICT, 
-            POLYGON, 
+            SDO_UTIL.TO_WKTGEOMETRY(POLYGON) as POLYGON, 
             EDGES, 
             BENEFICIARY_RIGHTS, 
             ACCOMMODATION_RIGHTS, 
             IS_APARTMENT, 
             FLOOR_NUMBER, 
             UNIT_NUMBER, 
-            ORIENTATION
+            ORIENTATION,
+            ATTACHMENTS
         FROM TBL_REGISTERED_CLAIM
         WHERE
-            REQUEST_ID = '{REQUEST_ID}'
+            1=1
     """
 
 }
@@ -378,6 +379,8 @@ def query_registered_parcel_claim_request(registered_claim: RegisteredClaim) -> 
             floor_number = str(result['FLOOR_NUMBER'])
             unit_number = str(result['UNIT_NUMBER'])
             orientation = str(result['ORIENTATION'])
+            polygon_wkt = str(result['POLYGON'])
+            attachments = str(result['ATTACHMENTS'])
 
             result_registered_claim = RegisteredClaim(
                 id=id,
@@ -402,17 +405,26 @@ def query_registered_parcel_claim_request(registered_claim: RegisteredClaim) -> 
                 floor_number=parse_to_float(floor_number),
                 unit_number=parse_to_float(unit_number),
                 orientation=parse_to_int(orientation, 8),
+                polygon=polygon_wkt,
+                attachments=attachments
             )
             registered_claim_list.append(result_registered_claim)
 
         return registered_claim_list
 
-    if not registered_claim.request_id:
-        raise ServiceException(ErrorCodes.VALIDATION_INVALID_REQUEST_FIELDS,
-                               error_message="claim request_id is empty!")
+    request_id = registered_claim.request_id
+    claim_tracing_id = registered_claim.claim_tracing_id
 
-    query = QUERIES['query_registered_claim'].format(
-        REQUEST_ID=registered_claim.request_id)
+    if not request_id and not claim_tracing_id:
+        raise ServiceException(ErrorCodes.VALIDATION_INVALID_REQUEST_FIELDS,
+                               error_message="claim request_id and claim_tracing_id are empty!")
+
+    query = QUERIES['query_registered_claim']
+
+    if request_id:
+        query = query + f" AND REQUEST_ID = '{request_id}' "
+    if claim_tracing_id:
+        query = query + f" AND CLAIM_TRACING_ID = '{claim_tracing_id}' "
 
     registered_claims = execute_query(query, run)
     log.debug(registered_claims)
