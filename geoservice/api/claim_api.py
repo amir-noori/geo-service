@@ -10,7 +10,7 @@ from fastapi import Request
 from fastapi.encoders import jsonable_encoder
 from pycamunda.message import CorrelateSingle
 from pycamunda.processdef import StartInstance
-from shapely.geometry import Polygon, Point
+from shapely.geometry import Polygon
 from shapely.geometry import shape
 from shapely.wkt import loads
 
@@ -26,6 +26,7 @@ from geoservice.model.dto.BaseDTO import RequestHeader
 from geoservice.model.dto.ParcelDtoRequest import PolygonWrapperCmsDTO, WrapperCmsRequest, GetOverlappingParcelsDTO, \
     GetOverlappingParcelsRequest
 from geoservice.model.dto.ParcelDtoResponse import WrapperCmsResponse, OverlappingResponse, OverlappingResponseDTO
+from geoservice.model.dto.PersonDTO import PersonDTO
 from geoservice.model.dto.claim.ClaimDtoReq import ClaimRequest, ClaimParcelQueryRequest, RegisterNewClaimRequest, \
     RegisterNewClaimRequestDTO, RegisterNewClaimCallbackRequestDTO, RegisterNewClaimCallbackRequest, \
     ClaimParcelSurveyQueryRequest, ClaimParcelSurveyQueryRequestDTO, ParcelMetadataDTO
@@ -34,9 +35,12 @@ from geoservice.model.dto.claim.ClaimDtoResponse import ClaimResponse, ClaimParc
     ClaimParcelQueryResponseDTO, ClaimResponseDTO, RegisterNewClaimResponseDTO, RegisterNewClaimResponse, \
     RegisterNewClaimCallbackResponse, RegisterNewClaimCallbackResponseDTO, ClaimParcelSurveyQueryResponse, \
     ClaimParcelSurveyQueryResponseDTO
+from geoservice.model.dto.common import PointDTO
 from geoservice.model.entity.Claim import Claim, ParcelClaim, RegisteredClaim
+from geoservice.model.entity.Person import Person
 from geoservice.service.claim_service import create_new_claim_request, query_claim_parcel, check_trace_id_exists, \
     query_parcel_claim_request, query_registered_parcel_claim_request, save_new_registered_parcel_claim_request
+from geoservice.service.person_service import query_person
 from geoservice.util.gis_util import is_polygon, load_shp_data, load_kml_data
 from log.logger import logger
 
@@ -257,7 +261,7 @@ async def assign_surveyor_callback_api(request: Request,
                                        subsidiary_plate_number=body.subsidiary_plate_number,
                                        section=body.section,
                                        district=body.district,
-                                       edges=str(jsonable_encoder(body.survey_parcel_metadata.edge_metadata)),
+                                       edges=json.dumps(jsonable_encoder(body.survey_parcel_metadata.edge_metadata)),
                                        beneficiary_rights=metadata.beneficiary_rights,
                                        accommodation_rights=metadata.accommodation_rights,
                                        is_apartment=metadata.is_apartment,
@@ -265,9 +269,8 @@ async def assign_surveyor_callback_api(request: Request,
                                        unit_number=parse_to_float(metadata.unit_number),
                                        orientation=parse_to_int(metadata.orientation, 8),
                                        polygon=survey_parcel_wkt,
-                                       attachments=str(
-                                           jsonable_encoder(body.survey_parcel_metadata.attachment_properties))
-                                       )
+                                       attachments=json.dumps(
+                                           jsonable_encoder(body.survey_parcel_metadata.attachment_properties)))
 
     save_new_registered_parcel_claim_request(registered_claim)
 
@@ -302,9 +305,14 @@ async def claim_parcel_survey_query_api(request: Request,
     registered_claim: RegisteredClaim = query_registered_parcel_claim_request(
         RegisteredClaim(request_id=request_id, claim_tracing_id=claim_tracing_id))
 
+    request_claim = None
+    request_claims: List[ParcelClaim] = query_parcel_claim_request(request_id=registered_claim.request_id)
+    if request_claims:
+        request_claim = request_claims[0]
+
     polygon_coordinates = []
     if registered_claim.polygon:
-        polygon = wkt.loads(registered_claim.polygon)
+        polygon = loads(registered_claim.polygon)
         if isinstance(polygon, Polygon):
             # Get coordinates and convert to list of [lon, lat] pairs
             polygon_coordinates = [list(coord) for coord in polygon.exterior.coords]
@@ -325,70 +333,58 @@ async def claim_parcel_survey_query_api(request: Request,
                 "floorNumber": registered_claim.floor_number,
                 "unitNumber": registered_claim.unit_number,
                 "orientation": registered_claim.orientation,
-                "edges": registered_claim.edges,
-                "attachmentProperties": registered_claim.attachments
+                "edges": [
+                    {
+                        "lineIndex": edge.get("lineIndex", ""),
+                        "length": edge.get("length", ""),
+                        "orientation": edge.get("orientation", ""),
+                        "boundary": edge.get("boundary", ""),
+                        "area": edge.get("area", ""),
+                        "isAdjacentToPlateNumber": edge.get("isAdjacentToPlateNumber", ""),
+                        "isAdjacentToPassage": edge.get("isAdjacentToPassage", ""),
+                        "passageName": edge.get("passageName", ""),
+                        "passageWidth": edge.get("passageWidth", ""),
+                        "startingPoint": edge.get("startingPoint", ""),
+                        "endingPoint": edge.get("startingPoint", "")
+                    } for edge in json.loads(json.loads(registered_claim.edges))
+                    if len(registered_claim.edges) > 0 and registered_claim.edges is not None
+                ],
+                "attachmentProperties": [
+                    {
+                        "title": attachment.get("title", ""),
+                        "description": attachment.get("description", ""),
+                        "attachmentCode": attachment.get("attachmentCode", ""),
+                        "area": attachment.get("area", "")
+                    } for attachment in json.loads(json.loads(registered_claim.attachments))
+                    if len(registered_claim.attachments) > 0 and registered_claim.attachments is not None
+                ]
             }
         }
     }
 
-    # parcel = {
-    #     "type": "Feature",
-    #     "geometry": {
-    #         "type": "Polygon",
-    #         "coordinates": [polygon_coordinates] if polygon_coordinates else []
-    #     },
-    #     "properties": {
-    #         "beneficiaryRights": registered_claim.beneficiary_rights,
-    #         "accommodationRights": registered_claim.accommodation_rights,
-    #         "isApartment": registered_claim.is_apartment,
-    #         "floorNumber": registered_claim.floor_number,
-    #         "unitNumber": registered_claim.unit_number,
-    #         "orientation": registered_claim.orientation,
-    #         "edges": [ # maybe only putting registered_claim.edge will suffice
-    #             {
-    #                 "lineIndex": edge.line_index,
-    #                 "length": edge.length,
-    #                 "orientation": edge.orientation,
-    #                 "boundary": edge.boundary,
-    #                 "startingPoint": {
-    #                     "x": edge.starting_point.x,
-    #                     "y": edge.starting_point.y,
-    #                     "srs": edge.starting_point.srs
-    #                 },
-    #                 "endingPoint": {
-    #                     "x": edge.ending_point.x,
-    #                     "y": edge.ending_point.y,
-    #                     "srs": edge.ending_point.srs
-    #                 },
-    #                 "isAdjacentToPlateNumber": edge.is_adjacent_to_plate_number,
-    #                 "isAdjacentToPassage": edge.is_adjacent_to_passage,
-    #                 "passageName": edge.passage_name,
-    #                 "passageWidth": edge.passage_width
-    #             } for edge in registered_claim.edges
-    #         ],
-    #         "attachmentProperties": [ # maybe only putting registered_claim.edge will suffice
-    #             {
-    #                 "title": attachment.title,
-    #                 "description": attachment.description,
-    #                 "attachmentCode": attachment.attachment_code,
-    #                 "area": attachment.area
-    #             } for attachment in registered_claim.attachments
-    #         ]
-    #     }
-    # }
+    neighbouring_point: PointDTO = PointDTO()
+    neighbouring_point_shapely = loads(request_claim.neighbouring_point)
+    neighbouring_point.x = neighbouring_point_shapely.x
+    neighbouring_point.y = neighbouring_point_shapely.y
+
+    claimants: List[Person] = query_person(Person(id=request_claim.claimant_id))
+    surveyors: List[Person] = query_person(Person(id=request_claim.surveyor_id))
 
     claim_parcel_survey_query_response_dto = ClaimParcelSurveyQueryResponseDTO(
         request_id=request_id,
         claim_tracing_id=registered_claim.claim_tracing_id,
+        cms=registered_claim.cms,
         area=registered_claim.area,
+        neighborhood_point=neighbouring_point,
         county=registered_claim.county,
         state_code=registered_claim.state_code,
         main_plate_number=registered_claim.main_plate_number,
         subsidiary_plate_number=registered_claim.subsidiary_plate_number,
         section=registered_claim.section,
         district=registered_claim.district,
-        polygon=json.dumps(parcel)
+        parcel=parcel,
+        claimant=PersonDTO.from_dict(jsonable_encoder(claimants[0])) if len(claimants) > 0 else None,
+        surveyor=PersonDTO.from_dict(jsonable_encoder(surveyors[0])) if len(surveyors) > 0 else None
     )
 
-    claim_parcel_survey_query_response_dto = ClaimParcelSurveyQueryResponseDTO(request_id=request_id)
     return handle_response(request, ClaimParcelSurveyQueryResponse(body=claim_parcel_survey_query_response_dto))

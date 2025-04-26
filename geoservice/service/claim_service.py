@@ -1,5 +1,8 @@
+import json
 from datetime import datetime
 from typing import List
+
+from shapely import wkt
 
 from common.date_util import date_to_str
 from common.str_util import parse_to_int, parse_to_float
@@ -16,8 +19,6 @@ from geoservice.model.entity.Person import Person
 from geoservice.service.person_service import create_person
 from geoservice.util.gis_util import polygon_wkt_to_oracle_sdo_geometry
 from log.logger import logger
-from shapely import wkt
-
 
 log = logger()
 
@@ -115,7 +116,8 @@ QUERIES = {
                 IS_APARTMENT, 
                 FLOOR_NUMBER, 
                 UNIT_NUMBER, 
-                ORIENTATION
+                ORIENTATION,
+                ATTACHMENTS
             )
         VALUES
             (
@@ -141,7 +143,8 @@ QUERIES = {
                 :IS_APARTMENT, 
                 :FLOOR_NUMBER, 
                 :UNIT_NUMBER, 
-                :ORIENTATION
+                :ORIENTATION,
+                :ATTACHMENTS
             )
     """,
 
@@ -340,12 +343,13 @@ def save_new_registered_parcel_claim_request(registered_claim: RegisteredClaim) 
               registered_claim.status, registered_claim.cms, registered_claim.area,
               registered_claim.county, registered_claim.state_code,
               registered_claim.main_plate_number, registered_claim.subsidiary_plate_number,
-              registered_claim.section, registered_claim.district,
-              registered_claim.edges, registered_claim.beneficiary_rights, registered_claim.accommodation_rights,
+              registered_claim.section, registered_claim.district, json.dumps(registered_claim.edges),
+              registered_claim.beneficiary_rights, registered_claim.accommodation_rights,
               registered_claim.is_apartment, registered_claim.floor_number, registered_claim.unit_number,
-              registered_claim.orientation]
+              registered_claim.orientation, json.dumps(registered_claim.attachments)]
     query = QUERIES['insert_registered_claim'].format(SRID=str(GLOBAL_SRID),
-                                                      POLYGON=polygon_wkt_to_oracle_sdo_geometry(registered_claim.polygon))
+                                                      POLYGON=polygon_wkt_to_oracle_sdo_geometry(
+                                                          registered_claim.polygon))
     execute_insert(query, params)
 
     return RegisteredClaim()

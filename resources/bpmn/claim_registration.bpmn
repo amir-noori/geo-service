@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1sceyoz" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.0.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.17.0">
   <bpmn:process id="Parcel_Claim_Process" name="Parcel Claim Process " isExecutable="true">
-    <bpmn:startEvent id="StartEvent_1" name="new claim request from Kateb">
+    <bpmn:startEvent id="claim_request_start_event" name="new claim request from Kateb">
       <bpmn:outgoing>Flow_0gcbwye</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="Flow_03cezuu" sourceRef="inform_kateb_about_surveyor" targetRef="Event_03cky85" />
-    <bpmn:intermediateCatchEvent id="Event_03cky85" name="wait for TOM survey response">
+    <bpmn:sequenceFlow id="Flow_03cezuu" sourceRef="inform_kateb_about_surveyor" targetRef="wait_tom_surveyor_response_catch_event" />
+    <bpmn:intermediateCatchEvent id="wait_tom_surveyor_response_catch_event" name="wait for TOM survey response">
       <bpmn:incoming>Flow_03cezuu</bpmn:incoming>
       <bpmn:outgoing>Flow_1d7e5ss</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_0aesezf" messageRef="Message_3aifee6" />
     </bpmn:intermediateCatchEvent>
-    <bpmn:endEvent id="Event_1hnggjj">
+    <bpmn:endEvent id="claim_request_end_event" name="Claim Request Done">
       <bpmn:incoming>Flow_1skz3qg</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1skz3qg" sourceRef="notify_kateb_about_claim_survey" targetRef="Event_1hnggjj" />
+    <bpmn:sequenceFlow id="Flow_1skz3qg" sourceRef="notify_kateb_about_claim_survey" targetRef="claim_request_end_event" />
     <bpmn:sequenceFlow id="Flow_0t30s3e" sourceRef="persist_claim_request" targetRef="send_request_to_tom" />
     <bpmn:sequenceFlow id="Flow_0ljzkvl" sourceRef="send_request_to_tom" targetRef="inform_kateb_about_surveyor" />
     <bpmn:serviceTask id="persist_claim_request" name="persist claim request" camunda:type="external" camunda:topic="persist-claim-request">
-      <bpmn:incoming>Flow_18v4obz</bpmn:incoming>
+      <bpmn:incoming>Flow_0gcbwye</bpmn:incoming>
       <bpmn:outgoing>Flow_0t30s3e</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="send_request_to_tom" name="send request to TOM" camunda:type="external" camunda:topic="send-request-to-tom">
@@ -29,93 +29,81 @@
       <bpmn:outgoing>Flow_03cezuu</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="notify_kateb_about_claim_survey" name="notify Kateb about survey status." camunda:type="external" camunda:topic="notify-kateb-about-claim-survey">
-      <bpmn:incoming>Flow_0y3gie5</bpmn:incoming>
+      <bpmn:incoming>Flow_0a797l4</bpmn:incoming>
       <bpmn:outgoing>Flow_1skz3qg</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:userTask id="Activity_0u7qjrt" name="User task will be removed later">
-      <bpmn:incoming>Flow_0gcbwye</bpmn:incoming>
-      <bpmn:outgoing>Flow_18v4obz</bpmn:outgoing>
-    </bpmn:userTask>
-    <bpmn:sequenceFlow id="Flow_0gcbwye" sourceRef="StartEvent_1" targetRef="Activity_0u7qjrt" />
-    <bpmn:sequenceFlow id="Flow_18v4obz" sourceRef="Activity_0u7qjrt" targetRef="persist_claim_request" />
-    <bpmn:sequenceFlow id="Flow_1d7e5ss" sourceRef="Event_03cky85" targetRef="update_claim_with_cadastre_data" />
+    <bpmn:sequenceFlow id="Flow_0gcbwye" sourceRef="claim_request_start_event" targetRef="persist_claim_request" />
+    <bpmn:sequenceFlow id="Flow_1d7e5ss" sourceRef="wait_tom_surveyor_response_catch_event" targetRef="update_claim_with_cadastre_data" />
     <bpmn:serviceTask id="update_claim_with_cadastre_data" name="update claim with cadastre data" camunda:type="external" camunda:topic="update-claim-with-cadastre-data">
       <bpmn:incoming>Flow_1d7e5ss</bpmn:incoming>
-      <bpmn:outgoing>Flow_0y3gie5</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0a797l4</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_0y3gie5" sourceRef="update_claim_with_cadastre_data" targetRef="notify_kateb_about_claim_survey" />
+    <bpmn:sequenceFlow id="Flow_0a797l4" sourceRef="update_claim_with_cadastre_data" targetRef="notify_kateb_about_claim_survey" />
   </bpmn:process>
   <bpmn:message id="Message_3aifee6" name="waitTomSurveyorResponse-${requestId}" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Parcel_Claim_Process">
-      <bpmndi:BPMNEdge id="Flow_18v4obz_di" bpmnElement="Flow_18v4obz">
-        <di:waypoint x="410" y="117" />
-        <di:waypoint x="470" y="117" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0gcbwye_di" bpmnElement="Flow_0gcbwye">
         <di:waypoint x="218" y="117" />
-        <di:waypoint x="310" y="117" />
+        <di:waypoint x="320" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0ljzkvl_di" bpmnElement="Flow_0ljzkvl">
-        <di:waypoint x="770" y="117" />
-        <di:waypoint x="840" y="117" />
+        <di:waypoint x="580" y="117" />
+        <di:waypoint x="630" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0t30s3e_di" bpmnElement="Flow_0t30s3e">
-        <di:waypoint x="570" y="117" />
-        <di:waypoint x="670" y="117" />
+        <di:waypoint x="420" y="117" />
+        <di:waypoint x="480" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1skz3qg_di" bpmnElement="Flow_1skz3qg">
-        <di:waypoint x="1200" y="117" />
+        <di:waypoint x="1270" y="117" />
         <di:waypoint x="1332" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_03cezuu_di" bpmnElement="Flow_03cezuu">
-        <di:waypoint x="940" y="117" />
-        <di:waypoint x="961" y="117" />
-        <di:waypoint x="961" y="300" />
-        <di:waypoint x="982" y="300" />
+        <di:waypoint x="730" y="117" />
+        <di:waypoint x="832" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1d7e5ss_di" bpmnElement="Flow_1d7e5ss">
-        <di:waypoint x="1018" y="300" />
-        <di:waypoint x="1100" y="300" />
+        <di:waypoint x="868" y="117" />
+        <di:waypoint x="980" y="117" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0y3gie5_di" bpmnElement="Flow_0y3gie5">
-        <di:waypoint x="1150" y="260" />
-        <di:waypoint x="1150" y="157" />
+      <bpmndi:BPMNEdge id="Flow_0a797l4_di" bpmnElement="Flow_0a797l4">
+        <di:waypoint x="1080" y="117" />
+        <di:waypoint x="1170" y="117" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="claim_request_start_event">
         <dc:Bounds x="182" y="99" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="155" y="142" width="90" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1hnggjj_di" bpmnElement="Event_1hnggjj">
+      <bpmndi:BPMNShape id="Event_1hnggjj_di" bpmnElement="claim_request_end_event">
         <dc:Bounds x="1332" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1315" y="142" width="74" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0od97bt_di" bpmnElement="persist_claim_request">
-        <dc:Bounds x="470" y="77" width="100" height="80" />
+        <dc:Bounds x="320" y="77" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1c5m6xa_di" bpmnElement="send_request_to_tom">
-        <dc:Bounds x="670" y="77" width="100" height="80" />
+        <dc:Bounds x="480" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1oye9r4_di" bpmnElement="notify_kateb_about_claim_survey">
+        <dc:Bounds x="1170" y="77" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_08lteg1_di" bpmnElement="inform_kateb_about_surveyor">
-        <dc:Bounds x="840" y="77" width="100" height="80" />
+        <dc:Bounds x="630" y="77" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1ckcxfd_di" bpmnElement="Activity_0u7qjrt">
-        <dc:Bounds x="310" y="77" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0gmbjte_di" bpmnElement="Event_03cky85">
-        <dc:Bounds x="982" y="282" width="36" height="36" />
+      <bpmndi:BPMNShape id="Event_0gmbjte_di" bpmnElement="wait_tom_surveyor_response_catch_event">
+        <dc:Bounds x="832" y="99" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="960" y="325" width="81" height="27" />
+          <dc:Bounds x="810" y="142" width="81" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1ouhcyg_di" bpmnElement="update_claim_with_cadastre_data">
-        <dc:Bounds x="1100" y="260" width="100" height="80" />
+        <dc:Bounds x="980" y="77" width="100" height="80" />
         <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1oye9r4_di" bpmnElement="notify_kateb_about_claim_survey">
-        <dc:Bounds x="1100" y="77" width="100" height="80" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

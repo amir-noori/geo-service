@@ -1,7 +1,9 @@
+from typing import Any
+
 from geoservice.model.dto.BaseDTO import BaseDTO, BaseResponse, partial_model
 from geoservice.model.dto.ParcelDtoResponse import OverlappingResponseDTO
-from geoservice.model.dto.common import PointDTO
 from geoservice.model.dto.PersonDTO import PersonDTO
+from geoservice.model.dto.common import PointDTO
 
 
 @partial_model
@@ -78,11 +80,10 @@ class RegisterNewClaimCallbackResponse(BaseResponse):
         self.body = body
 
 
-
 @partial_model
 class ClaimParcelSurveyQueryResponseDTO(BaseDTO):
     request_id: str
-    claim_tracing_id: str 
+    claim_tracing_id: str
     cms: str
     area: float
     state_code: str
@@ -91,15 +92,33 @@ class ClaimParcelSurveyQueryResponseDTO(BaseDTO):
     subsidiary_plate_number: str
     section: str
     district: str
-    status: int # 1: OK, -1: Failed
+    status: int  # 1: OK, -1: Failed
     neighborhood_point: PointDTO
     surveyor: PersonDTO
     claimant: PersonDTO
-    parcel: str # geojson
+    parcel: Any  # geojson
 
-    def __init__(self, request_id: str) -> None:
+    def __init__(self, request_id: str = None, claim_tracing_id: str = None, cms: str = None,
+                 area: float = 0.0, state_code: str = None, county: str = None, main_plate_number: str = None,
+                 subsidiary_plate_number: str = None, section: str = None, district: str = None,
+                 status: int = None, neighborhood_point: PointDTO = None, surveyor: PersonDTO = None,
+                 claimant: PersonDTO = None, parcel: Any = None) -> None:
         super().__init__()
         self.request_id = request_id
+        self.claim_tracing_id = claim_tracing_id
+        self.cms = cms
+        self.area = area
+        self.state_code = state_code
+        self.county = county
+        self.main_plate_number = main_plate_number
+        self.subsidiary_plate_number = subsidiary_plate_number
+        self.section = section
+        self.district = district
+        self.status = status
+        self.neighborhood_point = neighborhood_point
+        self.surveyor = surveyor
+        self.claimant = claimant
+        self.parcel = parcel
 
 
 @partial_model
