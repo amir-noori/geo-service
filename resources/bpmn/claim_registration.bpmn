@@ -5,7 +5,7 @@
       <bpmn:outgoing>Flow_0gcbwye</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="Flow_03cezuu" sourceRef="inform_kateb_about_surveyor" targetRef="wait_tom_surveyor_response_catch_event" />
-    <bpmn:intermediateCatchEvent id="wait_tom_surveyor_response_catch_event" name="wait for TOM survey response">
+    <bpmn:intermediateCatchEvent id="wait_tom_surveyor_response_catch_event" name="wait for TOM survey response" camunda:asyncBefore="true" camunda:asyncAfter="true" camunda:exclusive="false">
       <bpmn:incoming>Flow_03cezuu</bpmn:incoming>
       <bpmn:outgoing>Flow_1d7e5ss</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_0aesezf" messageRef="Message_3aifee6" />
@@ -16,25 +16,25 @@
     <bpmn:sequenceFlow id="Flow_1skz3qg" sourceRef="notify_kateb_about_claim_survey" targetRef="claim_request_end_event" />
     <bpmn:sequenceFlow id="Flow_0t30s3e" sourceRef="persist_claim_request" targetRef="send_request_to_tom" />
     <bpmn:sequenceFlow id="Flow_0ljzkvl" sourceRef="send_request_to_tom" targetRef="inform_kateb_about_surveyor" />
-    <bpmn:serviceTask id="persist_claim_request" name="persist claim request" camunda:type="external" camunda:topic="persist-claim-request">
+    <bpmn:serviceTask id="persist_claim_request" name="persist claim request" camunda:asyncAfter="true" camunda:exclusive="false" camunda:type="external" camunda:topic="persist-claim-request">
       <bpmn:incoming>Flow_0gcbwye</bpmn:incoming>
       <bpmn:outgoing>Flow_0t30s3e</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="send_request_to_tom" name="send request to TOM" camunda:type="external" camunda:topic="send-request-to-tom">
+    <bpmn:serviceTask id="send_request_to_tom" name="send request to TOM" camunda:asyncBefore="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:type="external" camunda:topic="send-request-to-tom">
       <bpmn:incoming>Flow_0t30s3e</bpmn:incoming>
       <bpmn:outgoing>Flow_0ljzkvl</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="inform_kateb_about_surveyor" name="inform kateb about surveyor detail" camunda:type="external" camunda:topic="inform-kateb-about-surveyor">
+    <bpmn:serviceTask id="inform_kateb_about_surveyor" name="inform kateb about surveyor detail" camunda:asyncBefore="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:type="external" camunda:topic="inform-kateb-about-surveyor">
       <bpmn:incoming>Flow_0ljzkvl</bpmn:incoming>
       <bpmn:outgoing>Flow_03cezuu</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="notify_kateb_about_claim_survey" name="notify Kateb about survey status." camunda:type="external" camunda:topic="notify-kateb-about-claim-survey">
+    <bpmn:serviceTask id="notify_kateb_about_claim_survey" name="notify Kateb about survey status." camunda:asyncBefore="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:type="external" camunda:topic="notify-kateb-about-claim-survey">
       <bpmn:incoming>Flow_0a797l4</bpmn:incoming>
       <bpmn:outgoing>Flow_1skz3qg</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_0gcbwye" sourceRef="claim_request_start_event" targetRef="persist_claim_request" />
     <bpmn:sequenceFlow id="Flow_1d7e5ss" sourceRef="wait_tom_surveyor_response_catch_event" targetRef="update_claim_with_cadastre_data" />
-    <bpmn:serviceTask id="update_claim_with_cadastre_data" name="update claim with cadastre data" camunda:type="external" camunda:topic="update-claim-with-cadastre-data">
+    <bpmn:serviceTask id="update_claim_with_cadastre_data" name="update claim with cadastre data" camunda:asyncBefore="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:type="external" camunda:topic="update-claim-with-cadastre-data">
       <bpmn:incoming>Flow_1d7e5ss</bpmn:incoming>
       <bpmn:outgoing>Flow_0a797l4</bpmn:outgoing>
     </bpmn:serviceTask>

@@ -103,7 +103,6 @@ async def handle_persist_claim_request_task(task) -> Dict[str, Any]:
 
 async def handle_send_request_to_tom_task(task) -> Dict[str, Any]:
     logger.info(f"Processing send request to tom task {task.id_}")
-
     try:
         variables = get_process_variables(task)
         request_id = variables["requestId"]

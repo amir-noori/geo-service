@@ -1,7 +1,8 @@
 import base64
 import json
 import os
-import uuid
+from datetime import datetime
+import random
 from typing import List
 
 import requests.auth
@@ -201,6 +202,8 @@ async def register_new_claim_api(request: Request, register_new_claim_request: R
         tenant_id=os.environ.get("CAMUNDA_TENANT_ID", 300)
     )
     start_instance.auth = auth
+    start_instance.async_ = True  # Enable async execution
+    start_instance.async_before = True  # Start before async continuation
 
     start_instance.add_variable(name="requestId", value=request_id)
     start_instance.add_variable(name="claimant", value=jsonable_encoder(body.claimant))
@@ -245,7 +248,7 @@ async def assign_surveyor_callback_api(request: Request,
 
     claim_tracing_id = None
     if not body.claim_tracing_id:
-        claim_tracing_id = str(uuid.uuid1())
+        claim_tracing_id = f"{datetime.now().strftime('%Y%m%d%H%M%S')}{random.randint(100, 900)}"
 
     metadata: ParcelMetadataDTO = body.survey_parcel_metadata.metadata
 
