@@ -48,13 +48,13 @@ def query_person(person: Person) -> List[Person]:
 
     query = QUERIES['query_person']
     if person.id:
-        query = query + f" AND ID = {person.id} "
+        query = query + f" AND ID = '{person.id}' "
     if person.first_name:
-        query = query + f" AND FIRST_NAME = {person.first_name} "
+        query = query + f" AND FIRST_NAME = '{person.first_name}' "
     if person.last_name:
-        query = query + f" AND LAST_NAME = {person.last_name} "
+        query = query + f" AND LAST_NAME = '{person.last_name}' "
     if person.national_id:
-        query = query + f" AND NATIONAL_ID = {person.national_id} "
+        query = query + f" AND NATIONAL_ID = '{person.national_id}' "
 
     return execute_query(query, run)
 
@@ -68,6 +68,7 @@ def create_person(person: Person) -> Person:
     id = next_seq("TBL_PERSON_SEQ")
 
     query = QUERIES['insert_person']
+    birthday = str_to_date(person.birthday) if person.birthday else None
     params = {
         'FIRST_NAME': person.first_name,
         'LAST_NAME': person.last_name,
@@ -75,7 +76,7 @@ def create_person(person: Person) -> Person:
         'PHONE_NUMBER': person.phone_number,
         'MOBILE_NUMBER': person.mobile_number,
         'FATHER_NAME': person.father_name,
-        'BIRTHDAY': str_to_date(person.birthday),
+        'BIRTHDAY': birthday,
         'ADDRESS': person.address,
         'ID': id
     }

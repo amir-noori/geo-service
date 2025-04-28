@@ -7,7 +7,8 @@ import requests
 from fastapi.encoders import jsonable_encoder
 from shapely import wkt
 
-from geoservice.common.constants import GLOBAL_SRID
+from geoservice.api.external.apigw import call_downstream_service_post
+from geoservice.api.external.tom import call_tom_assign_surveyor
 from geoservice.exception.common import ErrorCodes
 from geoservice.exception.persist_exception import CustomerExistsException
 from geoservice.exception.process_exception import ProcessException
@@ -113,42 +114,23 @@ async def handle_send_request_to_tom_task(task) -> Dict[str, Any]:
         claimant: Person = query_person(Person(id=claimant_id))[0]
         surveyor: Person = await query_surveyor(parcel_claim)
 
-        tom_service_base_url = os.environ.get("TOM_SERVICE_URL",
-                                              "https://26dc4823-95ee-4f4c-8c90-e33fdcc32993.mock.pstmn.io")
-        tom_assign_surveyor_service_path = os.environ.get("TOM_ASSIGN_SURVEYOR_SERVICE_PATH", "assignSurveyor")
-        url = f"{tom_service_base_url}/{tom_assign_surveyor_service_path}"
+        assigned_surveyor, claim_tracing_id, sms_message = call_tom_assign_surveyor(parcel_claim,
+                                                                                    PersonDTO.from_dict(
+                                                                                        jsonable_encoder(claimant)),
+                                                                                    PersonDTO.from_dict(
+                                                                                        jsonable_encoder(surveyor)))
 
-        response = requests.post(url, json={
-            "requestId": request_id,
-            "claimant": jsonable_encoder(PersonDTO.from_dict(jsonable_encoder(claimant))),
-            "surveyor": jsonable_encoder(PersonDTO.from_dict(jsonable_encoder(surveyor))),
-            "neighborhoodPoint": {
-                "x": neighbouring_point.x,
-                "y": neighbouring_point.y,
-                "SRS": str(GLOBAL_SRID)
-            }
-        })
-        if response.status_code == 200:
-            response_content = json.loads(response.content.decode('utf-8'))
-            logger.debug(response_content)
-
-            assigned_surveyor_data = response_content["surveyor"]
-            assigned_surveyor = Person(first_name=assigned_surveyor_data["firstName"],
-                                       last_name=assigned_surveyor_data["lastName"],
-                                       national_id=assigned_surveyor_data["nationalId"],
-                                       phone_number=assigned_surveyor_data["phoneNumber"],
-                                       birthday=assigned_surveyor_data["birthday"])
-            try:
-                assigned_surveyor = create_person(assigned_surveyor)
-            except CustomerExistsException as e:
-                assigned_surveyor = e.person
-            parcel_claim.surveyor = assigned_surveyor.id
-            update_parcel_claim_request(parcel_claim)
-
-        else:
-            error_message = f"error code: {response.status_code}, error content: {response.content}"
-            logger.error(error_message)
-            ProcessException(error_message)
+        assigned_surveyor = Person(first_name=assigned_surveyor.first_name,
+                                   last_name=assigned_surveyor.last_name,
+                                   national_id=assigned_surveyor.national_id,
+                                   phone_number=assigned_surveyor.phone_number,
+                                   mobile_number=assigned_surveyor.mobile_number)
+        try:
+            assigned_surveyor = create_person(assigned_surveyor)
+        except CustomerExistsException as e:
+            assigned_surveyor = e.person
+        parcel_claim.surveyor = assigned_surveyor.id
+        update_parcel_claim_request(parcel_claim)
 
         return {
             "status": "SUCCESS",
@@ -171,10 +153,11 @@ async def handle_inform_kateb_about_surveyor_task(task) -> Dict[str, Any]:
 
         url = os.environ.get("KATEB_NOTIFY_SURVEYOR_SERVICE_URL",
                              "https://26dc4823-95ee-4f4c-8c90-e33fdcc32993.mock.pstmn.io/surveyorStatusUpdate")
-        response = requests.post(url, json={
+        request = {
             "requestId": request_id,
             "surveyor": jsonable_encoder(PersonDTO.from_dict(jsonable_encoder(surveyor)))
-        })
+        }
+        response = call_downstream_service_post(service_url=url, payload=request)
         if response.status_code == 200:
             response_content = json.loads(response.content.decode('utf-8'))
             logger.debug(response_content)
@@ -233,11 +216,13 @@ async def handle_notify_kateb_about_survey_status_task(task) -> Dict[str, Any]:
 
         url = os.environ.get("KATEB_NOTIFY_SURVEY_STATUS_SERVICE_URL",
                              "https://26dc4823-95ee-4f4c-8c90-e33fdcc32993.mock.pstmn.io/surveyStatusUpdate")
-        response = requests.post(url, json={
+        request = {
             "requestId": request_id,
             "claimTracingId": registered_claim.claim_tracing_id,
             "status": registered_claim.status
-        })
+        }
+        response = call_downstream_service_post(service_url=url, payload=request)
+
         if response.status_code == 200:
             response_content = json.loads(response.content.decode('utf-8'))
             logger.debug(response_content)

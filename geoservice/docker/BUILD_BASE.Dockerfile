@@ -40,6 +40,7 @@ RUN cd /opt/app && source bin/activate && \
     pip install pykml && \
     pip install apscheduler && \
     pip install pycamunda && \
+    pip install zeep && \
     deactivate
 
 

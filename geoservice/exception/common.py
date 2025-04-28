@@ -39,6 +39,12 @@ class ErrorCodes:
 
 
     """
+        Integration Errors
+    """
+    INTEGRATION_EXTERNAL_SERVICE_ERROR = ErrorCode(4000, "INTEGRATION_EXTERNAL_SERVICE_ERROR")
+
+
+    """
         Basic Geo Errors
     """
 
