@@ -76,7 +76,7 @@ QUERIES = {
 
     "query_parcel_claim": """
         SELECT
-            ID, REQUEST_ID, SURVEYOR_ID, CLAIMANT_ID, SDO_UTIL.TO_WKTGEOMETRY(NEIGHBOURING_POINT) as NEIGHBOURING_POINT, 
+            ID, REQUEST_ID, CLAIM_TRACING_ID, SURVEYOR_ID, CLAIMANT_ID, SDO_UTIL.TO_WKTGEOMETRY(NEIGHBOURING_POINT) as NEIGHBOURING_POINT, 
             REQUEST_TIMESTAMP, MODIFY_TIMESTAMP, CMS, PROCESS_INSTANCE_ID
         FROM TBL_PARCEL_CLAIM
         WHERE 1=1
@@ -85,7 +85,9 @@ QUERIES = {
 
     "update_parcel_claim": """
         UPDATE TBL_PARCEL_CLAIM SET 
-            SURVEYOR_ID = '{SURVEYOR_ID}', CLAIMANT_ID = '{CLAIMANT_ID}', MODIFY_TIMESTAMP = TO_DATE('{MODIFY_TIMESTAMP}', 'YYYY-MM-DD')
+            SURVEYOR_ID = '{SURVEYOR_ID}', CLAIMANT_ID = '{CLAIMANT_ID}', 
+            MODIFY_TIMESTAMP = TO_DATE('{MODIFY_TIMESTAMP}', 'YYYY-MM-DD'),
+            CLAIM_TRACING_ID = '{CLAIM_TRACING_ID}'
         WHERE
             1=1
             
@@ -245,7 +247,7 @@ def check_trace_id_exists(claim_trace_id):
 
 def save_new_claim_parcel_request(request_id: str, claimant: PersonDTO, surveyor: PersonDTO,
                                   cms: str, neighbouring_point_wkt: str, process_instance_id: str,
-                                  srs: int = GLOBAL_SRID):
+                                  postal_code: str = None, area: float = 0.0, srs: int = GLOBAL_SRID):
     claimant_person = None
     surveyor_person = None
     try:
@@ -288,6 +290,7 @@ def query_parcel_claim_request(request_id: str = None, surveyor_id: str = None, 
         for result in results:
             id = int(result['ID'])
             queried_request_id = str(result['REQUEST_ID'])
+            queried_claim_tracing_id = str(result['CLAIM_TRACING_ID'])
             queried_surveyor_id = str(result['SURVEYOR_ID'])
             queried_claimant_id = str(result['CLAIMANT_ID'])
             neighbouring_point = str(result['NEIGHBOURING_POINT'])
@@ -298,6 +301,7 @@ def query_parcel_claim_request(request_id: str = None, surveyor_id: str = None, 
             parcel_claim = ParcelClaim(
                 id=id,
                 request_id=queried_request_id,
+                claim_tracing_id=queried_claim_tracing_id,
                 surveyor_id=queried_surveyor_id,
                 claimant_id=queried_claimant_id,
                 neighbouring_point=neighbouring_point,
@@ -330,6 +334,7 @@ def update_parcel_claim_request(parcel_claim: ParcelClaim):
     query = QUERIES['update_parcel_claim'].format(
         SURVEYOR_ID=parcel_claim.surveyor_id,
         CLAIMANT_ID=parcel_claim.claimant_id,
+        CLAIM_TRACING_ID=parcel_claim.claim_tracing_id,
         MODIFY_TIMESTAMP=date_to_str(datetime.now())
     )
 

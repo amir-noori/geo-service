@@ -50,11 +50,15 @@ class ParcelClaim(BaseEntity):
     modify_timestamp: str
     cms: str
     process_instance_id: str
+    postal_code: str
+    area: float
+    claim_tracing_id: str
 
     def __init__(self, id: int = None, request_id: str = None, surveyor_id: str = None,
                  claimant_id: str = None, neighbouring_point: str = None,
                  request_timestamp: str = None, modify_timestamp: str = None, cms: str = None,
-                 process_instance_id: str = None) -> None:
+                 process_instance_id: str = None, postal_code: str = None, area: float = 0.0,
+                 claim_tracing_id: str = None) -> None:
         super().__init__()
         self.id = id
         self.request_id = request_id
@@ -65,6 +69,9 @@ class ParcelClaim(BaseEntity):
         self.modify_timestamp = modify_timestamp
         self.cms = cms
         self.process_instance_id = process_instance_id
+        self.postal_code = postal_code
+        self.area = area
+        self.claim_tracing_id = claim_tracing_id
 
 
 class RegisteredClaim(BaseEntity):

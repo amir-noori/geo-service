@@ -8,7 +8,7 @@ from geoservice.model.dto.PersonDTO import PersonDTO
 from geoservice.model.entity.Claim import ParcelClaim
 
 
-def call_tom_assign_surveyor(parcel_claim: ParcelClaim,
+def call_tom_assign_surveyor_soap(parcel_claim: ParcelClaim,
                              claimant: PersonDTO,
                              surveyor: PersonDTO):
     wsdl_url = os.environ.get("TOM_SERVICE_URL", "http://localhost:7979/RequestWS.asmx?WSDL")

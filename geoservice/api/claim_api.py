@@ -180,6 +180,8 @@ async def register_new_claim_api(request: Request, register_new_claim_request: R
     body: RegisterNewClaimRequestDTO = register_new_claim_request.body
     request_id = body.request_id
     neighborhood_point = body.neighborhood_point
+    postal_code = body.postal_code
+    area = body.area
     srs = None
     if neighborhood_point.srs:
         srs = neighborhood_point.srs
@@ -211,6 +213,8 @@ async def register_new_claim_api(request: Request, register_new_claim_request: R
     start_instance.add_variable(name="cms", value=body.cms)
     start_instance.add_variable(name="neighborhoodPoint", value=f'POINT({neighborhood_point.x} {neighborhood_point.y})')
     start_instance.add_variable(name="srs", value=str(srs))
+    start_instance.add_variable(name="postalCode", value=str(postal_code))
+    start_instance.add_variable(name="area", value=str(area))
 
     process_instance = start_instance()
 
@@ -246,14 +250,14 @@ async def assign_surveyor_callback_api(request: Request,
     geometry = shape(geometry_str)
     survey_parcel_wkt = geometry.wkt
 
-    claim_tracing_id = None
-    if not body.claim_tracing_id:
-        claim_tracing_id = f"{datetime.now().strftime('%Y%m%d%H%M%S')}{random.randint(100, 900)}"
+    # claim_tracing_id = None
+    # if not body.claim_tracing_id:
+    #     claim_tracing_id = f"{datetime.now().strftime('%Y%m%d%H%M%S')}{random.randint(100, 900)}"
 
     metadata: ParcelMetadataDTO = body.survey_parcel_metadata.metadata
 
     registered_claim = RegisteredClaim(request_id=request_id,
-                                       claim_tracing_id=claim_tracing_id,
+                                       claim_tracing_id=parcel_claim_request.claim_tracing_id,
                                        surveyor_id=parcel_claim_request.surveyor_id,
                                        cms=parcel_claim_request.cms,
                                        status=parse_to_int(body.status),
@@ -307,6 +311,9 @@ async def claim_parcel_survey_query_api(request: Request,
     claim_tracing_id = body.claim_tracing_id
     registered_claim: RegisteredClaim = query_registered_parcel_claim_request(
         RegisteredClaim(request_id=request_id, claim_tracing_id=claim_tracing_id))
+
+    if not registered_claim:
+        raise ServiceException(ErrorCodes.NO_CLAIM_FOUND)
 
     request_claim = None
     request_claims: List[ParcelClaim] = query_parcel_claim_request(request_id=registered_claim.request_id)

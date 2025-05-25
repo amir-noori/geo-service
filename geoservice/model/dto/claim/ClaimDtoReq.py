@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 
 from pydantic import BaseModel, ConfigDict
 from pydantic import field_validator
@@ -108,6 +108,8 @@ class RegisterNewClaimRequestDTO(BaseModel):
     surveyor: PersonDTO
     claimant: PersonDTO
     neighborhood_point: PointDTO
+    postal_code: str
+    area: float
 
 
 class RegisterNewClaimRequest(BaseModel):
@@ -229,6 +231,8 @@ class RegisterNewClaimCallbackRequestDTO(BaseModel):
     district: str
     survey_parcel: str
     survey_parcel_metadata: SurveyParcelMetadataDTO
+    survey_apartment_parcel: str
+    survey_apartment_parcel_metadata: SurveyParcelMetadataDTO
 
 
 class RegisterNewClaimCallbackRequest(BaseModel):
@@ -258,8 +262,8 @@ class ClaimParcelSurveyQueryRequestDTO(BaseModel):
         arbitrary_types_allowed=True
     )
 
-    request_id: str
-    claim_tracing_id: str
+    request_id: Optional[str] = None
+    claim_tracing_id: Optional[str] = None
 
 
 class ClaimParcelSurveyQueryRequest(BaseModel):
@@ -269,7 +273,7 @@ class ClaimParcelSurveyQueryRequest(BaseModel):
     @field_validator('body')
     @classmethod
     def validate_body(cls, b: Any):
-        if not b.request_id and not b.claim_trace_id:
+        if not b.request_id and not b.claim_tracing_id:
             raise ValidationException(ErrorCodes.VALIDATION_EMPTY_REQUEST_FIELDS,
                                       error_message="request_id or claim_tracing_id is required!")
         return b
